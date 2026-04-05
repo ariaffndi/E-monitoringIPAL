@@ -12,11 +12,20 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return Inertia::render('admin/users/Index', [
-            'users' => User::select('id', 'name', 'email', 'role')->get(),
-        ]);
+        $query = User::query();
+
+    if ($request->filled('search')) {
+    $query->where(function ($q) use ($request) {
+        $q->where('name', 'like', '%' . $request->search . '%')
+            ->orWhere('email', 'like', '%' . $request->search . '%');
+    });
+}
+
+    return Inertia::render('admin/users/Index', [
+        'users' => $query->select('id', 'name', 'email', 'role')->get()
+    ]);
     }
 
     /**
@@ -32,21 +41,21 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|in:admin,operator',
-            'role' => 'required',
-        ]);
+        $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users,email',
+        'role' => 'required|in:admin,operator',
+        'password' => 'required|min:6',
+    ]);
 
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-        ]);
+    User::create([
+        'name' => $validated['name'],
+        'email' => $validated['email'],
+        'role' => $validated['role'],
+        'password' => Hash::make($validated['password']),
+    ]);
 
-        return redirect()->route('user.index')->with('success', 'User created successfully.');
+    return redirect()->back()->with('success', 'User berhasil ditambahkan');
     }
 
     /**
@@ -76,10 +85,10 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        $user = User::find($id);
+        $user = User::findOrFail($id);
         $user->delete();
-        return redirect()->route('user.index')->with('success', 'User deleted successfully.');
+        return back()->with('success', 'User berhasil dihapus');
     }
 }

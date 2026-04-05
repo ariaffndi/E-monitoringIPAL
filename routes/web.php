@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UnitController;
 
 //Route Guest
 Route::get('/', function () {
@@ -26,6 +27,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     })->name('admin.dashboard');
 
     Route::resource('users', UserController::class);
+    Route::resource('units', UnitController::class);
 });
 
 //Route Operator

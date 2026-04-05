@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Users, FolderGit2, LayoutGrid } from 'lucide-react';
+import { Users, FolderGit2, LayoutGrid, Boxes } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 // import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -41,11 +41,13 @@ export function AppSidebar() {
     const { auth } = usePage().props as any;
     const user = auth.user;
     const isAdmin = user?.role === 'admin';
+    const dashboardHref = isAdmin ? '/admin' : '/operator';
+
     const mainNavItems: NavItem[] = isAdmin
         ? [
             {
                 title: 'Dashboard',
-                href: dashboard(),
+                href: dashboardHref,
                 icon: LayoutGrid,
             },
             {
@@ -54,15 +56,15 @@ export function AppSidebar() {
                 icon: Users,
             },
             {
-                title: 'Menu Admin 2',
-                href: '/reports',
-                icon: FolderGit2,
+                title: 'Unit IPAL',
+                href: '/units',
+                icon: Boxes,
             },
         ]
-    : [
+        : [
             {
                 title: 'Dashboard',
-                href: dashboard(),
+                href: dashboardHref,
                 icon: LayoutGrid,
             },
             {

@@ -1,13 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { useForm } from '@inertiajs/react';
-import {
-    PlusCircle,
-    Search,
-    HardHat,
-    BookCheck,
-    Trash,
-    Info,
-} from 'lucide-react';
+import { PlusCircle, Search, Trash, Info } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 import { toast } from 'sonner';
@@ -20,36 +13,37 @@ import { FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
 
-export default function Users({ users }: any) {
+export default function Units({ units }: any) {
     // state
     const [openCreate, setOpenCreate] = useState(false);
     const [openDetail, setOpenDetail] = useState(false);
-    const [selectedUser, setSelectedUser] = useState<any>(null);
+    const [selectedUnit, setSelectedUnit] = useState<any>(null);
     const [openDelete, setOpenDelete] = useState(false);
     const [selectedId, setSelectedId] = useState<number | null>(null);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState('');
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
-        email: '',
-        role: 'operator',
-        password: '',
+        specification: '',
+        dimension: '',
+        description: '',
+        image: '',
     });
 
     // handler
     const handleCreate = () => {
-        post('/users', {
+        post('/units', {
             onSuccess: () => {
                 setOpenCreate(false);
                 reset();
 
-                toast.success('User berhasil ditambahkan');
+                toast.success('unit berhasil ditambahkan');
             },
         });
     };
 
-    const handleView = (user: any) => {
-        setSelectedUser(user);
+    const handleView = (unit: any) => {
+        setSelectedUnit(unit);
         setOpenDetail(true);
     };
 
@@ -58,10 +52,10 @@ export default function Users({ users }: any) {
             return;
         }
 
-        router.delete(`/users/${selectedId}`, {
+        router.delete(`/units/${selectedId}`, {
             onSuccess: () => {
                 setOpenDelete(false);
-                toast.success('User berhasil dihapus');
+                toast.success('Unit berhasil dihapus');
             },
         });
     };
@@ -77,7 +71,7 @@ export default function Users({ users }: any) {
         setLoading(true);
 
         const delay = setTimeout(() => {
-            router.get('/users', search ? { search } : {}, {
+            router.get('/units', search ? { search } : {}, {
                 preserveState: true,
                 replace: true,
                 onFinish: () => setLoading(false),
@@ -90,13 +84,13 @@ export default function Users({ users }: any) {
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Escape') {
             setSearch('');
-            router.get('/users', {}, { preserveState: true });
+            router.get('/units', {}, { preserveState: true });
         }
     };
 
     return (
         <>
-            <Head title="Users" />
+            <Head title="Units" />
             <div className="flex flex-col gap-4 p-4">
                 {/* header */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
@@ -105,7 +99,7 @@ export default function Users({ users }: any) {
                         className="cursor-pointer bg-blue-600 text-sm hover:bg-blue-700"
                     >
                         <PlusCircle />
-                        Tambah User
+                        Tambah Unit
                     </Button>
 
                     <div className="relative">
@@ -137,41 +131,28 @@ export default function Users({ users }: any) {
                             <tr className="bg-secondary">
                                 <th className="p-2">No</th>
                                 <th className="p-2">Nama</th>
-                                <th className="p-2">Email</th>
-                                <th className="p-2">Role</th>
+                                <th className="p-2">Deskripsi</th>
+                                <th className="p-2">Dimensi</th>
                                 <th className="p-2">Aksi</th>
                             </tr>
                         </thead>
 
                         <tbody>
-                            {users.map((user: any, index: number) => (
+                            {units.map((unit: any, index: number) => (
                                 <tr
-                                    key={user.id}
+                                    key={unit.id}
                                     className="hover:bg-secondary"
                                 >
                                     <td className="p-2">{index + 1}</td>
-                                    <td className="p-2">{user.name}</td>
-                                    <td className="p-2">{user.email}</td>
-
-                                    <td className="p-2">
-                                        {user.role === 'admin' ? (
-                                            <div className="inline-flex items-center gap-2 rounded bg-green-100 px-2 py-1 text-xs text-green-700">
-                                                <BookCheck className="size-3" />
-                                                Admin
-                                            </div>
-                                        ) : (
-                                            <div className="inline-flex items-center gap-2 rounded bg-yellow-100 px-2 py-1 text-xs text-yellow-700">
-                                                <HardHat className="size-3" />
-                                                Operator
-                                            </div>
-                                        )}
-                                    </td>
+                                    <td className="p-2">{unit.name}</td>
+                                    <td className="p-2">{unit.description}</td>
+                                    <td className="p-2">{unit.dimension}</td>
 
                                     <td className="p-2">
                                         <div className="flex flex-nowrap items-center justify-center gap-2">
                                             <Button
                                                 title="Detail Data"
-                                                onClick={() => handleView(user)}
+                                                onClick={() => handleView(unit)}
                                                 className="cursor-pointer bg-sky-100 text-sky-700 hover:bg-sky-300"
                                             >
                                                 <Info />
@@ -179,7 +160,7 @@ export default function Users({ users }: any) {
                                             <Button
                                                 title="Hapus Data"
                                                 onClick={() =>
-                                                    confirmDelete(user.id)
+                                                    confirmDelete(unit.id)
                                                 }
                                                 className="cursor-pointer bg-red-100 text-red-700 hover:bg-red-300"
                                             >
@@ -197,7 +178,7 @@ export default function Users({ users }: any) {
             <ModalCreate
                 open={openCreate}
                 setOpen={setOpenCreate}
-                title="Tambah User"
+                title="Tambah Unit"
                 onSubmit={handleCreate}
                 processing={processing}
             >
@@ -214,68 +195,90 @@ export default function Users({ users }: any) {
                 </Field>
 
                 <Field>
-                    <FieldLabel htmlFor="email">Email</FieldLabel>
+                    <FieldLabel htmlFor="Specification">Spesifikasi</FieldLabel>
                     <Input
-                        placeholder="Email"
-                        type="email"
-                        onChange={(e) => setData('email', e.target.value)}
+                        placeholder="Spesifikasi"
+                        onChange={(e) =>
+                            setData('specification', e.target.value)
+                        }
                         className="mb-2"
                     />
-                    {errors.email && (
-                        <p className="text-xs text-red-500">{errors.email}</p>
-                    )}
-                </Field>
-
-                <Field>
-                    <FieldLabel htmlFor="role">Role</FieldLabel>
-                    <select
-                        className="w-full rounded border p-2"
-                        value={data.role}
-                        onChange={(e) => setData('role', e.target.value)}
-                    >
-                        <option value="admin">Admin</option>
-                        <option value="operator">Operator</option>
-                    </select>
-                </Field>
-
-                <Field>
-                    <FieldLabel htmlFor="password">Password</FieldLabel>
-                    <Input
-                        placeholder="Password"
-                        type="password"
-                        onChange={(e) => setData('password', e.target.value)}
-                        className="mb-2"
-                    />
-                    {errors.password && (
+                    {errors.specification && (
                         <p className="text-xs text-red-500">
-                            {errors.password}
+                            {errors.specification}
                         </p>
                     )}
                 </Field>
+
+                <Field>
+                    <FieldLabel htmlFor="Dimension">Dimensi</FieldLabel>
+                    <Input
+                        placeholder="Dimensi"
+                        onChange={(e) => setData('dimension', e.target.value)}
+                        className="mb-2"
+                    />
+                    {errors.dimension && (
+                        <p className="text-xs text-red-500">
+                            {errors.dimension}
+                        </p>
+                    )}
+                </Field>
+
+                <Field>
+                    <FieldLabel htmlFor="Description">Deskripsi</FieldLabel>
+                    <Input
+                        placeholder="Deskripsi"
+                        onChange={(e) => setData('description', e.target.value)}
+                        className="mb-2"
+                    />
+                    {errors.description && (
+                        <p className="text-xs text-red-500">
+                            {errors.description}
+                        </p>
+                    )}
+                </Field>
+
+                <Field>
+                    <FieldLabel htmlFor="picture">Picture</FieldLabel>
+                    <Input className='cursor-pointer' id="picture" type="file" />
+                </Field>
+
             </ModalCreate>
 
             {/* modal detail */}
             <ModalDetail
                 open={openDetail}
                 setOpen={setOpenDetail}
-                title="Detail User"
+                title="Detail Unit"
             >
-                {selectedUser && (
+                {selectedUnit && (
                     <>
                         <div>
                             <span className="font-medium">Nama:</span>{' '}
-                            {selectedUser.name}
+                            {selectedUnit.name}
                         </div>
 
                         <div>
-                            <span className="font-medium">Email:</span>{' '}
-                            {selectedUser.email}
+                            <span className="font-medium">Spesifikasi:</span>{' '}
+                            {selectedUnit.specification}
                         </div>
 
                         <div>
-                            <span className="font-medium">Role:</span>{' '}
-                            {selectedUser.role}
+                            <span className="font-medium">Dimensi:</span>{' '}
+                            {selectedUnit.dimension}
                         </div>
+
+                        <div>
+                            <span className="font-medium">Deskripsi:</span>{' '}
+                            {selectedUnit.description}
+                        </div>
+
+                        <div>
+                            <span className="font-medium">Gambar:</span>{' '}
+                            {selectedUnit.picture}
+                        </div>
+
+                        
                     </>
                 )}
             </ModalDetail>
@@ -284,8 +287,8 @@ export default function Users({ users }: any) {
             <ModalConfirmDelete
                 open={openDelete}
                 setOpen={setOpenDelete}
-                title="Hapus User?"
-                description="Apakah anda yakin ingin menghapus user ini?"
+                title="Hapus Unit?"
+                description="Apakah anda yakin ingin menghapus unit ini?"
                 onConfirm={handleDelete}
             />
         </>
