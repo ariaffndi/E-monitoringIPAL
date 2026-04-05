@@ -294,3 +294,11 @@ export default function Units({ units }: any) {
         </>
     );
 }
+
+Units.layout = {
+    breadcrumbs: [
+        {
+            title: 'Unit IPAL',
+        },
+    ],
+};

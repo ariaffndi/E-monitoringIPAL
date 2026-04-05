@@ -291,3 +291,11 @@ export default function Users({ users }: any) {
         </>
     );
 }
+
+Users.layout = {
+    breadcrumbs: [
+        {
+            title: 'Data Pengguna',
+        },
+    ],
+};
