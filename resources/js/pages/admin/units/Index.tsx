@@ -1,6 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { useForm } from '@inertiajs/react';
-import { PlusCircle, Search, Trash, Info } from 'lucide-react';
+import { PlusCircle, Search, Trash2, Info, Pencil } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 import { toast } from 'sonner';
@@ -12,6 +12,7 @@ import { Field } from '@/components/ui/field';
 import { FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function Units({ units }: any) {
     // state
@@ -22,29 +23,70 @@ export default function Units({ units }: any) {
     const [selectedId, setSelectedId] = useState<number | null>(null);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState('');
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const { data, setData, post, processing, errors, reset } = useForm<{
+        name: string;
+        specification: string;
+        dimension: string;
+        description: string;
+        image: File | null;
+    }>({
         name: '',
         specification: '',
         dimension: '',
         description: '',
-        image: '',
+        image: null,
     });
+    const [isEdit, setIsEdit] = useState(false);
 
     // handler
-    const handleCreate = () => {
-        post('/units', {
-            onSuccess: () => {
-                setOpenCreate(false);
-                reset();
-
-                toast.success('unit berhasil ditambahkan');
-            },
-        });
+    const handleSubmit = () => {
+        if (isEdit && selectedUnit) {
+            router.post(
+                `/units/${selectedUnit.id}`,
+                {
+                    _method: 'put',
+                    ...data,
+                },
+                {
+                    forceFormData: true,
+                    onSuccess: () => {
+                        setOpenCreate(false);
+                        reset();
+                        setIsEdit(false);
+                        toast.success('Unit berhasil diupdate');
+                    },
+                },
+            );
+        } else {
+            post('/units', {
+                forceFormData: true,
+                onSuccess: () => {
+                    setOpenCreate(false);
+                    reset();
+                    toast.success('Unit berhasil ditambahkan');
+                },
+            });
+        }
     };
 
     const handleView = (unit: any) => {
         setSelectedUnit(unit);
         setOpenDetail(true);
+    };
+
+    const handleEdit = (unit: any) => {
+        setIsEdit(true);
+        setSelectedUnit(unit);
+
+        setData({
+            name: unit.name,
+            specification: unit.specification,
+            dimension: unit.dimension,
+            description: unit.description,
+            image: null,
+        });
+
+        setOpenCreate(true);
     };
 
     const handleDelete = () => {
@@ -58,6 +100,12 @@ export default function Units({ units }: any) {
                 toast.success('Unit berhasil dihapus');
             },
         });
+    };
+
+    const handleCloseModal = () => {
+        setOpenCreate(false);
+        setIsEdit(false);
+        reset();
     };
 
     const confirmDelete = (id: number) => {
@@ -130,6 +178,7 @@ export default function Units({ units }: any) {
                         <thead>
                             <tr className="bg-secondary">
                                 <th className="p-2">No</th>
+                                <th className="p-2">Foto</th>
                                 <th className="p-2">Nama</th>
                                 <th className="p-2">Deskripsi</th>
                                 <th className="p-2">Dimensi</th>
@@ -138,54 +187,83 @@ export default function Units({ units }: any) {
                         </thead>
 
                         <tbody>
-                            {units.map((unit: any, index: number) => (
-                                <tr
-                                    key={unit.id}
-                                    className="hover:bg-secondary"
-                                >
-                                    <td className="p-2">{index + 1}</td>
-                                    <td className="p-2">{unit.name}</td>
-                                    <td className="p-2">{unit.description}</td>
-                                    <td className="p-2">{unit.dimension}</td>
+                            {units
+                                ?.filter((unit: any) => unit !== null)
+                                .map((unit: any, index: number) => (
+                                    <tr
+                                        key={unit.id}
+                                        className="hover:bg-secondary"
+                                    >
+                                        <td className="p-2">{index + 1}</td>
+                                        <td className="flex justify-center p-2">
+                                            <img
+                                                src={`/storage/${unit.image}`}
+                                                alt={unit.name}
+                                                className="mt-2 h-10 w-10 rounded-full object-cover"
+                                            />
+                                        </td>
+                                        <td className="p-2">{unit.name}</td>
+                                        <td className="hidden max-w-50 truncate p-2 whitespace-nowrap sm:table-cell">
+                                            {unit.description}
+                                        </td>
+                                        <td className="p-2">
+                                            {unit.dimension}
+                                        </td>
 
-                                    <td className="p-2">
-                                        <div className="flex flex-nowrap items-center justify-center gap-2">
-                                            <Button
-                                                title="Detail Data"
-                                                onClick={() => handleView(unit)}
-                                                className="cursor-pointer bg-sky-100 text-sky-700 hover:bg-sky-300"
-                                            >
-                                                <Info />
-                                            </Button>
-                                            <Button
-                                                title="Hapus Data"
-                                                onClick={() =>
-                                                    confirmDelete(unit.id)
-                                                }
-                                                className="cursor-pointer bg-red-100 text-red-700 hover:bg-red-300"
-                                            >
-                                                <Trash />
-                                            </Button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                                        <td className="p-2">
+                                            <div className="flex flex-nowrap items-center justify-center gap-2">
+                                                <Button
+                                                    title="Detail Data"
+                                                    onClick={() =>
+                                                        handleView(unit)
+                                                    }
+                                                    size="sm"
+                                                    className="cursor-pointer bg-sky-100 text-sky-700 hover:bg-sky-300"
+                                                >
+                                                    <Info />
+                                                </Button>
+                                                <Button
+                                                    title="Edit Data"
+                                                    onClick={() =>
+                                                        handleEdit(unit)
+                                                    }
+                                                    size="sm"
+                                                    className="cursor-pointer bg-yellow-100 text-yellow-700 hover:bg-yellow-300"
+                                                >
+                                                    <Pencil size={20} />
+                                                </Button>
+                                                <Button
+                                                    title="Hapus Data"
+                                                    onClick={() =>
+                                                        confirmDelete(unit.id)
+                                                    }
+                                                    size="sm"
+                                                    className="cursor-pointer bg-red-100 text-red-700 hover:bg-red-300"
+                                                >
+                                                    <Trash2 />
+                                                </Button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
                         </tbody>
                     </table>
                 </div>
             </div>
+
             {/* modal create */}
             <ModalCreate
                 open={openCreate}
-                setOpen={setOpenCreate}
-                title="Tambah Unit"
-                onSubmit={handleCreate}
+                setOpen={handleCloseModal}
+                title={isEdit ? 'Edit Unit' : 'Tambah Unit'}
+                onSubmit={handleSubmit}
                 processing={processing}
             >
                 <Field>
-                    <FieldLabel htmlFor="Name">Name</FieldLabel>
+                    <FieldLabel htmlFor="Name">Nama</FieldLabel>
                     <Input
                         placeholder="Nama"
+                        value={data.name}
                         onChange={(e) => setData('name', e.target.value)}
                         className="mb-2"
                     />
@@ -198,6 +276,7 @@ export default function Units({ units }: any) {
                     <FieldLabel htmlFor="Specification">Spesifikasi</FieldLabel>
                     <Input
                         placeholder="Spesifikasi"
+                        value={data.specification}
                         onChange={(e) =>
                             setData('specification', e.target.value)
                         }
@@ -214,6 +293,7 @@ export default function Units({ units }: any) {
                     <FieldLabel htmlFor="Dimension">Dimensi</FieldLabel>
                     <Input
                         placeholder="Dimensi"
+                        value={data.dimension}
                         onChange={(e) => setData('dimension', e.target.value)}
                         className="mb-2"
                     />
@@ -226,8 +306,9 @@ export default function Units({ units }: any) {
 
                 <Field>
                     <FieldLabel htmlFor="Description">Deskripsi</FieldLabel>
-                    <Input
+                    <Textarea
                         placeholder="Deskripsi"
+                        value={data.description}
                         onChange={(e) => setData('description', e.target.value)}
                         className="mb-2"
                     />
@@ -240,9 +321,24 @@ export default function Units({ units }: any) {
 
                 <Field>
                     <FieldLabel htmlFor="picture">Picture</FieldLabel>
-                    <Input className='cursor-pointer' id="picture" type="file" />
+                    <div>
+                        <img
+                            src={`/storage/${data.image}`}
+                            alt={data.name}
+                            className="mt-2 h-25 w-25 rounded-lg object-cover"
+                        />
+                    </div>
+                    <Input
+                        type="file"
+                        className="cursor-pointer"
+                        onChange={(e) => {
+                            const file = e.target.files
+                                ? e.target.files[0]
+                                : null;
+                            setData('image', file);
+                        }}
+                    />
                 </Field>
-
             </ModalCreate>
 
             {/* modal detail */}
@@ -254,31 +350,35 @@ export default function Units({ units }: any) {
                 {selectedUnit && (
                     <>
                         <div>
-                            <span className="font-medium">Nama:</span>{' '}
+                            <span className="font-semibold">Nama:</span>{' '}
                             {selectedUnit.name}
                         </div>
 
                         <div>
-                            <span className="font-medium">Spesifikasi:</span>{' '}
+                            <span className="font-semibold">Spesifikasi:</span>{' '}
                             {selectedUnit.specification}
                         </div>
 
                         <div>
-                            <span className="font-medium">Dimensi:</span>{' '}
+                            <span className="font-semibold">Dimensi:</span>{' '}
                             {selectedUnit.dimension}
                         </div>
 
                         <div>
-                            <span className="font-medium">Deskripsi:</span>{' '}
+                            <span className="font-semibold">Deskripsi:</span>{' '}
                             {selectedUnit.description}
                         </div>
 
                         <div>
-                            <span className="font-medium">Gambar:</span>{' '}
-                            {selectedUnit.picture}
+                            <span className="font-semibold">Gambar:</span>{' '}
+                            <div className="flex justify-center p-2">
+                                <img
+                                    src={`/storage/${selectedUnit.image}`}
+                                    alt={selectedUnit.name}
+                                    className="mt-2 h-50 w-50 rounded-full object-cover"
+                                />
+                            </div>
                         </div>
-
-                        
                     </>
                 )}
             </ModalDetail>

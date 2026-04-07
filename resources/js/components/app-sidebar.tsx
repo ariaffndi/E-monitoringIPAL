@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Users, FolderGit2, LayoutGrid, Boxes } from 'lucide-react';
+import { Users, FolderGit2, LayoutGrid, Boxes, Droplet } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 // import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -51,7 +51,7 @@ export function AppSidebar() {
                 icon: LayoutGrid,
             },
             {
-                title: 'Users',
+                title: 'Pengguna',
                 href: '/users',
                 icon: Users,
             },
@@ -59,6 +59,11 @@ export function AppSidebar() {
                 title: 'Unit IPAL',
                 href: '/units',
                 icon: Boxes,
+            },
+            {
+                title: 'Parameter Air',
+                href: '/waterparameters',
+                icon: Droplet,
             },
         ]
         : [

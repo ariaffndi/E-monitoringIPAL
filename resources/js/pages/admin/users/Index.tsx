@@ -1,13 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { useForm } from '@inertiajs/react';
-import {
-    PlusCircle,
-    Search,
-    HardHat,
-    BookCheck,
-    Trash,
-    Info,
-} from 'lucide-react';
+import {PlusCircle, Search, HardHat, BookCheck, Trash2, Info,} from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 import { toast } from 'sonner';
@@ -172,6 +165,7 @@ export default function Users({ users }: any) {
                                             <Button
                                                 title="Detail Data"
                                                 onClick={() => handleView(user)}
+                                                size="sm"
                                                 className="cursor-pointer bg-sky-100 text-sky-700 hover:bg-sky-300"
                                             >
                                                 <Info />
@@ -181,9 +175,10 @@ export default function Users({ users }: any) {
                                                 onClick={() =>
                                                     confirmDelete(user.id)
                                                 }
+                                                size="sm"
                                                 className="cursor-pointer bg-red-100 text-red-700 hover:bg-red-300"
                                             >
-                                                <Trash />
+                                                <Trash2 />
                                             </Button>
                                         </div>
                                     </td>
@@ -193,6 +188,7 @@ export default function Users({ users }: any) {
                     </table>
                 </div>
             </div>
+
             {/* modal create */}
             <ModalCreate
                 open={openCreate}
@@ -205,6 +201,7 @@ export default function Users({ users }: any) {
                     <FieldLabel htmlFor="Name">Name</FieldLabel>
                     <Input
                         placeholder="Nama"
+                        value={data.name}
                         onChange={(e) => setData('name', e.target.value)}
                         className="mb-2"
                     />
@@ -217,6 +214,7 @@ export default function Users({ users }: any) {
                     <FieldLabel htmlFor="email">Email</FieldLabel>
                     <Input
                         placeholder="Email"
+                        value={data.email}
                         type="email"
                         onChange={(e) => setData('email', e.target.value)}
                         className="mb-2"
