@@ -62,7 +62,7 @@ export function AppSidebar() {
             },
             {
                 title: 'Parameter Air',
-                href: '/waterparameters',
+                href: '/water-parameters',
                 icon: Droplet,
             },
         ]

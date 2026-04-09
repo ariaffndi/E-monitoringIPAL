@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UnitController;
+use App\Http\Controllers\WaterParameterController;
 
 //Route Guest
 Route::get('/', function () {
@@ -28,6 +29,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::resource('users', UserController::class);
     Route::resource('units', UnitController::class);
+    Route::resource('water-parameters', WaterParameterController::class);
 });
 
 //Route Operator
