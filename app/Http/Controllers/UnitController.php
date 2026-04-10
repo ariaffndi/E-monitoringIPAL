@@ -59,7 +59,7 @@ class UnitController extends Controller
             'specification' => $validated['specification'],
             'dimension' => $validated['dimension'],
             'description' => $validated['description'],
-            'image' => $path, // bisa null
+            'image' => $path,
         ]);
 
         return redirect()->back()->with('success', 'Unit berhasil ditambahkan');
@@ -85,24 +85,24 @@ class UnitController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, Unit $unit)
-{
-    $validated = $request->validate([
-        'name' => 'required|string|max:255',
-        'specification' => 'required|string|max:255',
-        'dimension' => 'required|string|max:255',
-        'description' => 'required|string',
-        'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'specification' => 'required|string|max:255',
+            'dimension' => 'required|string|max:255',
+            'description' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
 
-    if ($request->hasFile('image')) {
-        $path = $request->file('image')->store('units', 'public');
-        $validated['image'] = $path;
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('units', 'public');
+            $validated['image'] = $path;
+        }
+
+        $unit->update($validated);
+
+        return back()->with('success', 'Unit berhasil diupdate');
     }
-
-    $unit->update($validated);
-
-    return back()->with('success', 'Unit berhasil diupdate');
-}
 
     /**
      * Remove the specified resource from storage.

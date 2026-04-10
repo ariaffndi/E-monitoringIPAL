@@ -61,7 +61,7 @@ export default function WaterParameters({ waterparameters }: any) {
                         setOpenCreate(false);
                         reset();
                         setIsEdit(false);
-                        toast.success('Unit berhasil diupdate');
+                        toast.success('Parameter berhasil diupdate');
                     },
                 },
             );
@@ -71,7 +71,7 @@ export default function WaterParameters({ waterparameters }: any) {
                 onSuccess: () => {
                     setOpenCreate(false);
                     reset();
-                    toast.success('Unit berhasil ditambahkan');
+                    toast.success('Parameter berhasil ditambahkan');
                 },
             });
         }
@@ -105,7 +105,7 @@ export default function WaterParameters({ waterparameters }: any) {
         router.delete(`/water-parameters/${selectedId}`, {
             onSuccess: () => {
                 setOpenDelete(false);
-                toast.success('Unit berhasil dihapus');
+                toast.success('Parameter berhasil dihapus');
             },
         });
     };
@@ -365,6 +365,22 @@ export default function WaterParameters({ waterparameters }: any) {
                             <span className="font-semibold">Nama:</span>{' '}
                             {selectedWaterParameter.name}
                         </div>
+                        <div>
+                            <span className="font-semibold">Satuan:</span>{' '}
+                            {selectedWaterParameter.unit}
+                        </div>
+                        <div>
+                            <span className="font-semibold">Nilai Minimum:</span>{' '}
+                            {selectedWaterParameter.min_value}
+                        </div>
+                        <div>
+                            <span className="font-semibold">Nilai Maksimum:</span>{' '}
+                            {selectedWaterParameter.max_value}
+                        </div>
+                        <div>
+                            <span className="font-semibold">Tipe Parameter:</span>{' '}
+                            {selectedWaterParameter.type}
+                        </div>
                     </>
                 )}
             </ModalDetail>
@@ -374,7 +390,7 @@ export default function WaterParameters({ waterparameters }: any) {
                 open={openDelete}
                 setOpen={setOpenDelete}
                 title="Hapus Unit?"
-                description="Apakah anda yakin ingin menghapus waterparameter ini?"
+                description="Apakah anda yakin ingin menghapus parameter ini?"
                 onConfirm={handleDelete}
             />
         </>

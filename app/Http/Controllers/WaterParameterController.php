@@ -38,7 +38,24 @@ class WaterParameterController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'unit' => 'required|string|max:255',
+            'min_value' => 'required|numeric',
+            'max_value' => 'required|numeric',
+            'type' => 'required|string|max:255',
+            
+        ]);
+
+        WaterParameter::create([
+            'name' => $validated['name'],
+            'unit' => $validated['unit'],
+            'min_value' => $validated['min_value'],
+            'max_value' => $validated['max_value'],
+            'type' => $validated['type'],
+        ]);
+
+        return redirect()->back()->with('success', 'Parameter berhasil ditambahkan');
     }
 
     /**
@@ -60,16 +77,28 @@ class WaterParameterController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, WaterParameter $waterParameter)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'unit' => 'required|string|max:255',
+            'min_value' => 'required|numeric',
+            'max_value' => 'required|numeric',
+            'type' => 'required|string|max:255',
+        ]);
+
+        $waterParameter->update($validated);
+
+        return back()->with('success', 'Parameter berhasil diupdate');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        //
+        $waterParameter = WaterParameter::findOrFail($id);
+        $waterParameter->delete();
+        return back()->with('success', 'Parameter berhasil dihapus');
     }
 }
