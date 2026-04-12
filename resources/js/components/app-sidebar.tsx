@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Users, FolderGit2, LayoutGrid, Boxes, Droplet } from 'lucide-react';
+import { Users, LayoutGrid, Boxes, Droplet, SquareChartGantt, History } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 // import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -51,7 +51,12 @@ export function AppSidebar() {
                 icon: LayoutGrid,
             },
             {
-                title: 'Pengguna',
+                title: 'Laporan Operasional',
+                href: '/',
+                icon: SquareChartGantt,
+            },
+            {
+                title: 'Operator IPAL',
                 href: '/users',
                 icon: Users,
             },
@@ -73,14 +78,9 @@ export function AppSidebar() {
                 icon: LayoutGrid,
             },
             {
-                title: 'Menu Operator 1',
-                href: '/input',
-                icon: Users,
-            },
-            {
-                title: 'Menu Operator 2',
+                title: 'Riwayat',
                 href: '/history',
-                icon: FolderGit2,
+                icon: History,
             },
         ];
 
