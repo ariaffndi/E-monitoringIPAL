@@ -13,8 +13,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 
-/* ================= TYPES ================= */
-
+// types
 type Unit = {
     id: number;
     name: string;
@@ -57,11 +56,11 @@ type Props = {
     parameters: Parameter[];
 };
 
-/* ================= COMPONENT ================= */
 
 export default function Create({ units, parameters }: Props) {
-    const [step, setStep] = useState(1);
 
+    // states
+    const [step, setStep] = useState(1);
     const [form, setForm] = useState<FormType>(() => ({
         note: '',
         unit_tests: units.map((unit) => ({
@@ -90,12 +89,11 @@ export default function Create({ units, parameters }: Props) {
         },
     }));
 
-    /* ================= HANDLER ================= */
-
-    const handleUnitChange = (
+    // handlers
+    const handleUnitChange = <K extends keyof UnitTest>(
         index: number,
-        field: keyof UnitTest,
-        value: any,
+        field: K,
+        value: UnitTest[K],
     ) => {
         const updated = [...form.unit_tests];
         updated[index][field] = value;
@@ -103,11 +101,11 @@ export default function Create({ units, parameters }: Props) {
         setForm({ ...form, unit_tests: updated });
     };
 
-    const handleWaterChange = (
+    const handleWaterChange = <K extends keyof WaterTest>(
         location: 'inlet' | 'outlet',
         index: number,
-        field: keyof WaterTest,
-        value: any,
+        field: K,
+        value: WaterTest[K],
     ) => {
         const updated = [...form.water_tests[location]];
         updated[index][field] = value;
@@ -130,16 +128,16 @@ export default function Create({ units, parameters }: Props) {
         });
     };
 
-    /* ================= UI ================= */
+    
+
 
     return (
         <>
             <Head title="Input Laporan Operasional" />
 
             <div className="space-y-6 p-6">
-                <h1 className="text-xl font-bold">Input Laporan Operasional</h1>
 
-                {/* STEP INDICATOR */}
+                {/* steps */}
                 <div className="flex gap-2">
                     <span className={step === 1 ? 'font-bold' : ''}>
                         1. Unit
@@ -154,7 +152,7 @@ export default function Create({ units, parameters }: Props) {
                     </span>
                 </div>
 
-                {/* ================= STEP 1 ================= */}
+                {/* step 1 */}
                 {step === 1 && (
                     <div className="space-y-4">
                         <h2 className="font-semibold">Unit Test</h2>
@@ -219,7 +217,7 @@ export default function Create({ units, parameters }: Props) {
                     </div>
                 )}
 
-                {/* ================= STEP 2 ================= */}
+                {/* step 2 */}
                 {step === 2 && (
                     <div className="space-y-6">
                         <h2 className="font-semibold">Water Test</h2>
@@ -319,21 +317,10 @@ export default function Create({ units, parameters }: Props) {
                     </div>
                 )}
 
-                {/* ================= STEP 3 ================= */}
+                {/* step 3 */}
                 {step === 3 && (
                     <div className="space-y-4">
                         <h2 className="font-semibold">Preview</h2>
-
-                        <Textarea
-                            placeholder="Catatan"
-                            value={form.note}
-                            onChange={(e) =>
-                                setForm({
-                                    ...form,
-                                    note: e.target.value,
-                                })
-                            }
-                        />
 
                         {/* UNIT */}
                         <div>
@@ -363,6 +350,18 @@ export default function Create({ units, parameters }: Props) {
                                 </div>
                             ))}
                         </div>
+                        
+                        {/* NOTE */}
+                        <Textarea
+                            placeholder="Catatan"
+                            value={form.note}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    note: e.target.value,
+                                })
+                            }
+                        />
 
                         <div className="flex justify-between">
                             <Button

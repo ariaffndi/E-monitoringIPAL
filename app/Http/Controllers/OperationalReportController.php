@@ -105,9 +105,20 @@ class OperationalReportController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($id)
     {
-        //
+        $report = OperationalReport::with([
+            'unitTests.unit',
+            'waterTests.waterParameter'
+        ])
+        ->where('user_id', Auth::id())
+        ->findOrFail($id);
+
+        
+
+        return Inertia::render('operator/operational-reports/Show', [
+            'report' => $report
+        ]);
     }
 
     /**
@@ -132,5 +143,18 @@ class OperationalReportController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+
+    public function history()
+    {
+        $reports = OperationalReport::withCount(['unitTests', 'waterTests'])
+            ->where('user_id', Auth::id())
+            ->latest()
+            ->get();
+
+        return Inertia::render('operator/operational-reports/History', [
+            'reports' => $reports
+        ]);
     }
 }

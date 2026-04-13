@@ -11,7 +11,16 @@ import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
 import { FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
+
 
 export default function Users({ users }: any) {
     // state
@@ -226,14 +235,21 @@ export default function Users({ users }: any) {
 
                 <Field>
                     <FieldLabel htmlFor="role">Role</FieldLabel>
-                    <select
-                        className="w-full rounded border p-2"
+
+                    <Select
                         value={data.role}
-                        onChange={(e) => setData('role', e.target.value)}
+                        onValueChange={(value) => setData('role', value)}
                     >
-                        <option value="admin">Admin</option>
-                        <option value="operator">Operator</option>
-                    </select>
+                        <SelectTrigger className="">
+                            <SelectValue placeholder="Pilih Role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                <SelectItem value="admin">Admin</SelectItem>
+                                <SelectItem value="operator">Operator</SelectItem>
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
                 </Field>
 
                 <Field>

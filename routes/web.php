@@ -41,6 +41,10 @@ Route::middleware(['auth', 'role:operator'])->group(function () {
         return inertia('operator/Dashboard');
     })->name('operator.dashboard');
 
+    Route::prefix('operational-reports')->group(function () {
+        Route::get('/history', [OperationalReportController::class, 'history']);
+    });
+
     Route::resource('operational-reports', OperationalReportController::class);
     Route::resource('unit-tests', UnitTestController::class);
     Route::resource('water-tests', WaterTestController::class);

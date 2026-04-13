@@ -84,7 +84,7 @@ export function AppSidebar() {
             },
             {
                 title: 'Riwayat',
-                href: '/history',
+                href: '/operational-reports/history',
                 icon: History,
             },
         ];
