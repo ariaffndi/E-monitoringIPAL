@@ -78,6 +78,11 @@ export function AppSidebar() {
                 icon: LayoutGrid,
             },
             {
+                title: 'Input Data Operasional',
+                href: '/operational-reports/create',
+                icon: SquareChartGantt,
+            },
+            {
                 title: 'Riwayat',
                 href: '/history',
                 icon: History,
