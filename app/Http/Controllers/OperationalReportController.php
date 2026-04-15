@@ -18,9 +18,21 @@ class OperationalReportController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(request $request)
     {
-        
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
+        $query = OperationalReport::with('user')->latest();
+
+        if ($request->filled('search')) {
+            $query->where('note', 'like', '%' . $request->search . '%');
+        }
+
+        return Inertia::render('admin/operational-reports/Index', [
+            'reports' => $query->get()
+        ]);
     }
 
     /**
@@ -28,6 +40,10 @@ class OperationalReportController extends Controller
      */
     public function create()
     {
+        if (Auth::user()->role !== 'operator') {
+            abort(403);
+        }
+
         return Inertia::render('operator/operational-reports/Create', [
             'units' => Unit::select('id', 'name')->get(),
             'parameters' => WaterParameter::select('id', 'name', 'unit', 'type')->get(),
@@ -39,6 +55,10 @@ class OperationalReportController extends Controller
      */
     public function store(Request $request)
     {
+        if (Auth::user()->role !== 'operator') {
+            abort(403);
+        }
+
         $request->validate([
             'unit_tests' => 'required|array',
             'water_tests.inlet' => 'required|array',
@@ -107,16 +127,17 @@ class OperationalReportController extends Controller
      */
     public function show($id)
     {
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
         $report = OperationalReport::with([
+            'user',
             'unitTests.unit',
             'waterTests.waterParameter'
-        ])
-        ->where('user_id', Auth::id())
-        ->findOrFail($id);
+        ])->findOrFail($id);
 
-        
-
-        return Inertia::render('operator/operational-reports/Show', [
+        return Inertia::render('admin/operational-reports/Show', [
             'report' => $report
         ]);
     }
@@ -148,6 +169,10 @@ class OperationalReportController extends Controller
 
     public function history()
     {
+        if (Auth::user()->role !== 'operator') {
+            abort(403);
+        }
+
         $reports = OperationalReport::withCount(['unitTests', 'waterTests'])
             ->where('user_id', Auth::id())
             ->latest()
@@ -155,6 +180,24 @@ class OperationalReportController extends Controller
 
         return Inertia::render('operator/operational-reports/History', [
             'reports' => $reports
+        ]);
+    }
+
+    public function historyShow($id)
+    {
+        if (Auth::user()->role !== 'operator') {
+            abort(403);
+        }
+
+        $report = OperationalReport::with([
+            'unitTests.unit',
+            'waterTests.waterParameter'
+        ])
+        ->where('user_id', Auth::id())
+        ->findOrFail($id);
+
+        return Inertia::render('operator/operational-reports/HistoryShow', [
+            'report' => $report
         ]);
     }
 }

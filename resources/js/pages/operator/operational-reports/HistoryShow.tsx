@@ -27,7 +27,7 @@ type Report = {
    water_tests: WaterTest[];
 };
 
-export default function Show({ report }: { report: Report }) {
+export default function HistoryShow({ report }: { report: Report }) {
    const formatTanggal = (dateString: string) => {
       const date = new Date(dateString);
 
@@ -128,6 +128,6 @@ export default function Show({ report }: { report: Report }) {
    );
 }
 
-Show.layout = {
+HistoryShow.layout = {
    breadcrumbs: [{ title: 'Detail Laporan' }],
 };

@@ -52,7 +52,7 @@ export function AppSidebar() {
             },
             {
                 title: 'Laporan Operasional',
-                href: '/',
+                href: '/operational-reports',
                 icon: SquareChartGantt,
             },
             {

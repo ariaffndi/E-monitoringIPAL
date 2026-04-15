@@ -35,7 +35,7 @@ export default function History({ reports }: { reports: Report[] }) {
                            <Button
                               onClick={() =>
                                     router.get(
-                                       `/operational-reports/${report.id}`,
+                                       `/operational-reports/history/${report.id}`,
                                     )
                               }
                            >

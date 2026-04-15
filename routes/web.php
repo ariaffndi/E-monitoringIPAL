@@ -35,19 +35,25 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('water-parameters', WaterParameterController::class);
 });
 
+
 //Route Operator
 Route::middleware(['auth', 'role:operator'])->group(function () {
     Route::get('/operator', function () {
         return inertia('operator/Dashboard');
     })->name('operator.dashboard');
-
-    Route::prefix('operational-reports')->group(function () {
-        Route::get('/history', [OperationalReportController::class, 'history']);
-    });
-
-    Route::resource('operational-reports', OperationalReportController::class);
+    
     Route::resource('unit-tests', UnitTestController::class);
     Route::resource('water-tests', WaterTestController::class);
 });
+
+//Route Operational Report (Gabungan)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/operational-reports/history', [OperationalReportController::class, 'history']);
+    Route::get('/operational-reports/history/{id}', [OperationalReportController::class, 'historyShow']);
+    
+    Route::resource('operational-reports', OperationalReportController::class)
+        ->only(['index', 'show', 'create', 'store']);
+});
+
 
 require __DIR__.'/settings.php';
