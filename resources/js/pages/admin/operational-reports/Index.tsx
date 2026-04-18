@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
 
 type Report = {
@@ -48,12 +49,9 @@ export default function OperationalReports({ reports }: { reports: Report[] }) {
 
             <div className="flex flex-col gap-4 p-4">
                 {/* HEADER */}
-                <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
+                <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:justify-between">
                     <Button
-                        onClick={() =>
-                            router.visit('/operational-reports/create')
-                        }
-                        className="cursor-pointer bg-blue-600 text-sm hover:bg-blue-700"
+                        className="mb-2 w-fit cursor-pointer bg-blue-600 hover:bg-blue-700 sm:mb-0"
                     >
                         <PlusCircle />
                         Tambah Laporan
@@ -80,6 +78,8 @@ export default function OperationalReports({ reports }: { reports: Report[] }) {
                         )}
                     </div>
                 </div>
+
+                <Separator />
 
                 {/* TABLE */}
                 <div className="w-full overflow-x-auto rounded-lg border">

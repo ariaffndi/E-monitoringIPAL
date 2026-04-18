@@ -1,6 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { useForm } from '@inertiajs/react';
-import {PlusCircle, Search, HardHat, BookCheck, Trash2, Info,} from 'lucide-react';
+import { PlusCircle, Search, MoreVertical, Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 import { toast } from 'sonner';
@@ -8,51 +8,60 @@ import ModalConfirmDelete from '@/components/modal-confirm-delete';
 import ModalCreate from '@/components/modal-create';
 import ModalDetail from '@/components/modal-detail';
 import { Button } from '@/components/ui/button';
-import { Field } from '@/components/ui/field';
-import { FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
 import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
 
+type User = {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+};
 
-export default function Users({ users }: any) {
-    // state
+export default function Users({ users }: { users: User[] }) {
     const [openCreate, setOpenCreate] = useState(false);
     const [openDetail, setOpenDetail] = useState(false);
-    const [selectedUser, setSelectedUser] = useState<any>(null);
+    const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [openDelete, setOpenDelete] = useState(false);
     const [selectedId, setSelectedId] = useState<number | null>(null);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState('');
+
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
-        role: 'operator',
+        role: 'operator', // 🔒 dikunci
         password: '',
     });
 
-    // handler
+    // ================= CREATE =================
     const handleCreate = () => {
         post('/users', {
             onSuccess: () => {
                 setOpenCreate(false);
                 reset();
-
                 toast.success('User berhasil ditambahkan');
             },
         });
     };
 
-    const handleView = (user: any) => {
+    // ================= DETAIL =================
+    const handleView = (user: User) => {
         setSelectedUser(user);
         setOpenDetail(true);
+    };
+
+    // ================= DELETE =================
+    const confirmDelete = (id: number) => {
+        setSelectedId(id);
+        setOpenDelete(true);
     };
 
     const handleDelete = () => {
@@ -68,12 +77,7 @@ export default function Users({ users }: any) {
         });
     };
 
-    const confirmDelete = (id: number) => {
-        setSelectedId(id);
-        setOpenDelete(true);
-    };
-
-    // search
+    // ================= SEARCH =================
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setLoading(true);
@@ -96,18 +100,24 @@ export default function Users({ users }: any) {
         }
     };
 
+    // ================= HELPER =================
+    const getInitial = (name: string) => {
+        return name.charAt(0).toUpperCase();
+    };
+
     return (
         <>
             <Head title="Users" />
-            <div className="flex flex-col gap-4 p-4">
-                {/* header */}
-                <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
+
+            <div className="flex flex-col gap-4 p-6">
+                {/* HEADER */}
+                <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:justify-between">
                     <Button
                         onClick={() => setOpenCreate(true)}
-                        className="cursor-pointer bg-blue-600 text-sm hover:bg-blue-700"
+                        className="mb-2 w-fit cursor-pointer bg-blue-600 hover:bg-blue-700 sm:mb-0"
                     >
                         <PlusCircle />
-                        Tambah User
+                        Tambah Operator
                     </Button>
 
                     <div className="relative">
@@ -132,143 +142,107 @@ export default function Users({ users }: any) {
                     </div>
                 </div>
 
-                {/* table */}
-                <div className="w-full overflow-x-auto rounded-lg border">
-                    <table className="table min-w-full text-center text-sm">
-                        <thead>
-                            <tr className="bg-secondary">
-                                <th className="p-2">No</th>
-                                <th className="p-2">Nama</th>
-                                <th className="p-2">Email</th>
-                                <th className="p-2">Role</th>
-                                <th className="p-2">Aksi</th>
-                            </tr>
-                        </thead>
+                <Separator />
 
-                        <tbody>
-                            {users.map((user: any, index: number) => (
-                                <tr
-                                    key={user.id}
-                                    className="hover:bg-secondary"
+                {/* CARD LIST */}
+                <div className="grid gap-8 p-6 sm:grid-cols-2 md:grid-cols-2">
+                    {users.map((user) => (
+                        <div
+                            key={user.id}
+                            className="relative cursor-pointer rounded-xl border p-4 shadow-sm transition hover:shadow-md"
+                            onClick={() => handleView(user)}
+                        >
+                            {/* DROPDOWN */}
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        variant="ghost"
+                                        className="absolute top-2 right-2 cursor-pointer"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <MoreVertical size={16} />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent
+                                    onClick={(e) => e.stopPropagation()}
                                 >
-                                    <td className="p-2">{index + 1}</td>
-                                    <td className="p-2">{user.name}</td>
-                                    <td className="p-2">{user.email}</td>
+                                    <DropdownMenuItem
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            confirmDelete(user.id);
+                                        }}
+                                        className="cursor-pointer text-red-500 focus:text-red-500"
+                                    >
+                                        <Trash2
+                                            size={16}
+                                            className="text-danger mr-2"
+                                        />
+                                        Hapus
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
 
-                                    <td className="p-2">
-                                        {user.role === 'admin' ? (
-                                            <div className="inline-flex items-center gap-2 rounded bg-green-100 px-2 py-1 text-xs text-green-700">
-                                                <BookCheck className="size-3" />
-                                                Admin
-                                            </div>
-                                        ) : (
-                                            <div className="inline-flex items-center gap-2 rounded bg-yellow-100 px-2 py-1 text-xs text-yellow-700">
-                                                <HardHat className="size-3" />
-                                                Operator
-                                            </div>
-                                        )}
-                                    </td>
+                            {/* CONTENT */}
+                            <div className="flex items-center gap-3">
+                                {/* AVATAR */}
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 font-bold text-blue-700">
+                                    {getInitial(user.name)}
+                                </div>
 
-                                    <td className="p-2">
-                                        <div className="flex flex-nowrap items-center justify-center gap-2">
-                                            <Button
-                                                title="Detail Data"
-                                                onClick={() => handleView(user)}
-                                                size="sm"
-                                                className="cursor-pointer bg-sky-100 text-sky-700 hover:bg-sky-300"
-                                            >
-                                                <Info />
-                                            </Button>
-                                            <Button
-                                                title="Hapus Data"
-                                                onClick={() =>
-                                                    confirmDelete(user.id)
-                                                }
-                                                size="sm"
-                                                className="cursor-pointer bg-red-100 text-red-700 hover:bg-red-300"
-                                            >
-                                                <Trash2 />
-                                            </Button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                                {/* INFO */}
+                                <div>
+                                    <p className="font-semibold">{user.name}</p>
+                                    <p className="text-sm text-muted-foreground">
+                                        {user.email}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
 
-            {/* modal create */}
+            {/* MODAL CREATE */}
             <ModalCreate
                 open={openCreate}
                 setOpen={setOpenCreate}
-                title="Tambah User"
+                title="Tambah Operator"
                 onSubmit={handleCreate}
                 processing={processing}
             >
-                <Field>
-                    <FieldLabel htmlFor="Name">Name</FieldLabel>
-                    <Input
-                        placeholder="Nama"
-                        value={data.name}
-                        onChange={(e) => setData('name', e.target.value)}
-                        className="mb-2"
-                    />
-                    {errors.name && (
-                        <p className="text-xs text-red-500">{errors.name}</p>
-                    )}
-                </Field>
+                <Input
+                    placeholder="Nama"
+                    value={data.name}
+                    onChange={(e) => setData('name', e.target.value)}
+                />
+                {errors.name && (
+                    <p className="text-xs text-red-500">{errors.name}</p>
+                )}
 
-                <Field>
-                    <FieldLabel htmlFor="email">Email</FieldLabel>
-                    <Input
-                        placeholder="Email"
-                        value={data.email}
-                        type="email"
-                        onChange={(e) => setData('email', e.target.value)}
-                        className="mb-2"
-                    />
-                    {errors.email && (
-                        <p className="text-xs text-red-500">{errors.email}</p>
-                    )}
-                </Field>
+                <Input
+                    placeholder="Email"
+                    type="email"
+                    value={data.email}
+                    onChange={(e) => setData('email', e.target.value)}
+                />
+                {errors.email && (
+                    <p className="text-xs text-red-500">{errors.email}</p>
+                )}
 
-                <Field>
-                    <FieldLabel htmlFor="role">Role</FieldLabel>
+                {/* ROLE DIKUNCI */}
+                <Input value="Operator" disabled />
 
-                    <Select
-                        value={data.role}
-                        onValueChange={(value) => setData('role', value)}
-                    >
-                        <SelectTrigger className="">
-                            <SelectValue placeholder="Pilih Role" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                <SelectItem value="admin">Admin</SelectItem>
-                                <SelectItem value="operator">Operator</SelectItem>
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select>
-                </Field>
-
-                <Field>
-                    <FieldLabel htmlFor="password">Password</FieldLabel>
-                    <Input
-                        placeholder="Password"
-                        type="password"
-                        onChange={(e) => setData('password', e.target.value)}
-                        className="mb-2"
-                    />
-                    {errors.password && (
-                        <p className="text-xs text-red-500">
-                            {errors.password}
-                        </p>
-                    )}
-                </Field>
+                <Input
+                    placeholder="Password"
+                    type="password"
+                    onChange={(e) => setData('password', e.target.value)}
+                />
+                {errors.password && (
+                    <p className="text-xs text-red-500">{errors.password}</p>
+                )}
             </ModalCreate>
 
-            {/* modal detail */}
+            {/* MODAL DETAIL */}
             <ModalDetail
                 open={openDetail}
                 setOpen={setOpenDetail}
@@ -276,25 +250,23 @@ export default function Users({ users }: any) {
             >
                 {selectedUser && (
                     <>
-                        <div>
-                            <span className="font-medium">Nama:</span>{' '}
-                            {selectedUser.name}
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 font-bold text-blue-700 mt-2">
+                            {getInitial(selectedUser.name)}
                         </div>
-
-                        <div>
-                            <span className="font-medium">Email:</span>{' '}
-                            {selectedUser.email}
-                        </div>
-
-                        <div>
-                            <span className="font-medium">Role:</span>{' '}
-                            {selectedUser.role}
-                        </div>
+                        <p>
+                            <b>Nama:</b> {selectedUser.name}
+                        </p>
+                        <p>
+                            <b>Email:</b> {selectedUser.email}
+                        </p>
+                        <p>
+                            <b>Role:</b> {selectedUser.role}
+                        </p>
                     </>
                 )}
             </ModalDetail>
 
-            {/* modal delete */}
+            {/* MODAL DELETE */}
             <ModalConfirmDelete
                 open={openDelete}
                 setOpen={setOpenDelete}
@@ -309,7 +281,7 @@ export default function Users({ users }: any) {
 Users.layout = {
     breadcrumbs: [
         {
-            title: 'Data Pengguna',
+            title: 'Data Operator',
         },
     ],
 };

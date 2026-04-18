@@ -1,6 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { useForm } from '@inertiajs/react';
-import { PlusCircle, Search, Trash2, Info, Pencil } from 'lucide-react';
+import { PlusCircle, Search, Trash2, Pencil, MoreVertical } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 import { toast } from 'sonner';
@@ -8,9 +8,16 @@ import ModalConfirmDelete from '@/components/modal-confirm-delete';
 import ModalCreate from '@/components/modal-create';
 import ModalDetail from '@/components/modal-detail';
 import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Field } from '@/components/ui/field';
 import { FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -139,12 +146,12 @@ export default function Units({ units }: any) {
     return (
         <>
             <Head title="Units" />
-            <div className="flex flex-col gap-4 p-4">
-                {/* header */}
-                <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
+            <div className="flex flex-col gap-4 p-6">
+                {/* HEADER */}
+                <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:justify-between">
                     <Button
                         onClick={() => setOpenCreate(true)}
-                        className="cursor-pointer bg-blue-600 text-sm hover:bg-blue-700"
+                        className="mb-2 w-fit cursor-pointer bg-blue-600 hover:bg-blue-700 sm:mb-0"
                     >
                         <PlusCircle />
                         Tambah Unit
@@ -172,82 +179,117 @@ export default function Units({ units }: any) {
                     </div>
                 </div>
 
+                <Separator />
+
                 {/* table */}
-                <div className="w-full overflow-x-auto rounded-lg border">
-                    <table className="table min-w-full text-center text-sm">
-                        <thead>
-                            <tr className="bg-secondary">
-                                <th className="p-2">No</th>
-                                <th className="p-2">Foto</th>
-                                <th className="p-2">Nama</th>
-                                <th className="p-2">Deskripsi</th>
-                                <th className="p-2">Dimensi</th>
-                                <th className="p-2">Aksi</th>
-                            </tr>
-                        </thead>
+                <div className="w-full overflow-x-auto rounded-lg border border-sidebar-border/70">
+                        <div className="w-full overflow-x-auto rounded-lg border border-sidebar-border/70 p-6">
+                            <table className="min-w-full text-center">
+                                <tbody className="">
+                                    {units?.map((unit: any, index: number) => (
+                                        <tr
+                                            key={unit.id}
+                                            onClick={() => handleView(unit)}
+                                            className={`cursor-pointer transition hover:bg-secondary ${
+                                                index % 2 === 0
+                                                    ? 'bg-white'
+                                                    : 'bg-muted/80'
+                                            }`}
+                                        >
+                                            {/* UNIT */}
+                                            <td className="flex items-center gap-8 p-4">
+                                                <img
+                                                    src={`/storage/${unit.image}`}
+                                                    alt={unit.name}
+                                                    className="h-16 w-16 rounded-lg object-cover"
+                                                />
 
-                        <tbody>
-                            {units
-                                ?.filter((unit: any) => unit !== null)
-                                .map((unit: any, index: number) => (
-                                    <tr
-                                        key={unit.id}
-                                        className="hover:bg-secondary"
-                                    >
-                                        <td className="p-2">{index + 1}</td>
-                                        <td className="flex justify-center p-2">
-                                            <img
-                                                src={`/storage/${unit.image}`}
-                                                alt={unit.name}
-                                                className="mt-2 h-10 w-10 rounded-full object-cover"
-                                            />
-                                        </td>
-                                        <td className="p-2">{unit.name}</td>
-                                        <td className="hidden max-w-50 truncate p-2 whitespace-nowrap sm:table-cell">
-                                            {unit.description}
-                                        </td>
-                                        <td className="p-2">
-                                            {unit.dimension}
-                                        </td>
+                                                <div className="text-start">
+                                                    <p className="font-bold">
+                                                        {unit.name}
+                                                    </p>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {unit.specification}
+                                                    </p>
+                                                </div>
+                                            </td>
 
-                                        <td className="p-2">
-                                            <div className="flex flex-nowrap items-center justify-center gap-2">
-                                                <Button
-                                                    title="Detail Data"
-                                                    onClick={() =>
-                                                        handleView(unit)
-                                                    }
-                                                    size="sm"
-                                                    className="cursor-pointer bg-sky-100 text-sky-700 hover:bg-sky-300"
-                                                >
-                                                    <Info />
-                                                </Button>
-                                                <Button
-                                                    title="Edit Data"
-                                                    onClick={() =>
-                                                        handleEdit(unit)
-                                                    }
-                                                    size="sm"
-                                                    className="cursor-pointer bg-yellow-100 text-yellow-700 hover:bg-yellow-300"
-                                                >
-                                                    <Pencil size={20} />
-                                                </Button>
-                                                <Button
-                                                    title="Hapus Data"
-                                                    onClick={() =>
-                                                        confirmDelete(unit.id)
-                                                    }
-                                                    size="sm"
-                                                    className="cursor-pointer bg-red-100 text-red-700 hover:bg-red-300"
-                                                >
-                                                    <Trash2 />
-                                                </Button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                        </tbody>
-                    </table>
+                                            {/* DESKRIPSI */}
+                                            <td className="max-w-sm text-sm truncate p-3 whitespace-nowrap sm:table-cell">
+                                                {unit.description}
+                                            </td>
+
+                                            {/* DIMENSI */}
+                                            <td className="p-3 text-center">
+                                                <span className="rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-700">
+                                                    {unit.dimension}
+                                                </span>
+                                            </td>
+
+                                            {/* ACTION */}
+                                            <td className="text-right">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger
+                                                        asChild
+                                                    >
+                                                        <Button
+                                                            variant="ghost"
+                                                            className="cursor-pointer"
+                                                            onClick={(e) =>
+                                                                e.stopPropagation()
+                                                            }
+                                                        >
+                                                            <MoreVertical
+                                                                size={16}
+                                                            />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+
+                                                    <DropdownMenuContent
+                                                        align="end"
+                                                        onClick={(e) =>
+                                                            e.stopPropagation()
+                                                        }
+                                                    >
+                                                        <DropdownMenuItem
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleEdit(
+                                                                    unit,
+                                                                );
+                                                            }}
+                                                            className="cursor-pointer text-yellow-500 focus:text-yellow-500"
+                                                        >
+                                                            <Pencil
+                                                                size={16}
+                                                                className="mr-2 text-yellow-500"
+                                                            />
+                                                            Edit
+                                                        </DropdownMenuItem>
+
+                                                        <DropdownMenuItem
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                confirmDelete(
+                                                                    unit.id,
+                                                                );
+                                                            }}
+                                                            className="cursor-pointer text-red-500 focus:text-red-500"
+                                                        >
+                                                            <Trash2
+                                                                size={16}
+                                                                className="mr-2 text-red-500"
+                                                            />
+                                                            Hapus
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                 </div>
             </div>
 
@@ -321,20 +363,25 @@ export default function Units({ units }: any) {
 
                 <Field>
                     <FieldLabel htmlFor="picture">Picture</FieldLabel>
-                    <div>
-                        <img
-                            src={`/storage/${data.image}`}
-                            alt={data.name}
-                            className="mt-2 h-25 w-25 rounded-lg object-cover"
-                        />
-                    </div>
+                    {(isEdit && selectedUnit?.image) || data.image ? (
+                        <div>
+                            <img
+                                src={
+                                    data.image
+                                        ? URL.createObjectURL(data.image)
+                                        : `/storage/${selectedUnit.image}`
+                                }
+                                alt={data.name}
+                                className="mt-2 h-25 w-25 rounded-lg object-cover"
+                            />
+                        </div>
+                    ) : null}
+
                     <Input
                         type="file"
                         className="cursor-pointer"
                         onChange={(e) => {
-                            const file = e.target.files
-                                ? e.target.files[0]
-                                : null;
+                            const file = e.target.files?.[0] ?? null;
                             setData('image', file);
                         }}
                     />
@@ -349,6 +396,14 @@ export default function Units({ units }: any) {
             >
                 {selectedUnit && (
                     <>
+                            <div className="flex justify-center p-2">
+                                <img
+                                    src={`/storage/${selectedUnit.image}`}
+                                    alt={selectedUnit.name}
+                                    className="mt-2 h-50 w-50 rounded-full object-cover"
+                                />
+                            </div>
+                        
                         <div>
                             <span className="font-semibold">Nama:</span>{' '}
                             {selectedUnit.name}
@@ -369,16 +424,6 @@ export default function Units({ units }: any) {
                             {selectedUnit.description}
                         </div>
 
-                        <div>
-                            <span className="font-semibold">Gambar:</span>{' '}
-                            <div className="flex justify-center p-2">
-                                <img
-                                    src={`/storage/${selectedUnit.image}`}
-                                    alt={selectedUnit.name}
-                                    className="mt-2 h-50 w-50 rounded-full object-cover"
-                                />
-                            </div>
-                        </div>
                     </>
                 )}
             </ModalDetail>

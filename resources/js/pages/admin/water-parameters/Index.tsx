@@ -1,6 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { useForm } from '@inertiajs/react';
-import { PlusCircle, Search, Trash2, Info, Pencil } from 'lucide-react';
+import { PlusCircle, Search, Trash2, Pencil } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 import { toast } from 'sonner';
@@ -19,6 +19,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
 
 export default function WaterParameters({ waterparameters }: any) {
@@ -144,18 +145,32 @@ export default function WaterParameters({ waterparameters }: any) {
         }
     };
 
+    const [filterType, setFilterType] = useState<string>('all');
+    const getTypeBadge = (type: string) => {
+        switch (type) {
+            case 'fisika':
+                return 'bg-blue-100 text-blue-700';
+            case 'kimia':
+                return 'bg-purple-100 text-purple-700';
+            case 'biologi':
+                return 'bg-green-100 text-green-700';
+            default:
+                return 'bg-gray-100 text-gray-700';
+        }
+    };
+
     return (
         <>
             <Head title="WaterParameters" />
-            <div className="flex flex-col gap-4 p-4">
+            <div className="flex flex-col gap-4 p-6">
                 {/* header */}
-                <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
+                <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:justify-between">
                     <Button
                         onClick={() => setOpenCreate(true)}
-                        className="cursor-pointer bg-blue-600 text-sm hover:bg-blue-700"
+                        className="mb-2 w-fit cursor-pointer bg-blue-600 hover:bg-blue-700 sm:mb-0"
                     >
                         <PlusCircle />
-                        Tambah Unit
+                        Tambah Parameter
                     </Button>
 
                     <div className="relative">
@@ -180,6 +195,8 @@ export default function WaterParameters({ waterparameters }: any) {
                     </div>
                 </div>
 
+                <Separator />
+
                 {/* table */}
                 <div className="w-full overflow-x-auto rounded-lg border">
                     <table className="table min-w-full text-center text-sm">
@@ -189,23 +206,59 @@ export default function WaterParameters({ waterparameters }: any) {
                                 <th className="p-2">Satuan</th>
                                 <th className="p-2">Nilai Minimum</th>
                                 <th className="p-2">Nilai Maksimum</th>
-                                <th className="p-2">Jenis</th>
+                                <th className="flex items-center justify-center">
+                                    <Select
+                                        value={filterType}
+                                        onValueChange={(value) =>
+                                            setFilterType(value)
+                                        }
+                                    >
+                                        <SelectTrigger className="h-auto border-none bg-transparent p-0 text-xs shadow-none ring-0 focus:ring-0 focus:outline-none">
+                                            <SelectValue placeholder="Jenis" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectGroup>
+                                                <SelectItem value="all">
+                                                    Jenis
+                                                </SelectItem>
+                                                <SelectItem value="fisika">
+                                                    Fisika
+                                                </SelectItem>
+                                                <SelectItem value="kimia">
+                                                    Kimia
+                                                </SelectItem>
+                                                <SelectItem value="biologi">
+                                                    Biologi
+                                                </SelectItem>
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
+                                </th>
                                 <th className="p-2">Aksi</th>
                             </tr>
                         </thead>
 
                         <tbody>
                             {waterparameters
-                                ?.filter(
-                                    (waterparameter: any) =>
-                                        waterparameter !== null,
+                                ?.filter((item: any) => item !== null)
+                                ?.filter((item: any) =>
+                                    filterType === 'all'
+                                        ? true
+                                        : item.type === filterType,
                                 )
-                                .map((waterparameter: any) => (
+                                ?.map((waterparameter: any, index: number) => (
                                     <tr
                                         key={waterparameter.id}
-                                        className="hover:bg-secondary"
+                                        onClick={() =>
+                                            handleView(waterparameter)
+                                        }
+                                        className={`cursor-pointer transition hover:bg-secondary ${
+                                            index % 2 === 0
+                                                ? 'bg-white'
+                                                : 'bg-muted/50'
+                                        }`}
                                     >
-                                        <td className="p-2">
+                                        <td className="p-2 font-semibold">
                                             {waterparameter.name}
                                         </td>
                                         <td className="p-2">
@@ -218,29 +271,24 @@ export default function WaterParameters({ waterparameters }: any) {
                                             {waterparameter.max_value}
                                         </td>
                                         <td className="p-2">
-                                            {waterparameter.type}
+                                            <span
+                                                className={`rounded-full px-3 py-1 text-xs capitalize ${getTypeBadge(
+                                                    waterparameter.type,
+                                                )}`}
+                                            >
+                                                {waterparameter.type}
+                                            </span>
                                         </td>
                                         <td className="p-2">
                                             <div className="flex flex-nowrap items-center justify-center gap-2">
                                                 <Button
-                                                    title="Detail Data"
-                                                    onClick={() =>
-                                                        handleView(
-                                                            waterparameter,
-                                                        )
-                                                    }
-                                                    size="sm"
-                                                    className="cursor-pointer bg-sky-100 text-sky-700 hover:bg-sky-300"
-                                                >
-                                                    <Info />
-                                                </Button>
-                                                <Button
                                                     title="Edit Data"
-                                                    onClick={() =>
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
                                                         handleEdit(
                                                             waterparameter,
-                                                        )
-                                                    }
+                                                        );
+                                                    }}
                                                     size="sm"
                                                     className="cursor-pointer bg-yellow-100 text-yellow-700 hover:bg-yellow-300"
                                                 >
@@ -248,11 +296,12 @@ export default function WaterParameters({ waterparameters }: any) {
                                                 </Button>
                                                 <Button
                                                     title="Hapus Data"
-                                                    onClick={() =>
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
                                                         confirmDelete(
                                                             waterparameter.id,
-                                                        )
-                                                    }
+                                                        );
+                                                    }}
                                                     size="sm"
                                                     className="cursor-pointer bg-red-100 text-red-700 hover:bg-red-300"
                                                 >
@@ -271,7 +320,7 @@ export default function WaterParameters({ waterparameters }: any) {
             <ModalCreate
                 open={openCreate}
                 setOpen={handleCloseModal}
-                title={isEdit ? 'Edit Unit' : 'Tambah Unit'}
+                title={isEdit ? 'Edit Parameter' : 'Tambah Parameter'}
                 onSubmit={handleSubmit}
                 processing={processing}
             >
@@ -357,7 +406,7 @@ export default function WaterParameters({ waterparameters }: any) {
             <ModalDetail
                 open={openDetail}
                 setOpen={setOpenDetail}
-                title="Detail Unit"
+                title="Detail Parameter Air"
             >
                 {selectedWaterParameter && (
                     <>
@@ -370,15 +419,21 @@ export default function WaterParameters({ waterparameters }: any) {
                             {selectedWaterParameter.unit}
                         </div>
                         <div>
-                            <span className="font-semibold">Nilai Minimum:</span>{' '}
+                            <span className="font-semibold">
+                                Nilai Minimum:
+                            </span>{' '}
                             {selectedWaterParameter.min_value}
                         </div>
                         <div>
-                            <span className="font-semibold">Nilai Maksimum:</span>{' '}
+                            <span className="font-semibold">
+                                Nilai Maksimum:
+                            </span>{' '}
                             {selectedWaterParameter.max_value}
                         </div>
                         <div>
-                            <span className="font-semibold">Tipe Parameter:</span>{' '}
+                            <span className="font-semibold">
+                                Tipe Parameter:
+                            </span>{' '}
                             {selectedWaterParameter.type}
                         </div>
                     </>
