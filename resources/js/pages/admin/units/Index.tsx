@@ -182,114 +182,104 @@ export default function Units({ units }: any) {
                 <Separator />
 
                 {/* table */}
-                <div className="w-full overflow-x-auto rounded-lg border border-sidebar-border/70">
-                        <div className="w-full overflow-x-auto rounded-lg border border-sidebar-border/70 p-6">
-                            <table className="min-w-full text-center">
-                                <tbody className="">
-                                    {units?.map((unit: any, index: number) => (
-                                        <tr
-                                            key={unit.id}
-                                            onClick={() => handleView(unit)}
-                                            className={`cursor-pointer transition hover:bg-secondary ${
-                                                index % 2 === 0
-                                                    ? 'bg-white'
-                                                    : 'bg-muted/80'
-                                            }`}
-                                        >
-                                            {/* UNIT */}
-                                            <td className="flex items-center gap-8 p-4">
-                                                <img
-                                                    src={`/storage/${unit.image}`}
-                                                    alt={unit.name}
-                                                    className="h-16 w-16 rounded-lg object-cover"
-                                                />
+                <div className="w-full overflow-x-auto rounded-lg border p-6">
+                    <table className="min-w-full text-center">
+                        <tbody className="">
+                            {units?.map((unit: any, index: number) => (
+                                <tr
+                                    key={unit.id}
+                                    onClick={() => handleView(unit)}
+                                    className={`cursor-pointer transition hover:bg-secondary ${
+                                        index % 2 === 0
+                                            ? 'bg-white'
+                                            : 'bg-muted/80'
+                                    }`}
+                                >
+                                    {/* UNIT */}
+                                    <td className="flex items-center gap-8 p-4">
+                                        <img
+                                            src={`/storage/${unit.image}`}
+                                            alt={unit.name}
+                                            className="h-16 w-16 rounded-lg object-cover"
+                                        />
 
-                                                <div className="text-start">
-                                                    <p className="font-bold">
-                                                        {unit.name}
-                                                    </p>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        {unit.specification}
-                                                    </p>
-                                                </div>
-                                            </td>
+                                        <div className="text-start">
+                                            <p className="font-bold">
+                                                {unit.name}
+                                            </p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {unit.specification}
+                                            </p>
+                                        </div>
+                                    </td>
 
-                                            {/* DESKRIPSI */}
-                                            <td className="max-w-sm text-sm truncate p-3 whitespace-nowrap sm:table-cell">
-                                                {unit.description}
-                                            </td>
+                                    {/* DESKRIPSI */}
+                                    <td className="max-w-sm truncate p-3 text-sm whitespace-nowrap sm:table-cell">
+                                        {unit.description}
+                                    </td>
 
-                                            {/* DIMENSI */}
-                                            <td className="p-3 text-center">
-                                                <span className="rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-700">
-                                                    {unit.dimension}
-                                                </span>
-                                            </td>
+                                    {/* DIMENSI */}
+                                    <td className="p-3 text-center">
+                                        <span className="rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-700">
+                                            {unit.dimension}
+                                        </span>
+                                    </td>
 
-                                            {/* ACTION */}
-                                            <td className="text-right">
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger
-                                                        asChild
-                                                    >
-                                                        <Button
-                                                            variant="ghost"
-                                                            className="cursor-pointer"
-                                                            onClick={(e) =>
-                                                                e.stopPropagation()
-                                                            }
-                                                        >
-                                                            <MoreVertical
-                                                                size={16}
-                                                            />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
+                                    {/* ACTION */}
+                                    <td className="text-right">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    className="cursor-pointer"
+                                                    onClick={(e) =>
+                                                        e.stopPropagation()
+                                                    }
+                                                >
+                                                    <MoreVertical size={16} />
+                                                </Button>
+                                            </DropdownMenuTrigger>
 
-                                                    <DropdownMenuContent
-                                                        align="end"
-                                                        onClick={(e) =>
-                                                            e.stopPropagation()
-                                                        }
-                                                    >
-                                                        <DropdownMenuItem
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                handleEdit(
-                                                                    unit,
-                                                                );
-                                                            }}
-                                                            className="cursor-pointer text-yellow-500 focus:text-yellow-500"
-                                                        >
-                                                            <Pencil
-                                                                size={16}
-                                                                className="mr-2 text-yellow-500"
-                                                            />
-                                                            Edit
-                                                        </DropdownMenuItem>
+                                            <DropdownMenuContent
+                                                align="end"
+                                                onClick={(e) =>
+                                                    e.stopPropagation()
+                                                }
+                                            >
+                                                <DropdownMenuItem
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleEdit(unit);
+                                                    }}
+                                                    className="cursor-pointer text-yellow-500 focus:text-yellow-500"
+                                                >
+                                                    <Pencil
+                                                        size={16}
+                                                        className="mr-2 text-yellow-500"
+                                                    />
+                                                    Edit
+                                                </DropdownMenuItem>
 
-                                                        <DropdownMenuItem
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                confirmDelete(
-                                                                    unit.id,
-                                                                );
-                                                            }}
-                                                            className="cursor-pointer text-red-500 focus:text-red-500"
-                                                        >
-                                                            <Trash2
-                                                                size={16}
-                                                                className="mr-2 text-red-500"
-                                                            />
-                                                            Hapus
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                                <DropdownMenuItem
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        confirmDelete(unit.id);
+                                                    }}
+                                                    className="cursor-pointer text-red-500 focus:text-red-500"
+                                                >
+                                                    <Trash2
+                                                        size={16}
+                                                        className="mr-2 text-red-500"
+                                                    />
+                                                    Hapus
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -396,14 +386,14 @@ export default function Units({ units }: any) {
             >
                 {selectedUnit && (
                     <>
-                            <div className="flex justify-center p-2">
-                                <img
-                                    src={`/storage/${selectedUnit.image}`}
-                                    alt={selectedUnit.name}
-                                    className="mt-2 h-50 w-50 rounded-full object-cover"
-                                />
-                            </div>
-                        
+                        <div className="flex justify-center p-2">
+                            <img
+                                src={`/storage/${selectedUnit.image}`}
+                                alt={selectedUnit.name}
+                                className="mt-2 h-50 w-50 rounded-full object-cover"
+                            />
+                        </div>
+
                         <div>
                             <span className="font-semibold">Nama:</span>{' '}
                             {selectedUnit.name}
@@ -423,7 +413,6 @@ export default function Units({ units }: any) {
                             <span className="font-semibold">Deskripsi:</span>{' '}
                             {selectedUnit.description}
                         </div>
-
                     </>
                 )}
             </ModalDetail>

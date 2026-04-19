@@ -24,14 +24,62 @@ class OperationalReportController extends Controller
             abort(403);
         }
 
-        $query = OperationalReport::with('user')->latest();
+        $reports = OperationalReport::with([
+            'user',
+            'unitTests',
+            'waterTests.waterParameter'
+        ])->latest()->get();
 
-        if ($request->filled('search')) {
-            $query->where('note', 'like', '%' . $request->search . '%');
-        }
+        $reports->map(function ($report) {
+
+            // ================= UNIT =================
+            $map = [
+                'sangat kurang' => 1,
+                'kurang' => 2,
+                'cukup' => 3,
+                'baik' => 4,
+                'sangat baik' => 5,
+            ];
+
+            $unitScores = $report->unitTests->map(function ($u) use ($map) {
+                return $map[strtolower($u->condition)] ?? 0;
+            });
+
+            $report->unit_avg = $unitScores->avg();
+
+
+            // ================= WATER =================
+            $inletScores = [];
+            $outletScores = [];
+
+            foreach ($report->waterTests as $w) {
+                $min = $w->waterParameter->min_value;
+                $max = $w->waterParameter->max_value;
+                $val = $w->value;
+
+                $score = 0;
+
+                if ($val >= $min && $val <= $max) {
+                    $score = 5;
+                } else {
+                    $score = 2;
+                }
+
+                if ($w->location === 'inlet') {
+                    $inletScores[] = $score;
+                } else {
+                    $outletScores[] = $score;
+                }
+            }
+
+            $report->inlet_avg = collect($inletScores)->avg();
+            $report->outlet_avg = collect($outletScores)->avg();
+
+            return $report;
+        });
 
         return Inertia::render('admin/operational-reports/Index', [
-            'reports' => $query->get()
+            'reports' => $reports
         ]);
     }
 

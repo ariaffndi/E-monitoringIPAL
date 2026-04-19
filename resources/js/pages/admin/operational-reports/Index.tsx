@@ -1,5 +1,5 @@
 import { Head, router } from '@inertiajs/react';
-import { PlusCircle, Search, Info } from 'lucide-react';
+import { ListChecks, Search } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -43,6 +43,50 @@ export default function OperationalReports({ reports }: { reports: Report[] }) {
         }
     };
 
+    const getStatusBadge = (value: number) => {
+        if (!value) {
+            return 'bg-gray-100 text-gray-500';
+        }
+
+        if (value >= 4.5) {
+            return 'bg-green-100 text-green-700';
+        }
+
+        if (value >= 3.5) {
+            return 'bg-blue-100 text-blue-700';
+        }
+        
+        if (value >= 2.5) {
+            return 'bg-yellow-100 text-yellow-700';
+        }
+        
+        return 'bg-red-100 text-red-700';
+    };
+
+    const getStatusLabel = (value: number) => {
+        if (!value) {
+            return '-';
+        }
+
+        if (value >= 4.5) {
+            return 'Sangat Baik';
+        }
+        
+        if (value >= 3.5) {
+            return 'Baik';
+        }
+
+        if (value >= 2.5) {
+            return 'Cukup';
+        }
+
+        if (value >= 1.5) {
+            return 'Kurang';
+        }
+
+        return 'Sangat Kurang';
+    };
+
     return (
         <>
             <Head title="Laporan Operasional" />
@@ -50,11 +94,9 @@ export default function OperationalReports({ reports }: { reports: Report[] }) {
             <div className="flex flex-col gap-4 p-4">
                 {/* HEADER */}
                 <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:justify-between">
-                    <Button
-                        className="mb-2 w-fit cursor-pointer bg-blue-600 hover:bg-blue-700 sm:mb-0"
-                    >
-                        <PlusCircle />
-                        Tambah Laporan
+                    <Button className="mb-2 w-fit cursor-pointer bg-green-600 hover:bg-green-700 sm:mb-0">
+                        <ListChecks />
+                        Rekap Laporan
                     </Button>
 
                     <div className="relative">
@@ -81,62 +123,94 @@ export default function OperationalReports({ reports }: { reports: Report[] }) {
 
                 <Separator />
 
-                {/* TABLE */}
                 <div className="w-full overflow-x-auto rounded-lg border">
                     <table className="table min-w-full text-center text-sm">
                         <thead>
                             <tr className="bg-secondary">
-                                <th className="p-2">No</th>
+                                <th className="max-w-fit p-2">No</th>
                                 <th className="p-2">Tanggal</th>
                                 <th className="p-2">Operator</th>
+                                <th className="p-2">Unit</th>
+                                <th className="p-2">Inlet</th>
+                                <th className="p-2">Outlet</th>
                                 <th className="p-2">Catatan</th>
-                                <th className="p-2">Aksi</th>
                             </tr>
                         </thead>
 
                         <tbody>
-                            {reports?.map((report, index) => (
-                                <tr
-                                    key={report.id}
-                                    className="hover:bg-secondary"
-                                >
-                                    <td className="p-2">{index + 1}</td>
+                            {reports
+                                ?.filter((item: any) => item !== null)
+                                ?.map((report: any, index: number) => (
+                                    <tr
+                                        key={report.id}
+                                        onClick={() =>
+                                            router.visit(
+                                                `/operational-reports/${report.id}`,
+                                            )
+                                        }
+                                        className={`cursor-pointer transition hover:bg-secondary ${
+                                            index % 2 === 0
+                                                ? 'bg-white'
+                                                : 'bg-muted/50'
+                                        }`}
+                                    >
+                                        <td className="max-w-fit p-4">
+                                            {index + 1}
+                                        </td>
 
-                                    <td className="p-2">
-                                        {new Date(
-                                            report.created_at,
-                                        ).toLocaleDateString('id-ID', {
-                                            weekday: 'long',
-                                            day: '2-digit',
-                                            month: '2-digit',
-                                            year: 'numeric',
-                                        })}
-                                    </td>
+                                        <td className="p-4">
+                                            {new Date(
+                                                report.created_at,
+                                            ).toLocaleDateString('id-ID', {
+                                                weekday: 'long',
+                                                day: '2-digit',
+                                                month: '2-digit',
+                                                year: 'numeric',
+                                            })}
+                                        </td>
 
-                                    <td className="p-2">{report.user?.name}</td>
-
-                                    <td className="max-w-50 truncate p-2">
-                                        {report.note}
-                                    </td>
-
-                                    <td className="p-2">
-                                        <div className="flex justify-center">
-                                            <Button
-                                                title="Detail"
-                                                size="sm"
-                                                onClick={() =>
-                                                    router.visit(
-                                                        `/operational-reports/${report.id}`,
-                                                    )
-                                                }
-                                                className="cursor-pointer bg-sky-100 text-sky-700 hover:bg-sky-300"
+                                        <td className="p-4">
+                                            {report.user?.name}
+                                        </td>
+                                        <td className="p-4">
+                                            <span
+                                                className={`rounded-full px-3 py-1 text-xs ${getStatusBadge(
+                                                    report.unit_avg,
+                                                )}`}
                                             >
-                                                <Info />
-                                            </Button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                                                {getStatusLabel(
+                                                    report.unit_avg,
+                                                )}
+                                            </span>
+                                        </td>
+                                        <td className="p-4">
+                                            <span
+                                                className={`rounded-full px-3 py-1 text-xs ${getStatusBadge(
+                                                    report.inlet_avg,
+                                                )}`}
+                                            >
+                                                {getStatusLabel(
+                                                    report.inlet_avg,
+                                                )}
+                                            </span>
+                                        </td>
+                                        <td className="p-4">
+                                            <span
+                                                className={`rounded-full px-3 py-1 text-xs ${getStatusBadge(
+                                                    report.outlet_avg,
+                                                )}`}
+                                            >
+                                                {getStatusLabel(
+                                                    report.outlet_avg,
+                                                )}
+                                            </span>
+                                        </td>
+
+                                        <td className="max-w-xs truncate p-4 text-sm whitespace-nowrap sm:table-cell">
+                                            {report.note}
+                                        </td>
+                                    </tr>
+                                ))}
                         </tbody>
                     </table>
                 </div>

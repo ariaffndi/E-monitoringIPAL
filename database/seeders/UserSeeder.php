@@ -29,6 +29,22 @@ class UserSeeder extends Seeder
             'role' => 'operator',
             'created_at' => now(),
             'updated_at' => now(),
+        ],
+        [
+            'name' => 'Operator2',
+            'email' => 'operator2@gmail.com',
+            'password' => Hash::make('passoperator2'),
+            'role' => 'operator',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ],
+        [
+            'name' => 'Operator3',
+            'email' => 'operator3@gmail.com',
+            'password' => Hash::make('passoperator3'),
+            'role' => 'operator',
+            'created_at' => now(),
+            'updated_at' => now(),
         ]
     ]);
     }

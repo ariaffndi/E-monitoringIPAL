@@ -219,16 +219,24 @@ export default function WaterParameters({ waterparameters }: any) {
                                         <SelectContent>
                                             <SelectGroup>
                                                 <SelectItem value="all">
-                                                    Jenis
+                                                    <p className="text-sm">
+                                                        Jenis
+                                                    </p>
                                                 </SelectItem>
                                                 <SelectItem value="fisika">
-                                                    Fisika
+                                                    <p className="text-sm">
+                                                        Fisika
+                                                    </p>
                                                 </SelectItem>
                                                 <SelectItem value="kimia">
-                                                    Kimia
+                                                    <p className="text-sm">
+                                                        Kimia
+                                                    </p>
                                                 </SelectItem>
                                                 <SelectItem value="biologi">
-                                                    Biologi
+                                                    <p className="text-sm">
+                                                        Biologi
+                                                    </p>
                                                 </SelectItem>
                                             </SelectGroup>
                                         </SelectContent>
