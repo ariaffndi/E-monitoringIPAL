@@ -43,6 +43,20 @@ export default function OperationalReports({ reports, filters }: any){
         }
     };
 
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        const hari = date.toLocaleDateString('id-ID', {
+            weekday: 'long',
+        });
+        const tanggal = date.toLocaleDateString('id-ID', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+        });
+
+        return `${hari}, ${tanggal.replace(/\//g, '-')}`;
+    };
+
     const getStatusBadge = (value: number) => {
         if (!value) {
             return 'bg-gray-100 text-gray-500';
@@ -159,14 +173,7 @@ export default function OperationalReports({ reports, filters }: any){
                                         </td>
 
                                         <td className="p-4">
-                                            {new Date(
-                                                report.created_at,
-                                            ).toLocaleDateString('id-ID', {
-                                                weekday: 'long',
-                                                day: '2-digit',
-                                                month: '2-digit',
-                                                year: 'numeric',
-                                            })}
+                                            {formatDate(report.created_at)}
                                         </td>
 
                                         <td className="p-4">

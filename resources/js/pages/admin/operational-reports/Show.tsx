@@ -27,13 +27,18 @@ export default function Show({ report }: { report: Report }) {
     const [openDetail, setOpenDetail] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     // helper format tanggal
-    const formatDate = (date: string) => {
-        return new Date(date).toLocaleDateString('id-ID', {
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        const hari = date.toLocaleDateString('id-ID', {
             weekday: 'long',
+        });
+        const tanggal = date.toLocaleDateString('id-ID', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
         });
+
+        return `${hari}, ${tanggal.replace(/\//g, '-')}`;
     };
 
     const handleView = (image: string | null) => {

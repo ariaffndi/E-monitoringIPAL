@@ -8,6 +8,7 @@ use App\Http\Controllers\WaterParameterController;
 use App\Http\Controllers\OperationalReportController;
 use App\Http\Controllers\UnitTestController;
 use App\Http\Controllers\WaterTestController;
+use App\Http\Controllers\DashboardController;
 
 //Route Guest
 Route::get('/', function () {
@@ -17,19 +18,13 @@ Route::get('/', function () {
 });
 
 //Route Dashboard based on role
-Route::get('/dashboard', function () {
-    if (Auth::user()->role === 'admin') {
-        return redirect('/admin');
-    }
-    return redirect('/operator');
-})->middleware(['auth'])->name('dashboard');
+// Dashboard (single entry)
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth'])
+    ->name('dashboard');
 
 //Route Admin
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin', function () {
-        return inertia('admin/Dashboard');
-    })->name('admin.dashboard');
-
     Route::resource('users', UserController::class);
     Route::resource('units', UnitController::class);
     Route::resource('water-parameters', WaterParameterController::class);
@@ -38,10 +33,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
 //Route Operator
 Route::middleware(['auth', 'role:operator'])->group(function () {
-    Route::get('/operator', function () {
-        return inertia('operator/Dashboard');
-    })->name('operator.dashboard');
-    
     Route::resource('unit-tests', UnitTestController::class);
     Route::resource('water-tests', WaterTestController::class);
 });

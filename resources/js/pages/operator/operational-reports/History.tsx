@@ -21,17 +21,15 @@ type Report = {
 export default function History({ reports }: any) {
    const formatTanggal = (dateString: string) => {
        const date = new Date(dateString);
-
        const hari = date.toLocaleDateString('id-ID', {
            weekday: 'long',
        });
-
        const tanggal = date.toLocaleDateString('id-ID', {
            day: '2-digit',
            month: '2-digit',
            year: 'numeric',
        });
-
+       
        return `${hari}, ${tanggal.replace(/\//g, '-')}`;
    };
 

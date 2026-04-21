@@ -41,13 +41,12 @@ export function AppSidebar() {
     const { auth } = usePage().props as any;
     const user = auth.user;
     const isAdmin = user?.role === 'admin';
-    const dashboardHref = isAdmin ? '/admin' : '/operator';
 
     const mainNavItems: NavItem[] = isAdmin
         ? [
             {
                 title: 'Dashboard',
-                href: dashboardHref,
+                href: dashboard(),
                 icon: LayoutGrid,
             },
             {
@@ -74,7 +73,7 @@ export function AppSidebar() {
         : [
             {
                 title: 'Dashboard',
-                href: dashboardHref,
+                href: dashboard(),
                 icon: LayoutGrid,
             },
             {
