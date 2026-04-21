@@ -6,19 +6,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from '@/components/ui/pagination';
 
-type Report = {
-    id: number;
-    note: string;
-    created_at: string;
-    user: {
-        name: string;
-    };
-};
-
-export default function OperationalReports({ reports }: { reports: Report[] }) {
+export default function OperationalReports({ reports, filters }: any){
     const [loading, setLoading] = useState(false);
-    const [search, setSearch] = useState('');
+    const [search, setSearch] = useState(filters.search || '');
 
     // 🔍 SEARCH
     useEffect(() => {
@@ -138,7 +138,7 @@ export default function OperationalReports({ reports }: { reports: Report[] }) {
                         </thead>
 
                         <tbody>
-                            {reports
+                            {reports?.data
                                 ?.filter((item: any) => item !== null)
                                 ?.map((report: any, index: number) => (
                                     <tr
@@ -155,7 +155,7 @@ export default function OperationalReports({ reports }: { reports: Report[] }) {
                                         }`}
                                     >
                                         <td className="max-w-fit p-4">
-                                            {index + 1}
+                                            {reports.from + index}
                                         </td>
 
                                         <td className="p-4">
@@ -214,6 +214,82 @@ export default function OperationalReports({ reports }: { reports: Report[] }) {
                         </tbody>
                     </table>
                 </div>
+                <Pagination className="my-4">
+                    <PaginationContent>
+                        {/* PREVIOUS */}
+                        <PaginationItem>
+                            <PaginationPrevious
+                                href={reports.prev_page_url || '#'}
+                                onClick={(e) => {
+                                    e.preventDefault();
+
+                                    if (reports.prev_page_url) {
+                                        router.visit(reports.prev_page_url, {
+                                            preserveState: true,
+                                            replace: true,
+                                        });
+                                    }
+                                }}
+                            />
+                        </PaginationItem>
+
+                        {/* NUMBER */}
+                        {reports.links.map((link: any, index: number) => {
+                            if (
+                                link.label.includes('Previous') ||
+                                link.label.includes('Next')
+                            ) {
+                                return null;
+                            }
+
+                            if (link.label === '...') {
+                                return (
+                                    <PaginationItem key={index}>
+                                        <PaginationEllipsis />
+                                    </PaginationItem>
+                                );
+                            }
+
+                            return (
+                                <PaginationItem key={index}>
+                                    <PaginationLink
+                                        href={link.url || '#'}
+                                        isActive={link.active}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+
+                                            if (link.url) {
+                                                router.visit(link.url, {
+                                                    preserveState: true,
+                                                    replace: true,
+                                                });
+                                            }
+                                        }}
+                                    >
+                                        {link.label}
+                                    </PaginationLink>
+                                </PaginationItem>
+                            );
+                        })}
+
+                        {/* NEXT */}
+                        <PaginationItem>
+                            <PaginationNext
+                                href={reports.next_page_url || '#'}
+                                onClick={(e) => {
+                                    e.preventDefault();
+
+                                    if (reports.next_page_url) {
+                                        router.visit(reports.next_page_url, {
+                                            preserveState: true,
+                                            replace: true,
+                                        });
+                                    }
+                                }}
+                            />
+                        </PaginationItem>
+                    </PaginationContent>
+                </Pagination>
             </div>
         </>
     );

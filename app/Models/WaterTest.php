@@ -15,7 +15,6 @@ class WaterTest extends Model
         'water_parameter_id',
         'location',
         'value',
-        'test_image',
     ];
 
     public function operationalReport()

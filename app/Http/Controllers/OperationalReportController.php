@@ -18,21 +18,34 @@ class OperationalReportController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(request $request)
+    public function index(Request $request)
     {
         if (Auth::user()->role !== 'admin') {
             abort(403);
         }
 
-        $reports = OperationalReport::with([
+        $query = OperationalReport::with([
             'user',
             'unitTests',
             'waterTests.waterParameter'
-        ])->latest()->get();
+        ]);
 
-        $reports->map(function ($report) {
+        // ================= SEARCH =================
+        if ($request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('note', 'like', '%' . $request->search . '%')
+                ->orWhereHas('user', function ($q2) use ($request) {
+                    $q2->where('name', 'like', '%' . $request->search . '%');
+                });
+            });
+        }
 
-            // ================= UNIT =================
+        // ================= PAGINATION =================
+        $reports = $query->latest()->paginate(15)->withQueryString();
+
+        // ================= CALCULATION =================
+        $reports->getCollection()->transform(function ($report) {
+
             $map = [
                 'sangat kurang' => 1,
                 'kurang' => 2,
@@ -41,14 +54,14 @@ class OperationalReportController extends Controller
                 'sangat baik' => 5,
             ];
 
+            // UNIT
             $unitScores = $report->unitTests->map(function ($u) use ($map) {
                 return $map[strtolower($u->condition)] ?? 0;
             });
 
             $report->unit_avg = $unitScores->avg();
 
-
-            // ================= WATER =================
+            // WATER
             $inletScores = [];
             $outletScores = [];
 
@@ -57,13 +70,7 @@ class OperationalReportController extends Controller
                 $max = $w->waterParameter->max_value;
                 $val = $w->value;
 
-                $score = 0;
-
-                if ($val >= $min && $val <= $max) {
-                    $score = 5;
-                } else {
-                    $score = 2;
-                }
+                $score = ($val >= $min && $val <= $max) ? 5 : 2;
 
                 if ($w->location === 'inlet') {
                     $inletScores[] = $score;
@@ -79,7 +86,8 @@ class OperationalReportController extends Controller
         });
 
         return Inertia::render('admin/operational-reports/Index', [
-            'reports' => $reports
+            'reports' => $reports,
+            'filters' => $request->only('search'),
         ]);
     }
 
@@ -155,7 +163,6 @@ class OperationalReportController extends Controller
                         'water_parameter_id' => $water['water_parameter_id'],
                         'location' => $location,
                         'value' => $water['value'],
-                        'test_image' => $image,
                     ]);
                 }
             }
@@ -224,7 +231,7 @@ class OperationalReportController extends Controller
         $reports = OperationalReport::withCount(['unitTests', 'waterTests'])
             ->where('user_id', Auth::id())
             ->latest()
-            ->get();
+            ->paginate(15);
 
         return Inertia::render('operator/operational-reports/History', [
             'reports' => $reports

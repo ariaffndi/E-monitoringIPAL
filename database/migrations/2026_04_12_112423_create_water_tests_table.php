@@ -17,7 +17,6 @@ return new class extends Migration
             $table->foreignId('water_parameter_id')->constrained()->cascadeOnDelete();
             $table->enum('location',['inlet', 'outlet'])->nullable();
             $table->decimal('value', 10, 2);
-            $table->string('test_image')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
