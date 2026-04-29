@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Progress } from '@/components/ui/progress';
 import {
     Select,
     SelectContent,
@@ -10,7 +11,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Progress } from '@/components/ui/progress';
 
 // types
 type Unit = {

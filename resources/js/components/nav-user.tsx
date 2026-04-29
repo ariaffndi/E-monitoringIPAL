@@ -1,5 +1,5 @@
 import { usePage } from '@inertiajs/react';
-import { ChevronsUpDown } from 'lucide-react';
+import { ChevronsUpDown, User } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -15,8 +15,12 @@ import { UserInfo } from '@/components/user-info';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-export function NavUser() {
-    const { auth } = usePage().props;
+type Props = {
+    variant?: 'sidebar' | 'mobile';
+};
+
+export function NavUser({ variant = 'sidebar' }: Props) {
+    const { auth } = usePage().props as any;
     const { state } = useSidebar();
     const isMobile = useIsMobile();
 
@@ -24,6 +28,29 @@ export function NavUser() {
         return null;
     }
 
+    // ================= MOBILE VERSION =================
+    if (variant === 'mobile') {
+        return (
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <button className="flex flex-col items-center text-xs text-gray-500">
+                        <User size={20} />
+                        Profil
+                    </button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent
+                    align="end"
+                    side="top"
+                    className="w-56 rounded-lg"
+                >
+                    <UserMenuContent user={auth.user} />
+                </DropdownMenuContent>
+            </DropdownMenu>
+        );
+    }
+
+    // ================= SIDEBAR VERSION =================
     return (
         <SidebarMenu>
             <SidebarMenuItem>
@@ -32,12 +59,12 @@ export function NavUser() {
                         <SidebarMenuButton
                             size="lg"
                             className="group text-sidebar-accent-foreground data-[state=open]:bg-sidebar-accent"
-                            data-test="sidebar-menu-button"
                         >
                             <UserInfo user={auth.user} />
                             <ChevronsUpDown className="ml-auto size-4" />
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>
+
                     <DropdownMenuContent
                         className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
                         align="end"
