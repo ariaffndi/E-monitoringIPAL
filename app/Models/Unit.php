@@ -16,4 +16,14 @@ class Unit extends Model
         'description',
         'image',
     ];
+
+        public function unitTests()
+    {
+        return $this->hasMany(UnitTest::class);
+    }
+
+    public function latestTest()
+    {
+        return $this->hasOne(UnitTest::class)->latestOfMany();
+    }
 }

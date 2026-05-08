@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\OperationalReport;
+use App\Models\Unit;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
@@ -14,7 +17,16 @@ class DashboardController extends Controller
 
         // ================= ADMIN =================
         if ($user->role === 'admin') {
-            return Inertia::render('admin/Dashboard');
+            return Inertia::render('admin/Dashboard', [
+                'units' => Unit::with(['latestTest'])->get(),
+
+                'chartData' => OperationalReport::latest()->take(5)->get(),
+
+                'operators' => User::where('role', 'operator')->get(),
+
+                'datesWithReport' => OperationalReport::pluck('created_at')
+                    ->map(fn($d) => Carbon::parse($d)->toDateString()),
+            ]);
         }
 
         // ================= OPERATOR =================
