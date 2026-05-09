@@ -1,10 +1,25 @@
 import { Head } from '@inertiajs/react';
 import { router } from '@inertiajs/react';
+import { useMemo, useState } from 'react';
+import {
+    Area,
+    AreaChart,
+    CartesianGrid,
+    ResponsiveContainer,
+    XAxis,
+    YAxis,
+} from 'recharts';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    ChartContainer,
+    ChartTooltip,
+    ChartTooltipContent,
+    type ChartConfig,
+} from '@/components/ui/chart';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import {
     Select,
@@ -23,6 +38,17 @@ type Unit = {
     } | null;
 };
 
+type WaterParameter = {
+    id: number;
+    name: string;
+};
+
+type ChartItem = {
+    date: string;
+    inlet: number | null;
+    outlet: number | null;
+};
+
 type Note = {
     id: number;
     note: string;
@@ -39,9 +65,23 @@ type Props = {
     units: Unit[];
     operators: Operator[];
     notes: Note[];
+    datesWithReports: string[];
+
+    waterParameters: WaterParameter[];
+    chartData: ChartItem[];
+    selectedParameter: number;
 };
 
-export default function Dashboard({ units, operators, notes }: Props) {
+export default function Dashboard({
+    units,
+    operators,
+    notes,
+    datesWithReports,
+
+    waterParameters,
+    chartData,
+    selectedParameter,
+}: Props) {
     // ================= BADGE COLOR =================
     const getConditionBadge = (condition: string) => {
         switch (condition.toLowerCase()) {
@@ -57,6 +97,30 @@ export default function Dashboard({ units, operators, notes }: Props) {
                 return 'bg-gray-100 text-gray-700';
         }
     };
+
+    const [parameter, setParameter] = useState(String(selectedParameter));
+
+    const reportDates = datesWithReports.map((date) => new Date(date));
+    const chartConfig = {
+        inlet: {
+            label: 'Inlet',
+            color: '#facc15',
+        },
+        outlet: {
+            label: 'Outlet',
+            color: '#22c55e',
+        },
+    } satisfies ChartConfig;
+
+    const yDomain = useMemo(() => {
+        const values = chartData
+            .flatMap((item) => [item.inlet, item.outlet])
+            .filter((value): value is number => value !== null);
+
+        const max = values.length ? Math.max(...values) : 0;
+
+        return [0, Math.ceil(max * 1.2)];
+    }, [chartData]);
 
     return (
         <>
@@ -131,23 +195,144 @@ export default function Dashboard({ units, operators, notes }: Props) {
                                 </div>
 
                                 {/* SELECT PARAMETER */}
-                                <Select>
+                                <Select
+                                    value={parameter}
+                                    onValueChange={(value) => {
+                                        setParameter(value);
+
+                                        router.get(
+                                            '/dashboard',
+                                            {
+                                                parameter: value,
+                                            },
+                                            {
+                                                preserveState: true,
+                                                replace: true,
+                                            },
+                                        );
+                                    }}
+                                >
                                     <SelectTrigger className="w-full sm:w-[140px]">
                                         <SelectValue placeholder="Parameter" />
                                     </SelectTrigger>
 
                                     <SelectContent>
-                                        <SelectItem value="bod">BOD</SelectItem>
-                                        <SelectItem value="cod">COD</SelectItem>
-                                        <SelectItem value="ph">pH</SelectItem>
+                                        {waterParameters.map((parameter) => (
+                                            <SelectItem
+                                                key={parameter.id}
+                                                value={String(parameter.id)}
+                                            >
+                                                {parameter.name}
+                                            </SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
                             </div>
                         </CardHeader>
 
                         <CardContent>
-                            <div className="flex h-[220px] items-center justify-center rounded-xl border border-dashed text-center text-sm text-muted-foreground sm:h-[280px]">
-                                Chart Line Inlet & Outlet
+                            <div className="h-[250px] w-full sm:h-[320px]">
+                                <ChartContainer
+                                    config={chartConfig}
+                                    className="h-full w-full"
+                                >
+                                    <ResponsiveContainer
+                                        width="100%"
+                                        height="100%"
+                                    >
+                                        <AreaChart
+                                            data={chartData}
+                                            margin={{
+                                                left: 12,
+                                                right: 12,
+                                                top: 10,
+                                            }}
+                                        >
+                                            <defs>
+                                                <linearGradient
+                                                    id="fillInlet"
+                                                    x1="0"
+                                                    y1="0"
+                                                    x2="0"
+                                                    y2="1"
+                                                >
+                                                    <stop
+                                                        offset="5%"
+                                                        stopColor="#facc15"
+                                                        stopOpacity={0.5}
+                                                    />
+                                                    <stop
+                                                        offset="95%"
+                                                        stopColor="#facc15"
+                                                        stopOpacity={0.05}
+                                                    />
+                                                </linearGradient>
+
+                                                <linearGradient
+                                                    id="fillOutlet"
+                                                    x1="0"
+                                                    y1="0"
+                                                    x2="0"
+                                                    y2="1"
+                                                >
+                                                    <stop
+                                                        offset="5%"
+                                                        stopColor="#22c55e"
+                                                        stopOpacity={0.5}
+                                                    />
+                                                    <stop
+                                                        offset="95%"
+                                                        stopColor="#22c55e"
+                                                        stopOpacity={0.05}
+                                                    />
+                                                </linearGradient>
+                                            </defs>
+
+                                            <CartesianGrid vertical={false} />
+
+                                            <XAxis
+                                                dataKey="date"
+                                                tickLine={false}
+                                                axisLine={false}
+                                                tickMargin={8}
+                                            />
+
+                                            <YAxis
+                                                tickLine={false}
+                                                axisLine={false}
+                                                width={40}
+                                                domain={yDomain}
+                                            />
+
+                                            <ChartTooltip
+                                                cursor={false}
+                                                content={
+                                                    <ChartTooltipContent />
+                                                }
+                                            />
+
+                                            {/* INLET */}
+                                            <Area
+                                                type="natural"
+                                                dataKey="inlet"
+                                                stroke="#facc15"
+                                                fill="url(#fillInlet)"
+                                                fillOpacity={1}
+                                                strokeWidth={2}
+                                            />
+
+                                            {/* OUTLET */}
+                                            <Area
+                                                type="natural"
+                                                dataKey="outlet"
+                                                stroke="#22c55e"
+                                                fill="url(#fillOutlet)"
+                                                fillOpacity={1}
+                                                strokeWidth={2}
+                                            />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                </ChartContainer>
                             </div>
                         </CardContent>
                     </Card>
@@ -185,6 +370,13 @@ export default function Dashboard({ units, operators, notes }: Props) {
                                 mode="single"
                                 selected={new Date()}
                                 className="w-full"
+                                modifiers={{
+                                    hasReport: reportDates,
+                                }}
+                                modifiersClassNames={{
+                                    hasReport:
+                                        'bg-blue-50 text-blue-700 border border-blue-200 rounded-lg',
+                                }}
                             />
                         </CardContent>
                     </Card>

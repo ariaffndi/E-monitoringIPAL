@@ -5,13 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\OperationalReport;
 use App\Models\Unit;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use App\Models\WaterParameter;
+use App\Models\WaterTest;
+use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
 
@@ -21,6 +23,42 @@ class DashboardController extends Controller
             $units = Unit::with('latestTest')
                 ->oldest()
                 ->get();
+
+            $waterParameters = WaterParameter::oldest()->get([
+                'id',
+                'name',
+            ]);
+
+            $selectedParameter =
+            $request->parameter ??
+            $waterParameters->first()?->id;
+
+            $chartData = WaterTest::query()
+                ->where('water_parameter_id', $selectedParameter)
+                ->whereIn('location', ['inlet', 'outlet'])
+                ->with('operationalReport:id,created_at')
+                ->latest()
+                ->take(20)
+                ->get()
+                ->groupBy(function ($item) {
+                    return optional($item->operationalReport)
+                        ->created_at
+                        ?->format('d M');
+                })
+                ->map(function ($items, $date) {
+                    return [
+                        'date' => $date,
+                        'inlet' => optional(
+                            $items->firstWhere('location', 'inlet')
+                        )->value,
+                        'outlet' => optional(
+                            $items->firstWhere('location', 'outlet')
+                        )->value,
+                    ];
+                })
+                ->take(10)
+                ->reverse()
+                ->values();
 
             $operators = User::where('role', 'operator')
                 ->oldest()
@@ -32,11 +70,19 @@ class DashboardController extends Controller
                 ->latest()
                 ->take(2)
                 ->get(['id', 'note', 'created_at']);
+            
+            $datesWithReports = OperationalReport::selectRaw('DATE(created_at) as date')
+                ->distinct()
+                ->pluck('date');
 
             return Inertia::render('admin/Dashboard', [
                 'units' => $units,
+                'waterParameters' => $waterParameters,
+                'chartData' => $chartData,
+                'selectedParameter' => $selectedParameter,
                 'operators' => $operators,
                 'notes' => $notes,
+                'datesWithReports' => $datesWithReports,
             ]);
         }
         // ================= OPERATOR =================
