@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Unit extends Model
 {
@@ -17,12 +19,12 @@ class Unit extends Model
         'image',
     ];
 
-        public function unitTests()
+    public function unitTests(): HasMany
     {
         return $this->hasMany(UnitTest::class);
     }
 
-    public function latestTest()
+    public function latestTest(): HasOne
     {
         return $this->hasOne(UnitTest::class)->latestOfMany();
     }

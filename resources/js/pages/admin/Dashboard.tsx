@@ -15,33 +15,33 @@ import {
 } from '@/components/ui/select';
 import { dashboard } from '@/routes';
 
-export default function Dashboard() {
-    // ================= DUMMY DATA =================
-    const dummyUnits = [
-        { id: 1, name: 'Bak Ekualisasi', condition: 'Baik' },
-        { id: 2, name: 'Bak Aerasi', condition: 'Sangat Baik' },
-        { id: 3, name: 'Clarifier', condition: 'Cukup' },
-        { id: 4, name: 'Filter', condition: 'Kurang' },
-        { id: 5, name: 'Disinfeksi', condition: 'Baik' },
-    ];
+type Unit = {
+    id: number;
+    name: string;
+    latest_test?: {
+        condition: string;
+    } | null;
+};
 
-    const dummyOperators = [
-        { id: 1, name: 'Ari Affandi' },
-        { id: 2, name: 'Budi Santoso' },
-        { id: 3, name: 'Andi Saputra' },
-    ];
+type Note = {
+    id: number;
+    note: string;
+    created_at: string;
+};
 
-    const dummyNotes = [
-        {
-            id: 1,
-            note: 'Kondisi aerasi cukup stabil hari ini.',
-        },
-        {
-            id: 2,
-            note: 'Perlu pengecekan filter outlet.',
-        },
-    ];
+type Operator = {
+    id: number;
+    name: string;
+    email: string;
+};
 
+type Props = {
+    units: Unit[];
+    operators: Operator[];
+    notes: Note[];
+};
+
+export default function Dashboard({ units, operators, notes }: Props) {
     // ================= BADGE COLOR =================
     const getConditionBadge = (condition: string) => {
         switch (condition.toLowerCase()) {
@@ -84,7 +84,7 @@ export default function Dashboard() {
                         <CardContent>
                             <ScrollArea className="w-full whitespace-nowrap">
                                 <div className="flex gap-4 pb-3">
-                                    {dummyUnits.map((unit) => (
+                                    {units.map((unit) => (
                                         <div
                                             key={unit.id}
                                             className="min-w-[170px] rounded-xl border bg-muted/30 p-4"
@@ -95,10 +95,12 @@ export default function Dashboard() {
 
                                             <Badge
                                                 className={getConditionBadge(
-                                                    unit.condition,
+                                                    unit.latest_test
+                                                        ?.condition ?? '-',
                                                 )}
                                             >
-                                                {unit.condition}
+                                                {unit.latest_test?.condition ??
+                                                    '-'}
                                             </Badge>
                                         </div>
                                     ))}
@@ -157,7 +159,7 @@ export default function Dashboard() {
                         </CardHeader>
 
                         <CardContent className="space-y-3">
-                            {dummyNotes.map((item) => (
+                            {notes.map((item) => (
                                 <div
                                     key={item.id}
                                     className="rounded-lg border p-3 text-sm"
@@ -204,28 +206,34 @@ export default function Dashboard() {
                         </CardHeader>
 
                         <CardContent className="space-y-4">
-                            {dummyOperators.map((operator) => (
-                                <div
-                                    key={operator.id}
-                                    className="flex items-center gap-3 rounded-lg border p-3"
-                                >
-                                    <Avatar>
-                                        <AvatarFallback>
-                                            {operator.name.charAt(0)}
-                                        </AvatarFallback>
-                                    </Avatar>
+                            {operators.length ? (
+                                operators.map((operator) => (
+                                    <div
+                                        key={operator.id}
+                                        className="flex items-center gap-3 rounded-lg border p-2 sm:p-3"
+                                    >
+                                        <Avatar>
+                                            <AvatarFallback>
+                                                {operator.name.charAt(0)}
+                                            </AvatarFallback>
+                                        </Avatar>
 
-                                    <div className="min-w-0">
-                                        <p className="truncate text-sm font-medium">
-                                            {operator.name}
-                                        </p>
+                                        <div className="min-w-0">
+                                            <p className="truncate text-sm font-medium">
+                                                {operator.name}
+                                            </p>
 
-                                        <p className="text-xs text-muted-foreground">
-                                            Operator IPAL
-                                        </p>
+                                            <p className="truncate text-xs text-muted-foreground">
+                                                {operator.email}
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))
+                            ) : (
+                                <p className="text-sm text-muted-foreground">
+                                    Belum ada operator
+                                </p>
+                            )}
                         </CardContent>
                     </Card>
                 </div>

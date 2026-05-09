@@ -17,18 +17,28 @@ class DashboardController extends Controller
 
         // ================= ADMIN =================
         if ($user->role === 'admin') {
+
+            $units = Unit::with('latestTest')
+                ->oldest()
+                ->get();
+
+            $operators = User::where('role', 'operator')
+                ->oldest()
+                ->take(3)
+                ->get();
+
+            $notes = OperationalReport::whereNotNull('note')
+                ->where('note', '!=', '')
+                ->latest()
+                ->take(2)
+                ->get(['id', 'note', 'created_at']);
+
             return Inertia::render('admin/Dashboard', [
-                'units' => Unit::with(['latestTest'])->get(),
-
-                'chartData' => OperationalReport::latest()->take(5)->get(),
-
-                'operators' => User::where('role', 'operator')->get(),
-
-                'datesWithReport' => OperationalReport::pluck('created_at')
-                    ->map(fn($d) => Carbon::parse($d)->toDateString()),
+                'units' => $units,
+                'operators' => $operators,
+                'notes' => $notes,
             ]);
         }
-
         // ================= OPERATOR =================
         $userId = $user->id;
 
