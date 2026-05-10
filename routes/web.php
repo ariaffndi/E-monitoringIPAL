@@ -28,6 +28,29 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('users', UserController::class);
     Route::resource('units', UnitController::class);
     Route::resource('water-parameters', WaterParameterController::class);
+    
+    // RECAP
+    Route::get(
+        '/operational-reports/recap',
+        [OperationalReportController::class, 'recap']
+    )->name('operational-reports.recap');
+
+    Route::get(
+        '/operational-reports/recap/print',
+        [OperationalReportController::class, 'printRecap']
+    )->name('operational-reports.recap.print');
+
+    // DETAIL PRINT
+    Route::get(
+        '/operational-reports/{report}/print',
+        [OperationalReportController::class, 'print']
+    )->name('operational-reports.print');
+
+    // DETAIL
+    Route::get(
+        '/operational-reports/{id}',
+        [OperationalReportController::class, 'show']
+    )->name('operational-reports.show');
 });
 
 

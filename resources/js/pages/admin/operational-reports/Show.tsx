@@ -192,7 +192,15 @@ export default function Show({ report }: { report: Report }) {
                         </p>
                     </div>
 
-                    <Button className="mb-2 w-fit cursor-pointer bg-green-600 hover:bg-green-700 sm:mb-0">
+                    <Button
+                        className="mb-2 w-fit cursor-pointer bg-green-600 hover:bg-green-700 sm:mb-0"
+                        onClick={() =>
+                            window.open(
+                                `/operational-reports/${report.id}/print`,
+                                '_blank',
+                            )
+                        }
+                    >
                         <Printer />
                         Cetak Detail Laporan
                     </Button>
@@ -203,7 +211,7 @@ export default function Show({ report }: { report: Report }) {
                 <div className="w-full overflow-x-auto rounded-lg border">
                     <div className="space-y-6 p-6">
                         {/* UNIT TEST */}
-                        <div className='mb-6'>
+                        <div className="mb-6">
                             <h2 className="text-md mb-3 font-semibold">
                                 Keadaan Unit IPAL
                             </h2>
@@ -260,7 +268,7 @@ export default function Show({ report }: { report: Report }) {
                             </div>
                         </div>
 
-                        <Separator className='mt-10'/>
+                        <Separator className="mt-10" />
 
                         {/* WATER TEST */}
                         <div>
@@ -285,7 +293,7 @@ export default function Show({ report }: { report: Report }) {
 
                                 {/* OUTLET */}
                                 <div className="lg:border-l lg:pl-6">
-                                    <h3 className="mb-3 text-lg text-center font-semibold text-green-600">
+                                    <h3 className="mb-3 text-center text-lg font-semibold text-green-600">
                                         Outlet
                                     </h3>
 

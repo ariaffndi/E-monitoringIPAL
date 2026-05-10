@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\WaterTest;
 
 class WaterParameter extends Model
 {
@@ -15,4 +17,9 @@ class WaterParameter extends Model
         'max_value',
         'type',
     ];
+
+    public function waterTests(): HasMany
+    {
+        return $this->hasMany(WaterTest::class);
+    }
 }

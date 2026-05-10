@@ -142,3 +142,23 @@
         font-family: 'poppins', sans-serif;
     }
 }
+
+@media print {
+    body {
+        background: white;
+    }
+
+    @page {
+        size: A4;
+        margin: 16mm;
+    }
+}
+
+@media print {
+    aside,
+    nav,
+    header,
+    .no-print {
+        display: none !important;
+    }
+}

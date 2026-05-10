@@ -1,11 +1,16 @@
 import { Head, router } from '@inertiajs/react';
 import { ListChecks, Search } from 'lucide-react';
+import { CalendarDays } from 'lucide-react';
 import { useState, useEffect } from 'react';
-
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
-import { Spinner } from '@/components/ui/spinner';
 import {
     Pagination,
     PaginationContent,
@@ -15,10 +20,13 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from '@/components/ui/pagination';
+import { Separator } from '@/components/ui/separator';
+import { Spinner } from '@/components/ui/spinner';
 
 export default function OperationalReports({ reports, filters }: any){
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState(filters.search || '');
+    
 
     // 🔍 SEARCH
     useEffect(() => {
@@ -101,6 +109,11 @@ export default function OperationalReports({ reports, filters }: any){
         return 'Sangat Kurang';
     };
 
+    const [openRecap, setOpenRecap] = useState(false);
+    const [fromDate, setFromDate] = useState('');
+    const [toDate, setToDate] = useState('');
+
+
     return (
         <>
             <Head title="Laporan Operasional" />
@@ -108,10 +121,92 @@ export default function OperationalReports({ reports, filters }: any){
             <div className="flex flex-col gap-4 p-4">
                 {/* HEADER */}
                 <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:justify-between">
-                    <Button className="mb-2 w-fit cursor-pointer bg-green-600 hover:bg-green-700 sm:mb-0">
-                        <ListChecks />
-                        Rekap Laporan
-                    </Button>
+                    <Dialog open={openRecap} onOpenChange={setOpenRecap}>
+                        <DialogTrigger asChild>
+                            <Button className="mb-2 w-fit cursor-pointer bg-green-600 hover:bg-green-700 sm:mb-0">
+                                <ListChecks />
+                                Rekap Laporan
+                            </Button>
+                        </DialogTrigger>
+
+                        <DialogContent className="sm:max-w-md">
+                            <DialogHeader>
+                                <DialogTitle>
+                                    Rekap Laporan Operasional
+                                </DialogTitle>
+                            </DialogHeader>
+
+                            <div className="space-y-4">
+                                {/* TANGGAL AWAL */}
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">
+                                        Tanggal Awal
+                                    </label>
+
+                                    <Input
+                                        type="date"
+                                        value={fromDate}
+                                        onChange={(e) =>
+                                            setFromDate(e.target.value)
+                                        }
+                                    />
+                                </div>
+
+                                {/* TANGGAL AKHIR */}
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">
+                                        Tanggal Akhir
+                                    </label>
+
+                                    <Input
+                                        type="date"
+                                        value={toDate}
+                                        onChange={(e) =>
+                                            setToDate(e.target.value)
+                                        }
+                                    />
+                                </div>
+
+                                {/* ACTION */}
+                                <div className="flex flex-col gap-2 pt-2 sm:flex-row">
+                                    {/* PREVIEW */}
+                                    <Button
+                                        className="flex-1 cursor-pointer"
+                                        onClick={() => {
+                                            if (!fromDate || !toDate) {
+                                                return;
+                                            }
+
+                                            router.visit(
+                                                `/operational-reports/recap?from=${fromDate}&to=${toDate}`,
+                                            );
+                                        }}
+                                    >
+                                        <CalendarDays />
+                                        Preview Rekap
+                                    </Button>
+
+                                    {/* PRINT */}
+                                    <Button
+                                        variant="outline"
+                                        className="flex-1 cursor-pointer"
+                                        onClick={() => {
+                                            if (!fromDate || !toDate) {
+                                                return;
+                                            }
+
+                                            window.open(
+                                                `/operational-reports/recap/print?from=${fromDate}&to=${toDate}`,
+                                                '_blank',
+                                            );
+                                        }}
+                                    >
+                                        Cetak PDF
+                                    </Button>
+                                </div>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
 
                     <div className="relative">
                         <Search
