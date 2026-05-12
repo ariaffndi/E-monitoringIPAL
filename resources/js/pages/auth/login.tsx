@@ -12,7 +12,6 @@ import { Spinner } from '@/components/ui/spinner';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 
-
 type Props = {
     status?: string;
     canResetPassword: boolean;
@@ -32,8 +31,8 @@ export default function Login({
                         <div className="flex size-6 items-center justify-center rounded-md bg-blue-600 text-primary-foreground">
                             <GalleryVerticalEnd className="size-4" />
                         </div>
-                        <p className='text-lg font-bold'>
-                        IPAL MITRA PRIMA ENVIRO
+                        <p className="text-lg font-bold">
+                            IPAL MITRA PRIMA ENVIRO
                         </p>
                     </a>
                 </div>
@@ -50,7 +49,7 @@ export default function Login({
                                 {({ processing, errors }) => (
                                     <>
                                         <div className="grid gap-6">
-                                            <div className='mb-2'>
+                                            <div className="mb-2">
                                                 <h1 className="text-2xl font-semibold">
                                                     Sign in to your account!
                                                 </h1>
@@ -119,7 +118,7 @@ export default function Login({
 
                                             <Button
                                                 type="submit"
-                                                className="mt-4 w-full bg-blue-600 hover:bg-blue-700"
+                                                className="mt-4 w-full cursor-pointer bg-blue-600 hover:bg-blue-700"
                                                 tabIndex={4}
                                                 disabled={processing}
                                                 data-test="login-button"
@@ -159,4 +158,4 @@ export default function Login({
             </div>
         </div>
     );
-};
+}

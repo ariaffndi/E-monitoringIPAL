@@ -18,10 +18,25 @@ Route::get('/', function () {
 });
 
 //Route Dashboard based on role
-// Dashboard (single entry)
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth'])
     ->name('dashboard');
+
+//Route Operator
+Route::middleware(['auth', 'role:operator'])->group(function () {
+    Route::resource('unit-tests', UnitTestController::class);
+    Route::resource('water-tests', WaterTestController::class);
+});
+
+//Route Operational Report (Gabungan)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/operational-reports/history', [OperationalReportController::class, 'history']);
+    Route::get('/operational-reports/history/{id}', [OperationalReportController::class, 'historyShow']);
+    
+    Route::resource('operational-reports', OperationalReportController::class)
+        ->only(['index', 'show', 'create', 'store']);
+});
+
 
 //Route Admin
 Route::middleware(['auth', 'role:admin'])->group(function () {
@@ -54,20 +69,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 });
 
 
-//Route Operator
-Route::middleware(['auth', 'role:operator'])->group(function () {
-    Route::resource('unit-tests', UnitTestController::class);
-    Route::resource('water-tests', WaterTestController::class);
-});
-
-//Route Operational Report (Gabungan)
-Route::middleware(['auth'])->group(function () {
-    Route::get('/operational-reports/history', [OperationalReportController::class, 'history']);
-    Route::get('/operational-reports/history/{id}', [OperationalReportController::class, 'historyShow']);
-    
-    Route::resource('operational-reports', OperationalReportController::class)
-        ->only(['index', 'show', 'create', 'store']);
-});
 
 
 require __DIR__.'/settings.php';
