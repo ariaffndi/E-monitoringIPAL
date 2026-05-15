@@ -1,5 +1,5 @@
 import { Form, Head } from '@inertiajs/react';
-import { GalleryVerticalEnd } from 'lucide-react';
+import AppLogo from '@/components/app-logo';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import TextLink from '@/components/text-link';
@@ -26,15 +26,8 @@ export default function Login({
     return (
         <div className="grid min-h-svh lg:grid-cols-2">
             <div className="flex flex-col gap-4 p-6 md:p-10">
-                <div className="flex justify-center gap-2 md:justify-start">
-                    <a href="#" className="flex items-center gap-2 font-medium">
-                        <div className="flex size-6 items-center justify-center rounded-md bg-blue-600 text-primary-foreground">
-                            <GalleryVerticalEnd className="size-4" />
-                        </div>
-                        <p className="text-lg font-bold">
-                            IPAL MITRA PRIMA ENVIRO
-                        </p>
-                    </a>
+                <div className="flex gap-2 md:justify-start">
+                    <AppLogo textClassName="text-2xl" iconClassName="size-8" />
                 </div>
                 <div className="flex flex-1 items-center justify-center">
                     <div className="w-full max-w-xs">
@@ -149,12 +142,31 @@ export default function Login({
                     </div>
                 </div>
             </div>
-            <div className="relative hidden bg-muted lg:block">
+            <div className="relative hidden overflow-hidden bg-muted lg:block">
+                {/* IMAGE */}
                 <img
-                    src="/placeholder.svg"
+                    src="/images/login-image.png"
                     alt="Image"
-                    className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+                    className="absolute inset-0 h-full w-full object-cover"
                 />
+
+                {/* DARK OVERLAY */}
+                <div className="absolute inset-0 bg-black/10" />
+
+                {/* TEXT */}
+                <div className="absolute inset-x-0 bottom-0 z-10 p-10">
+                    <div className="mx-auto max-w-xl text-center text-white">
+                        <p className="text-2xl leading-tight font-bold">
+                            Optimized WWTP Management Dashboard
+                        </p>
+
+                        <p className="mt-4 text-sm leading-relaxed text-white/90">
+                            Everything you need to monitor, analyze, and improve
+                            your wastewater treatment performance in one
+                            customizable view.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     );

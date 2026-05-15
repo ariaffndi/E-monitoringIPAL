@@ -358,44 +358,45 @@ class OperationalReportController extends Controller
     }
 
     private function buildChartData($reports)
-    {
-        return $reports
-            ->groupBy(fn ($r) => $r->created_at->format('d M'))
-            ->map(function ($items, $date) {
+{
+    return $reports
+        ->sortBy('created_at')
+        ->groupBy(fn ($r) => $r->created_at->format('Y-m-d'))
+        ->map(function ($items, $date) {
 
-                $total = 0;
-                $passed = 0;
+            $total = 0;
+            $passed = 0;
 
-                foreach ($items as $report) {
+            foreach ($items as $report) {
 
-                    foreach (
-                        $report->waterTests
-                            ->where('location', 'outlet')
-                        as $test
+                foreach (
+                    $report->waterTests
+                        ->where('location', 'outlet')
+                    as $test
+                ) {
+
+                    $total++;
+
+                    $min = $test->waterParameter->min_value;
+                    $max = $test->waterParameter->max_value;
+
+                    if (
+                        $test->value >= $min &&
+                        $test->value <= $max
                     ) {
-
-                        $total++;
-
-                        $min = $test->waterParameter->min_value;
-                        $max = $test->waterParameter->max_value;
-
-                        if (
-                            $test->value >= $min &&
-                            $test->value <= $max
-                        ) {
-                            $passed++;
-                        }
+                        $passed++;
                     }
                 }
+            }
 
-                return [
-                    'date' => $date,
-                    'compliance' => $total
-                        ? round(($passed / $total) * 100, 2)
-                        : 0,
-                ];
-            })
-            ->values();
+            return [
+                'date' => \Carbon\Carbon::parse($date)->format('d M'),
+                'compliance' => $total
+                    ? round(($passed / $total) * 100, 2)
+                    : 0,
+            ];
+        })
+        ->values();
     }
 
     private function buildUnitRecap($from, $to)

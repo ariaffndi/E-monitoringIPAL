@@ -22,27 +22,9 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth'])
     ->name('dashboard');
 
-//Route Operator
-Route::middleware(['auth', 'role:operator'])->group(function () {
-    Route::resource('unit-tests', UnitTestController::class);
-    Route::resource('water-tests', WaterTestController::class);
-});
-
-//Route Operational Report (Gabungan)
-Route::middleware(['auth'])->group(function () {
-    Route::get('/operational-reports/history', [OperationalReportController::class, 'history']);
-    Route::get('/operational-reports/history/{id}', [OperationalReportController::class, 'historyShow']);
-    
-    Route::resource('operational-reports', OperationalReportController::class)
-        ->only(['index', 'show', 'create', 'store']);
-});
-
 
 //Route Admin
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::resource('users', UserController::class);
-    Route::resource('units', UnitController::class);
-    Route::resource('water-parameters', WaterParameterController::class);
     
     // RECAP
     Route::get(
@@ -54,6 +36,20 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         '/operational-reports/recap/print',
         [OperationalReportController::class, 'printRecap']
     )->name('operational-reports.recap.print');
+});
+
+
+//Route Operational Report (Gabungan)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/operational-reports/history', [OperationalReportController::class, 'history']);
+    Route::get('/operational-reports/history/{id}', [OperationalReportController::class, 'historyShow']);
+    
+    Route::resource('operational-reports', OperationalReportController::class)
+        ->only(['index', 'show', 'create', 'store']);
+});
+
+//Route Admin
+Route::middleware(['auth', 'role:admin'])->group(function () {
 
     // DETAIL PRINT
     Route::get(
@@ -66,6 +62,20 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         '/operational-reports/{id}',
         [OperationalReportController::class, 'show']
     )->name('operational-reports.show');
+});
+
+//Route Operator
+Route::middleware(['auth', 'role:operator'])->group(function () {
+    Route::resource('unit-tests', UnitTestController::class);
+    Route::resource('water-tests', WaterTestController::class);
+});
+
+
+//Route Admin
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::resource('users', UserController::class);
+    Route::resource('units', UnitController::class);
+    Route::resource('water-parameters', WaterParameterController::class);
 });
 
 

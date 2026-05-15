@@ -542,6 +542,24 @@ export default function Create({ units, parameters }: Props) {
                                     </div>
                                 </div>
                             </div>
+                            {/* CATATAN */}
+                            <div className="my-8 space-y-2">
+                                <h3 className="font-semibold">
+                                    Catatan Operasional
+                                </h3>
+
+                                <textarea
+                                    value={form.note}
+                                    onChange={(e) =>
+                                        setForm({
+                                            ...form,
+                                            note: e.target.value,
+                                        })
+                                    }
+                                    placeholder="Masukkan catatan operasional..."
+                                    className="min-h-30 w-full rounded-md border border-input bg-background p-3 text-sm outline-none focus:ring-2 focus:ring-ring"
+                                />
+                            </div>
                         </div>
 
                         <div className="flex justify-between">

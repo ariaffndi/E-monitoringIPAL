@@ -119,10 +119,18 @@ export default function Recap({
                     </div>
                 </div>
 
-                {/* TABLE */}
-                <div className="overflow-x-auto rounded-lg border">
-                    <ReportsTable reports={reports} />
+                <div className="rounded-xl border">
+                    <div className="border-b p-4">
+                        <h2 className="text-lg font-semibold">
+                            Rekap Laporan Operasional
+                        </h2>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                        <ReportsTable reports={reports} />
+                    </div>
                 </div>
+
                 <div className="flex justify-end">
                     <Button
                         onClick={() => {
