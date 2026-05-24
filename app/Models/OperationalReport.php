@@ -32,4 +32,9 @@ class OperationalReport extends Model
         return $this->hasMany(WaterTest::class);
     }
 
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
+
 }

@@ -9,18 +9,23 @@ import {
     XAxis,
     YAxis,
 } from 'recharts';
+
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
 import {
     ChartContainer,
     ChartTooltip,
     ChartTooltipContent,
 } from '@/components/ui/chart';
+
 import type { ChartConfig } from '@/components/ui/chart';
+
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+
 import {
     Select,
     SelectContent,
@@ -28,6 +33,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+
 import { dashboard } from '@/routes';
 
 type Unit = {
@@ -87,12 +93,16 @@ export default function Dashboard({
         switch (condition.toLowerCase()) {
             case 'sangat baik':
                 return 'bg-green-100 text-green-700';
+
             case 'baik':
                 return 'bg-blue-100 text-blue-700';
+
             case 'cukup':
                 return 'bg-yellow-100 text-yellow-700';
+
             case 'kurang':
                 return 'bg-red-100 text-red-700';
+
             default:
                 return 'bg-gray-100 text-gray-700';
         }
@@ -101,11 +111,13 @@ export default function Dashboard({
     const [parameter, setParameter] = useState(String(selectedParameter));
 
     const reportDates = datesWithReports.map((date) => new Date(date));
+
     const chartConfig = {
         inlet: {
             label: 'Inlet',
             color: '#facc15',
         },
+
         outlet: {
             label: 'Outlet',
             color: '#22c55e',
@@ -146,32 +158,39 @@ export default function Dashboard({
                         </CardHeader>
 
                         <CardContent>
-                            <ScrollArea className="w-full whitespace-nowrap">
-                                <div className="flex gap-4 pb-3">
-                                    {units.map((unit) => (
-                                        <div
-                                            key={unit.id}
-                                            className="min-w-[170px] rounded-xl border bg-muted/30 p-4"
-                                        >
-                                            <p className="mb-3 line-clamp-2 font-semibold">
-                                                {unit.name}
-                                            </p>
-
-                                            <Badge
-                                                className={getConditionBadge(
-                                                    unit.latest_test
-                                                        ?.condition ?? '-',
-                                                )}
+                            {units.length ? (
+                                <ScrollArea className="w-full whitespace-nowrap">
+                                    <div className="flex gap-4 pb-3">
+                                        {units.map((unit) => (
+                                            <div
+                                                key={unit.id}
+                                                className="min-w-[170px] rounded-xl border bg-muted/30 p-4"
                                             >
-                                                {unit.latest_test?.condition ??
-                                                    '-'}
-                                            </Badge>
-                                        </div>
-                                    ))}
-                                </div>
+                                                <p className="mb-3 line-clamp-2 font-semibold">
+                                                    {unit.name}
+                                                </p>
 
-                                <ScrollBar orientation="horizontal" />
-                            </ScrollArea>
+                                                <Badge
+                                                    className={getConditionBadge(
+                                                        unit.latest_test
+                                                            ?.condition ?? '-',
+                                                    )}
+                                                >
+                                                    {unit.latest_test
+                                                        ?.condition ??
+                                                        'Belum ada pengecekan'}
+                                                </Badge>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <ScrollBar orientation="horizontal" />
+                                </ScrollArea>
+                            ) : (
+                                <div className="flex h-[120px] items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
+                                    Belum ada unit pada project ini
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
 
@@ -195,145 +214,161 @@ export default function Dashboard({
                                 </div>
 
                                 {/* SELECT PARAMETER */}
-                                <Select
-                                    value={parameter}
-                                    onValueChange={(value) => {
-                                        setParameter(value);
+                                {waterParameters.length ? (
+                                    <Select
+                                        value={parameter}
+                                        onValueChange={(value) => {
+                                            setParameter(value);
 
-                                        router.get(
-                                            '/dashboard',
-                                            {
-                                                parameter: value,
-                                            },
-                                            {
-                                                preserveState: true,
-                                                replace: true,
-                                            },
-                                        );
-                                    }}
-                                >
-                                    <SelectTrigger className="w-full sm:w-[140px]">
-                                        <SelectValue placeholder="Parameter" />
-                                    </SelectTrigger>
+                                            router.get(
+                                                '/dashboard',
+                                                {
+                                                    parameter: value,
+                                                },
+                                                {
+                                                    preserveState: true,
+                                                    replace: true,
+                                                },
+                                            );
+                                        }}
+                                    >
+                                        <SelectTrigger className="w-full sm:w-[140px]">
+                                            <SelectValue placeholder="Parameter" />
+                                        </SelectTrigger>
 
-                                    <SelectContent>
-                                        {waterParameters.map((parameter) => (
-                                            <SelectItem
-                                                key={parameter.id}
-                                                value={String(parameter.id)}
-                                            >
-                                                {parameter.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                        <SelectContent>
+                                            {waterParameters.map(
+                                                (parameter) => (
+                                                    <SelectItem
+                                                        key={parameter.id}
+                                                        value={String(
+                                                            parameter.id,
+                                                        )}
+                                                    >
+                                                        {parameter.name}
+                                                    </SelectItem>
+                                                ),
+                                            )}
+                                        </SelectContent>
+                                    </Select>
+                                ) : null}
                             </div>
                         </CardHeader>
 
                         <CardContent>
-                            <div className="h-[250px] w-full sm:h-[320px]">
-                                <ChartContainer
-                                    config={chartConfig}
-                                    className="h-full w-full"
-                                >
-                                    <ResponsiveContainer
-                                        width="100%"
-                                        height="100%"
+                            {chartData.length ? (
+                                <div className="h-[250px] w-full sm:h-[320px]">
+                                    <ChartContainer
+                                        config={chartConfig}
+                                        className="h-full w-full"
                                     >
-                                        <AreaChart
-                                            data={chartData}
-                                            margin={{
-                                                left: 12,
-                                                right: 12,
-                                                top: 10,
-                                            }}
+                                        <ResponsiveContainer
+                                            width="100%"
+                                            height="100%"
                                         >
-                                            <defs>
-                                                <linearGradient
-                                                    id="fillInlet"
-                                                    x1="0"
-                                                    y1="0"
-                                                    x2="0"
-                                                    y2="1"
-                                                >
-                                                    <stop
-                                                        offset="5%"
-                                                        stopColor="#facc15"
-                                                        stopOpacity={0.5}
-                                                    />
-                                                    <stop
-                                                        offset="95%"
-                                                        stopColor="#facc15"
-                                                        stopOpacity={0.05}
-                                                    />
-                                                </linearGradient>
+                                            <AreaChart
+                                                data={chartData}
+                                                margin={{
+                                                    left: 12,
+                                                    right: 12,
+                                                    top: 10,
+                                                }}
+                                            >
+                                                <defs>
+                                                    <linearGradient
+                                                        id="fillInlet"
+                                                        x1="0"
+                                                        y1="0"
+                                                        x2="0"
+                                                        y2="1"
+                                                    >
+                                                        <stop
+                                                            offset="5%"
+                                                            stopColor="#facc15"
+                                                            stopOpacity={0.5}
+                                                        />
 
-                                                <linearGradient
-                                                    id="fillOutlet"
-                                                    x1="0"
-                                                    y1="0"
-                                                    x2="0"
-                                                    y2="1"
-                                                >
-                                                    <stop
-                                                        offset="5%"
-                                                        stopColor="#22c55e"
-                                                        stopOpacity={0.5}
-                                                    />
-                                                    <stop
-                                                        offset="95%"
-                                                        stopColor="#22c55e"
-                                                        stopOpacity={0.05}
-                                                    />
-                                                </linearGradient>
-                                            </defs>
+                                                        <stop
+                                                            offset="95%"
+                                                            stopColor="#facc15"
+                                                            stopOpacity={0.05}
+                                                        />
+                                                    </linearGradient>
 
-                                            <CartesianGrid vertical={false} />
+                                                    <linearGradient
+                                                        id="fillOutlet"
+                                                        x1="0"
+                                                        y1="0"
+                                                        x2="0"
+                                                        y2="1"
+                                                    >
+                                                        <stop
+                                                            offset="5%"
+                                                            stopColor="#22c55e"
+                                                            stopOpacity={0.5}
+                                                        />
 
-                                            <XAxis
-                                                dataKey="date"
-                                                tickLine={false}
-                                                axisLine={false}
-                                                tickMargin={8}
-                                            />
+                                                        <stop
+                                                            offset="95%"
+                                                            stopColor="#22c55e"
+                                                            stopOpacity={0.05}
+                                                        />
+                                                    </linearGradient>
+                                                </defs>
 
-                                            <YAxis
-                                                tickLine={false}
-                                                axisLine={false}
-                                                width={40}
-                                                domain={yDomain}
-                                            />
+                                                <CartesianGrid
+                                                    vertical={false}
+                                                />
 
-                                            <ChartTooltip
-                                                cursor={false}
-                                                content={
-                                                    <ChartTooltipContent />
-                                                }
-                                            />
+                                                <XAxis
+                                                    dataKey="date"
+                                                    tickLine={false}
+                                                    axisLine={false}
+                                                    tickMargin={8}
+                                                />
 
-                                            {/* INLET */}
-                                            <Area
-                                                type="natural"
-                                                dataKey="inlet"
-                                                stroke="#facc15"
-                                                fill="url(#fillInlet)"
-                                                fillOpacity={1}
-                                                strokeWidth={2}
-                                            />
+                                                <YAxis
+                                                    tickLine={false}
+                                                    axisLine={false}
+                                                    width={40}
+                                                    domain={yDomain}
+                                                />
 
-                                            {/* OUTLET */}
-                                            <Area
-                                                type="natural"
-                                                dataKey="outlet"
-                                                stroke="#22c55e"
-                                                fill="url(#fillOutlet)"
-                                                fillOpacity={1}
-                                                strokeWidth={2}
-                                            />
-                                        </AreaChart>
-                                    </ResponsiveContainer>
-                                </ChartContainer>
-                            </div>
+                                                <ChartTooltip
+                                                    cursor={false}
+                                                    content={
+                                                        <ChartTooltipContent />
+                                                    }
+                                                />
+
+                                                {/* INLET */}
+                                                <Area
+                                                    type="natural"
+                                                    dataKey="inlet"
+                                                    stroke="#facc15"
+                                                    fill="url(#fillInlet)"
+                                                    fillOpacity={1}
+                                                    strokeWidth={2}
+                                                />
+
+                                                {/* OUTLET */}
+                                                <Area
+                                                    type="natural"
+                                                    dataKey="outlet"
+                                                    stroke="#22c55e"
+                                                    fill="url(#fillOutlet)"
+                                                    fillOpacity={1}
+                                                    strokeWidth={2}
+                                                />
+                                            </AreaChart>
+                                        </ResponsiveContainer>
+                                    </ChartContainer>
+                                </div>
+                            ) : (
+                                <div className="flex h-[250px] items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
+                                    Belum ada data water test
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
 
@@ -344,14 +379,20 @@ export default function Dashboard({
                         </CardHeader>
 
                         <CardContent className="space-y-3">
-                            {notes.map((item) => (
-                                <div
-                                    key={item.id}
-                                    className="rounded-lg border p-3 text-sm"
-                                >
-                                    {item.note}
+                            {notes.length ? (
+                                notes.map((item) => (
+                                    <div
+                                        key={item.id}
+                                        className="rounded-lg border p-3 text-sm"
+                                    >
+                                        {item.note}
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
+                                    Belum ada catatan operasional
                                 </div>
-                            ))}
+                            )}
                         </CardContent>
                     </Card>
                 </div>
@@ -365,7 +406,6 @@ export default function Dashboard({
                         </CardHeader>
 
                         <CardContent className="flex justify-center">
-                            {/* ❌ border dihapus */}
                             <Calendar
                                 mode="single"
                                 selected={new Date()}
@@ -382,7 +422,6 @@ export default function Dashboard({
                     </Card>
 
                     {/* ================= OPERATORS ================= */}
-                    {/* ✅ flex-1 agar memenuhi sisa tinggi */}
                     <Card className="flex-1">
                         <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <CardTitle>Operator</CardTitle>
@@ -422,9 +461,9 @@ export default function Dashboard({
                                     </div>
                                 ))
                             ) : (
-                                <p className="text-sm text-muted-foreground">
-                                    Belum ada operator
-                                </p>
+                                <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
+                                    Belum ada operator pada project ini
+                                </div>
                             )}
                         </CardContent>
                     </Card>

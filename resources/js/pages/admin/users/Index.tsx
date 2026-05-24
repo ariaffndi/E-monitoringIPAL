@@ -25,19 +25,28 @@ type User = {
     role: string;
 };
 
-export default function Users({ users }: { users: User[] }) {
+type Props = {
+    users: User[];
+    filters: {
+        search?: string;
+    };
+};
+
+export default function Users({ users, filters }: Props) {
     const [openCreate, setOpenCreate] = useState(false);
     const [openDetail, setOpenDetail] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [openDelete, setOpenDelete] = useState(false);
     const [selectedId, setSelectedId] = useState<number | null>(null);
     const [loading, setLoading] = useState(false);
-    const [search, setSearch] = useState('');
+
+    // ================= SEARCH =================
+    const [search, setSearch] = useState(filters?.search || '');
 
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
-        role: 'operator', // 🔒 dikunci
+        role: 'operator',
         password: '',
     });
 
@@ -47,6 +56,7 @@ export default function Users({ users }: { users: User[] }) {
             onSuccess: () => {
                 setOpenCreate(false);
                 reset();
+
                 toast.success('User berhasil ditambahkan');
             },
         });
@@ -72,6 +82,7 @@ export default function Users({ users }: { users: User[] }) {
         router.delete(`/users/${selectedId}`, {
             onSuccess: () => {
                 setOpenDelete(false);
+
                 toast.success('User berhasil dihapus');
             },
         });
@@ -96,7 +107,14 @@ export default function Users({ users }: { users: User[] }) {
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Escape') {
             setSearch('');
-            router.get('/users', {}, { preserveState: true });
+
+            router.get(
+                '/users',
+                {},
+                {
+                    preserveState: true,
+                },
+            );
         }
     };
 
@@ -127,7 +145,7 @@ export default function Users({ users }: { users: User[] }) {
                         />
 
                         <Input
-                            placeholder="Search..."
+                            placeholder="Cari operator..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             onKeyDown={handleKeyDown}
@@ -145,61 +163,76 @@ export default function Users({ users }: { users: User[] }) {
                 <Separator />
 
                 {/* CARD LIST */}
-                <div className="grid gap-8 p-6 sm:grid-cols-2 md:grid-cols-2">
-                    {users.map((user) => (
-                        <div
-                            key={user.id}
-                            className="relative cursor-pointer rounded-xl border p-4 shadow-sm transition hover:shadow-md"
-                            onClick={() => handleView(user)}
-                        >
-                            {/* DROPDOWN */}
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button
-                                        variant="ghost"
-                                        className="absolute top-2 right-2 cursor-pointer"
+                {users.length > 0 ? (
+                    <div className="grid gap-8 p-6 sm:grid-cols-2 md:grid-cols-2">
+                        {users.map((user) => (
+                            <div
+                                key={user.id}
+                                className="relative cursor-pointer rounded-xl border p-4 shadow-sm transition hover:shadow-md"
+                                onClick={() => handleView(user)}
+                            >
+                                {/* DROPDOWN */}
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            className="absolute top-2 right-2 cursor-pointer"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            <MoreVertical size={16} />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+
+                                    <DropdownMenuContent
                                         onClick={(e) => e.stopPropagation()}
                                     >
-                                        <MoreVertical size={16} />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <DropdownMenuItem
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            confirmDelete(user.id);
-                                        }}
-                                        className="cursor-pointer text-red-500 focus:text-red-500"
-                                    >
-                                        <Trash2
-                                            size={16}
-                                            className="text-danger mr-2"
-                                        />
-                                        Hapus
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                                        <DropdownMenuItem
+                                            onClick={(e) => {
+                                                e.stopPropagation();
 
-                            {/* CONTENT */}
-                            <div className="flex items-center gap-3">
-                                {/* AVATAR */}
-                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 font-bold text-blue-700">
-                                    {getInitial(user.name)}
-                                </div>
+                                                confirmDelete(user.id);
+                                            }}
+                                            className="cursor-pointer text-red-500 focus:text-red-500"
+                                        >
+                                            <Trash2
+                                                size={16}
+                                                className="mr-2"
+                                            />
+                                            Hapus
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
 
-                                {/* INFO */}
-                                <div>
-                                    <p className="font-semibold">{user.name}</p>
-                                    <p className="text-sm text-muted-foreground">
-                                        {user.email}
-                                    </p>
+                                {/* CONTENT */}
+                                <div className="flex items-center gap-3">
+                                    {/* AVATAR */}
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 font-bold text-blue-700">
+                                        {getInitial(user.name)}
+                                    </div>
+
+                                    {/* INFO */}
+                                    <div className="min-w-0">
+                                        <p className="truncate font-semibold">
+                                            {user.name}
+                                        </p>
+
+                                        <p className="truncate text-sm text-muted-foreground">
+                                            {user.email}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="rounded-xl border border-dashed py-12 text-center">
+                        <p className="text-sm text-muted-foreground">
+                            {search
+                                ? 'Operator tidak ditemukan'
+                                : 'Belum ada operator'}
+                        </p>
+                    </div>
+                )}
             </div>
 
             {/* MODAL CREATE */}
@@ -215,6 +248,7 @@ export default function Users({ users }: { users: User[] }) {
                     value={data.name}
                     onChange={(e) => setData('name', e.target.value)}
                 />
+
                 {errors.name && (
                     <p className="text-xs text-red-500">{errors.name}</p>
                 )}
@@ -225,18 +259,21 @@ export default function Users({ users }: { users: User[] }) {
                     value={data.email}
                     onChange={(e) => setData('email', e.target.value)}
                 />
+
                 {errors.email && (
                     <p className="text-xs text-red-500">{errors.email}</p>
                 )}
 
-                {/* ROLE DIKUNCI */}
+                {/* ROLE */}
                 <Input value="Operator" disabled />
 
                 <Input
                     placeholder="Password"
                     type="password"
+                    value={data.password}
                     onChange={(e) => setData('password', e.target.value)}
                 />
+
                 {errors.password && (
                     <p className="text-xs text-red-500">{errors.password}</p>
                 )}
@@ -248,21 +285,28 @@ export default function Users({ users }: { users: User[] }) {
                 setOpen={setOpenDetail}
                 title="Detail User"
             >
-                {selectedUser && (
-                    <>
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 font-bold text-blue-700 mt-2">
+                {selectedUser ? (
+                    <div className="space-y-3">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 font-bold text-blue-700">
                             {getInitial(selectedUser.name)}
                         </div>
+
                         <p>
                             <b>Nama:</b> {selectedUser.name}
                         </p>
+
                         <p>
                             <b>Email:</b> {selectedUser.email}
                         </p>
+
                         <p>
                             <b>Role:</b> {selectedUser.role}
                         </p>
-                    </>
+                    </div>
+                ) : (
+                    <p className="text-sm text-muted-foreground">
+                        Data user tidak tersedia
+                    </p>
                 )}
             </ModalDetail>
 

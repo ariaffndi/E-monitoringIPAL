@@ -28,4 +28,9 @@ class Unit extends Model
     {
         return $this->hasOne(UnitTest::class)->latestOfMany();
     }
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
 }

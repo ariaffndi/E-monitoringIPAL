@@ -16,24 +16,32 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
+        $projectId = session('selected_project_id');
 
         // ================= ADMIN =================
         if ($user->role === 'admin') {
 
             $units = Unit::with('latestTest')
+                ->where('project_id', $projectId)
                 ->oldest()
                 ->get();
 
-            $waterParameters = WaterParameter::oldest()->get([
-                'id',
-                'name',
-            ]);
+            $waterParameters = WaterParameter::where('project_id', $projectId)
+                ->oldest()
+                ->get([
+                    'id',
+                    'name',
+                ]);
 
             $selectedParameter =
-            $request->parameter ??
-            $waterParameters->first()?->id;
+                $request->parameter ??
+                $waterParameters->first()?->id;
 
             $chartData = WaterTest::query()
+                ->whereHas('operationalReport', function ($query) use ($projectId) {
+
+                    $query->where('project_id', $projectId);
+                })
                 ->where('water_parameter_id', $selectedParameter)
                 ->whereIn('location', ['inlet', 'outlet'])
                 ->with('operationalReport:id,created_at')
@@ -41,16 +49,20 @@ class DashboardController extends Controller
                 ->take(20)
                 ->get()
                 ->groupBy(function ($item) {
+
                     return optional($item->operationalReport)
                         ->created_at
                         ?->format('d M');
                 })
                 ->map(function ($items, $date) {
+
                     return [
                         'date' => $date,
+
                         'inlet' => optional(
                             $items->firstWhere('location', 'inlet')
                         )->value,
+
                         'outlet' => optional(
                             $items->firstWhere('location', 'outlet')
                         )->value,
@@ -61,17 +73,24 @@ class DashboardController extends Controller
                 ->values();
 
             $operators = User::where('role', 'operator')
+                ->where('project_id', $projectId)
                 ->oldest()
                 ->take(3)
                 ->get();
 
-            $notes = OperationalReport::whereNotNull('note')
+            $notes = OperationalReport::where('project_id', $projectId)
+                ->whereNotNull('note')
                 ->where('note', '!=', '')
                 ->latest()
                 ->take(2)
-                ->get(['id', 'note', 'created_at']);
-            
-            $datesWithReports = OperationalReport::selectRaw('DATE(created_at) as date')
+                ->get([
+                    'id',
+                    'note',
+                    'created_at'
+                ]);
+
+            $datesWithReports = OperationalReport::where('project_id', $projectId)
+                ->selectRaw('DATE(created_at) as date')
                 ->distinct()
                 ->pluck('date');
 
@@ -85,44 +104,72 @@ class DashboardController extends Controller
                 'datesWithReports' => $datesWithReports,
             ]);
         }
+
         // ================= OPERATOR =================
+
         $userId = $user->id;
 
-        $todayReport = OperationalReport::whereDate('created_at', now())
+        $todayReport = OperationalReport::where('project_id', $projectId)
+            ->whereDate('created_at', now())
             ->where('user_id', $userId)
             ->exists();
 
-        $month = OperationalReport::whereMonth('created_at', now()->month)
+        $month = OperationalReport::where('project_id', $projectId)
+            ->whereMonth('created_at', now()->month)
             ->where('user_id', $userId)
             ->count();
 
-        $week = OperationalReport::whereBetween('created_at', [
-            now()->startOfWeek(),
-            now()->endOfWeek(),
-        ])->where('user_id', $userId)->count();
+        $week = OperationalReport::where('project_id', $projectId)
+            ->whereBetween('created_at', [
+                now()->startOfWeek(),
+                now()->endOfWeek(),
+            ])
+            ->where('user_id', $userId)
+            ->count();
 
-        $latest = OperationalReport::with(['unitTests', 'waterTests.waterParameter'])
-    ->where('user_id', $userId)
-    ->latest()
-    ->first();
+        $latest = OperationalReport::with([
+                'unitTests',
+                'waterTests.waterParameter'
+            ])
+            ->where('project_id', $projectId)
+            ->where('user_id', $userId)
+            ->latest()
+            ->first();
 
         $latestReport = null;
 
         if ($latest) {
+
             // ================= UNIT AVG =================
+
             $unitAvg = $latest->unitTests->avg(function ($item) {
-                return $this->conditionToNumber($item->condition);
+
+                return $this->conditionToNumber(
+                    $item->condition
+                );
             });
 
             // ================= INLET =================
-            $inlet = $latest->waterTests->where('location', 'inlet')->pluck('value')->map(fn($v) => (float) $v);
 
-            $inletAvg = $inlet->count() ? $inlet->avg() : 0;
+            $inlet = $latest->waterTests
+                ->where('location', 'inlet')
+                ->pluck('value')
+                ->map(fn ($v) => (float) $v);
+
+            $inletAvg = $inlet->count()
+                ? $inlet->avg()
+                : 0;
 
             // ================= OUTLET =================
-            $outlet = $latest->waterTests->where('location', 'outlet')->pluck('value')->map(fn($v) => (float) $v);
 
-            $outletAvg = $outlet->count() ? $outlet->avg() : 0;
+            $outlet = $latest->waterTests
+                ->where('location', 'outlet')
+                ->pluck('value')
+                ->map(fn ($v) => (float) $v);
+
+            $outletAvg = $outlet->count()
+                ? $outlet->avg()
+                : 0;
 
             $latestReport = [
                 'id' => $latest->id,
@@ -133,7 +180,8 @@ class DashboardController extends Controller
             ];
         }
 
-        $recentReports = OperationalReport::where('user_id', $userId)
+        $recentReports = OperationalReport::where('project_id', $projectId)
+            ->where('user_id', $userId)
             ->latest()
             ->take(5)
             ->get();
@@ -168,8 +216,4 @@ class DashboardController extends Controller
             default => 0,
         };
     }
-
-
-
 }
-

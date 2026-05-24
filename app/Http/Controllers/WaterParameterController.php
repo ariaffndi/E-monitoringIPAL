@@ -13,18 +13,35 @@ class WaterParameterController extends Controller
      */
     public function index(Request $request)
     {
-        $query = WaterParameter::query();
+        $projectId = session('selected_project_id');
 
-    if ($request->filled('search')) {
-    $query->where(function ($q) use ($request) {
-        $q->where('name', 'like', '%' . $request->search . '%');
-        });
+        $query = WaterParameter::where(
+            'project_id',
+            $projectId
+        );
+
+        if ($request->filled('search')) {
+
+            $query->where(function ($q) use ($request) {
+
+                $q->where(
+                    'name',
+                    'like',
+                    '%' . $request->search . '%'
+                );
+            });
+        }
+
+        return Inertia::render(
+            'admin/water-parameters/Index',
+            [
+                'waterparameters' => $query
+                    ->latest()
+                    ->get()
+            ]
+        );
     }
 
-    return Inertia::render('admin/water-parameters/Index', [
-        'waterparameters' => $query->latest()->get()
-        ]);
-    }
     /**
      * Show the form for creating a new resource.
      */
@@ -44,10 +61,10 @@ class WaterParameterController extends Controller
             'min_value' => 'required|numeric',
             'max_value' => 'required|numeric',
             'type' => 'required|string|max:255',
-            
         ]);
 
         WaterParameter::create([
+            'project_id' => session('selected_project_id'),
             'name' => $validated['name'],
             'unit' => $validated['unit'],
             'min_value' => $validated['min_value'],
@@ -55,7 +72,12 @@ class WaterParameterController extends Controller
             'type' => $validated['type'],
         ]);
 
-        return redirect()->back()->with('success', 'Parameter berhasil ditambahkan');
+        return redirect()
+            ->back()
+            ->with(
+                'success',
+                'Parameter berhasil ditambahkan'
+            );
     }
 
     /**
@@ -77,8 +99,17 @@ class WaterParameterController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, WaterParameter $waterParameter)
-    {
+    public function update(
+        Request $request,
+        WaterParameter $waterParameter
+    ) {
+        if (
+            $waterParameter->project_id !==
+            session('selected_project_id')
+        ) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'unit' => 'required|string|max:255',
@@ -89,7 +120,10 @@ class WaterParameterController extends Controller
 
         $waterParameter->update($validated);
 
-        return back()->with('success', 'Parameter berhasil diupdate');
+        return back()->with(
+            'success',
+            'Parameter berhasil diupdate'
+        );
     }
 
     /**
@@ -97,8 +131,17 @@ class WaterParameterController extends Controller
      */
     public function destroy($id)
     {
-        $waterParameter = WaterParameter::findOrFail($id);
+        $waterParameter = WaterParameter::where(
+                'project_id',
+                session('selected_project_id')
+            )
+            ->findOrFail($id);
+
         $waterParameter->delete();
-        return back()->with('success', 'Parameter berhasil dihapus');
+
+        return back()->with(
+            'success',
+            'Parameter berhasil dihapus'
+        );
     }
 }

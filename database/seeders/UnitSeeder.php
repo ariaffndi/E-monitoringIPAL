@@ -13,6 +13,7 @@ class UnitSeeder extends Seeder
     {
         DB::table('units')->insert([
             [
+                'project_id' => 1,
                 'name' => 'Grease Trap (GT)',
                 'specification' => 'Struktur Beton',
                 'dimension' => '2 x 1 x 1.5 m',
@@ -22,6 +23,7 @@ class UnitSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
+                'project_id' => 1,
                 'name' => 'Equalization Tank',
                 'specification' => 'Struktur Beton',
                 'dimension' => '3 x 2 x 2 m',
@@ -31,6 +33,7 @@ class UnitSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
+                'project_id' => 1,
                 'name' => 'Anaerobic Baffled Reactor (ABR)',
                 'specification' => 'Struktur Beton',
                 'dimension' => '5 x 2 x 2.5 m',
@@ -40,6 +43,7 @@ class UnitSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
+                'project_id' => 1,
                 'name' => 'Aeration Tank',
                 'specification' => 'Struktur Beton',
                 'dimension' => '4 x 2 x 2.5 m',
@@ -49,6 +53,7 @@ class UnitSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
+                'project_id' => 1,
                 'name' => 'Clarifier',
                 'specification' => 'Struktur Beton',
                 'dimension' => '3 x 2 x 2 m',
@@ -58,6 +63,7 @@ class UnitSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
+                'project_id' => 1,
                 'name' => 'Effluent Tank',
                 'specification' => 'Struktur Beton',
                 'dimension' => '2 x 2 x 2 m',
@@ -67,6 +73,7 @@ class UnitSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
+                'project_id' => 1,
                 'name' => 'Filter Pump',
                 'specification' => 'Fabrikasi Vendor',
                 'dimension' => 'Pompa 1.5 HP',
@@ -76,6 +83,7 @@ class UnitSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
+                'project_id' => 1,
                 'name' => 'Pressure Filter',
                 'specification' => 'Fibre-reinforced plastic',
                 'dimension' => 'Ø 1 m, tinggi 2 m',
@@ -85,6 +93,7 @@ class UnitSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
+                'project_id' => 1,
                 'name' => 'Backwash Tank',
                 'specification' => 'Fibre-reinforced plastic',
                 'dimension' => '2 x 1.5 x 1.5 m',
@@ -94,6 +103,7 @@ class UnitSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
+                'project_id' => 1,
                 'name' => 'Clear Water Tank',
                 'specification' => 'Fibre-reinforced plastic',
                 'dimension' => '2 x 2 x 2 m',

@@ -32,13 +32,17 @@ class OperationalReportController extends Controller
     {
         $this->authorizeAdmin();
 
+        $projectId = session('selected_project_id');
+
         $query = OperationalReport::with([
             'user',
             'unitTests',
             'waterTests.waterParameter'
-        ]);
+        ])
+        ->where('project_id', $projectId);
 
         if ($request->search) {
+
             $query->where(function ($q) use ($request) {
 
                 $q->where(
@@ -101,14 +105,24 @@ class OperationalReportController extends Controller
         return Inertia::render(
             'operator/operational-reports/Create',
             [
-                'units' => Unit::select('id', 'name')->get(),
+                'units' => Unit::where(
+                        'project_id',
+                        session('selected_project_id')
+                    )
+                    ->select('id', 'name')
+                    ->get(),
 
-                'parameters' => WaterParameter::select(
-                    'id',
-                    'name',
-                    'unit',
-                    'type'
-                )->get(),
+                'parameters' => WaterParameter::where(
+                        'project_id',
+                        session('selected_project_id')
+                    )
+                    ->select(
+                        'id',
+                        'name',
+                        'unit',
+                        'type'
+                    )
+                    ->get(),
             ]
         );
     }
@@ -134,6 +148,7 @@ class OperationalReportController extends Controller
         try {
 
             $report = OperationalReport::create([
+                'project_id' => session('selected_project_id'),
                 'user_id' => Auth::id(),
                 'note' => $request->note,
                 'date' => now(),
@@ -195,6 +210,10 @@ class OperationalReportController extends Controller
                 'waterTests'
             ])
             ->where('user_id', Auth::id())
+            ->where(
+                'project_id',
+                session('selected_project_id')
+            )
             ->latest()
             ->paginate(15);
 
@@ -215,6 +234,10 @@ class OperationalReportController extends Controller
                 'waterTests.waterParameter'
             ])
             ->where('user_id', Auth::id())
+            ->where(
+                'project_id',
+                session('selected_project_id')
+            )
             ->findOrFail($id);
 
         return Inertia::render(
@@ -295,7 +318,12 @@ class OperationalReportController extends Controller
             'user',
             'unitTests.unit',
             'waterTests.waterParameter'
-        ])->findOrFail($id);
+        ])
+        ->where(
+            'project_id',
+            session('selected_project_id')
+        )
+        ->findOrFail($id);
     }
 
     private function calculateUnitAverage($report)
@@ -342,6 +370,10 @@ class OperationalReportController extends Controller
             'unitTests.unit',
             'waterTests.waterParameter',
         ])
+        ->where(
+            'project_id',
+            session('selected_project_id')
+        )
         ->whereDate('created_at', '>=', $from)
         ->whereDate('created_at', '<=', $to)
         ->latest()
@@ -358,114 +390,122 @@ class OperationalReportController extends Controller
     }
 
     private function buildChartData($reports)
-{
-    return $reports
-        ->sortBy('created_at')
-        ->groupBy(fn ($r) => $r->created_at->format('Y-m-d'))
-        ->map(function ($items, $date) {
+    {
+        return $reports
+            ->sortBy('created_at')
+            ->groupBy(fn ($r) => $r->created_at->format('Y-m-d'))
+            ->map(function ($items, $date) {
 
-            $total = 0;
-            $passed = 0;
+                $total = 0;
+                $passed = 0;
 
-            foreach ($items as $report) {
+                foreach ($items as $report) {
 
-                foreach (
-                    $report->waterTests
-                        ->where('location', 'outlet')
-                    as $test
-                ) {
-
-                    $total++;
-
-                    $min = $test->waterParameter->min_value;
-                    $max = $test->waterParameter->max_value;
-
-                    if (
-                        $test->value >= $min &&
-                        $test->value <= $max
+                    foreach (
+                        $report->waterTests
+                            ->where('location', 'outlet')
+                        as $test
                     ) {
-                        $passed++;
+
+                        $total++;
+
+                        $min = $test->waterParameter->min_value;
+                        $max = $test->waterParameter->max_value;
+
+                        if (
+                            $test->value >= $min &&
+                            $test->value <= $max
+                        ) {
+                            $passed++;
+                        }
                     }
                 }
-            }
 
-            return [
-                'date' => \Carbon\Carbon::parse($date)->format('d M'),
-                'compliance' => $total
-                    ? round(($passed / $total) * 100, 2)
-                    : 0,
-            ];
-        })
-        ->values();
+                return [
+                    'date' => \Carbon\Carbon::parse($date)->format('d M'),
+                    'compliance' => $total
+                        ? round(($passed / $total) * 100, 2)
+                        : 0,
+                ];
+            })
+            ->values();
     }
 
     private function buildUnitRecap($from, $to)
     {
-        return Unit::with([
-            'unitTests' => function ($query) use ($from, $to) {
+        return Unit::where(
+                'project_id',
+                session('selected_project_id')
+            )
+            ->with([
+                'unitTests' => function ($query) use ($from, $to) {
 
-                $query->whereHas(
-                    'operationalReport',
-                    function ($q) use ($from, $to) {
+                    $query->whereHas(
+                        'operationalReport',
+                        function ($q) use ($from, $to) {
 
-                        $q->whereDate('created_at', '>=', $from)
-                          ->whereDate('created_at', '<=', $to);
-                    }
-                );
-            }
-        ])
-        ->get()
-        ->map(function ($unit) {
+                            $q->whereDate('created_at', '>=', $from)
+                              ->whereDate('created_at', '<=', $to);
+                        }
+                    );
+                }
+            ])
+            ->get()
+            ->map(function ($unit) {
 
-            $scores = $unit->unitTests->map(function ($test) {
+                $scores = $unit->unitTests->map(function ($test) {
 
-                return $this->conditionMap[
-                    strtolower($test->condition)
-                ] ?? 0;
+                    return $this->conditionMap[
+                        strtolower($test->condition)
+                    ] ?? 0;
+                });
+
+                $avg = round($scores->avg(), 2);
+
+                return [
+                    'name' => $unit->name,
+                    'avg' => $avg,
+                    'status' => $this->getStatusLabel($avg),
+                ];
             });
-
-            $avg = round($scores->avg(), 2);
-
-            return [
-                'name' => $unit->name,
-                'avg' => $avg,
-                'status' => $this->getStatusLabel($avg),
-            ];
-        });
     }
 
     private function buildParameterRecap($from, $to)
     {
-        return WaterParameter::with([
-            'waterTests' => function ($query) use ($from, $to) {
+        return WaterParameter::where(
+                'project_id',
+                session('selected_project_id')
+            )
+            ->with([
+                'waterTests' => function ($query) use ($from, $to) {
 
-                $query->whereHas(
-                    'operationalReport',
-                    function ($q) use ($from, $to) {
+                    $query->whereHas(
+                        'operationalReport',
+                        function ($q) use ($from, $to) {
 
-                        $q->whereDate('created_at', '>=', $from)
-                          ->whereDate('created_at', '<=', $to);
-                    }
-                );
-            }
-        ])
-        ->get()
-        ->map(function ($parameter) {
+                            $q->whereDate('created_at', '>=', $from)
+                              ->whereDate('created_at', '<=', $to);
+                        }
+                    );
+                }
+            ])
+            ->get()
+            ->map(function ($parameter) {
 
-            $inlet = $parameter->waterTests
-                ->where('location', 'inlet');
+                $inlet = $parameter->waterTests
+                    ->where('location', 'inlet');
 
-            $outlet = $parameter->waterTests
-                ->where('location', 'outlet');
+                $outlet = $parameter->waterTests
+                    ->where('location', 'outlet');
 
-            return [
-                'name' => $parameter->name,
-                'min' => $parameter->min_value,
-                'max' => $parameter->max_value,
-                'avg_inlet' => round($inlet->avg('value'), 2),
-                'avg_outlet' => round($outlet->avg('value'), 2),
-            ];
-        });
+                return [
+                    'name' => $parameter->name,
+                    'min' => $parameter->min_value,
+                    'max' => $parameter->max_value,
+                    'avg_inlet' => round($inlet->avg('value'), 2),
+                    'avg_outlet' => round($outlet->avg('value'), 2),
+                ];
+            });
     }
 
     private function getStatusLabel($avg)
@@ -482,6 +522,20 @@ class OperationalReportController extends Controller
     private function storeUnitTests($request, $reportId)
     {
         foreach ($request->unit_tests as $index => $unit) {
+
+            $unitExists = Unit::where(
+                    'id',
+                    $unit['unit_id']
+                )
+                ->where(
+                    'project_id',
+                    session('selected_project_id')
+                )
+                ->exists();
+
+            if (!$unitExists) {
+                continue;
+            }
 
             $image = null;
 
@@ -509,6 +563,20 @@ class OperationalReportController extends Controller
                 $request->water_tests[$location]
                 as $index => $water
             ) {
+
+                $parameterExists = WaterParameter::where(
+                        'id',
+                        $water['water_parameter_id']
+                    )
+                    ->where(
+                        'project_id',
+                        session('selected_project_id')
+                    )
+                    ->exists();
+
+                if (!$parameterExists) {
+                    continue;
+                }
 
                 WaterTest::create([
                     'operational_report_id' => $reportId,

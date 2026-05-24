@@ -22,16 +22,32 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
 
-export default function WaterParameters({ waterparameters }: any) {
-    // state
+type Props = {
+    waterparameters: any[];
+    filters: {
+        search?: string;
+    };
+};
+
+export default function WaterParameters({ waterparameters, filters }: Props) {
+    // ================= STATE =================
     const [openCreate, setOpenCreate] = useState(false);
     const [openDetail, setOpenDetail] = useState(false);
+
     const [selectedWaterParameter, setSelectedWaterParameter] =
         useState<any>(null);
+
     const [openDelete, setOpenDelete] = useState(false);
+
     const [selectedId, setSelectedId] = useState<number | null>(null);
+
     const [loading, setLoading] = useState(false);
-    const [search, setSearch] = useState('');
+
+    // ================= SEARCH =================
+    const [search, setSearch] = useState(filters?.search || '');
+
+    const [filterType, setFilterType] = useState<string>('all');
+
     const { data, setData, post, processing, errors, reset } = useForm<{
         name: string;
         unit: string;
@@ -45,9 +61,10 @@ export default function WaterParameters({ waterparameters }: any) {
         max_value: '',
         type: 'fisika',
     });
+
     const [isEdit, setIsEdit] = useState(false);
 
-    // handler
+    // ================= HANDLER =================
     const handleSubmit = () => {
         if (isEdit && selectedWaterParameter) {
             router.post(
@@ -60,8 +77,11 @@ export default function WaterParameters({ waterparameters }: any) {
                     forceFormData: true,
                     onSuccess: () => {
                         setOpenCreate(false);
+
                         reset();
+
                         setIsEdit(false);
+
                         toast.success('Parameter berhasil diupdate');
                     },
                 },
@@ -71,7 +91,9 @@ export default function WaterParameters({ waterparameters }: any) {
                 forceFormData: true,
                 onSuccess: () => {
                     setOpenCreate(false);
+
                     reset();
+
                     toast.success('Parameter berhasil ditambahkan');
                 },
             });
@@ -80,19 +102,21 @@ export default function WaterParameters({ waterparameters }: any) {
 
     const handleView = (waterparameter: any) => {
         setSelectedWaterParameter(waterparameter);
+
         setOpenDetail(true);
     };
 
     const handleEdit = (waterparameter: any) => {
         setIsEdit(true);
+
         setSelectedWaterParameter(waterparameter);
 
         setData({
-            name: waterparameter.name,
-            unit: waterparameter.unit,
-            min_value: waterparameter.min_value,
-            max_value: waterparameter.max_value,
-            type: waterparameter.type,
+            name: waterparameter.name || '',
+            unit: waterparameter.unit || '',
+            min_value: String(waterparameter.min_value) || '',
+            max_value: String(waterparameter.max_value) || '',
+            type: waterparameter.type || 'fisika',
         });
 
         setOpenCreate(true);
@@ -106,6 +130,7 @@ export default function WaterParameters({ waterparameters }: any) {
         router.delete(`/water-parameters/${selectedId}`, {
             onSuccess: () => {
                 setOpenDelete(false);
+
                 toast.success('Parameter berhasil dihapus');
             },
         });
@@ -113,16 +138,19 @@ export default function WaterParameters({ waterparameters }: any) {
 
     const handleCloseModal = () => {
         setOpenCreate(false);
+
         setIsEdit(false);
+
         reset();
     };
 
     const confirmDelete = (id: number) => {
         setSelectedId(id);
+
         setOpenDelete(true);
     };
 
-    // search
+    // ================= SEARCH =================
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setLoading(true);
@@ -141,19 +169,37 @@ export default function WaterParameters({ waterparameters }: any) {
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Escape') {
             setSearch('');
-            router.get('/water-parameters', {}, { preserveState: true });
+
+            router.get(
+                '/water-parameters',
+                {},
+                {
+                    preserveState: true,
+                },
+            );
         }
     };
 
-    const [filterType, setFilterType] = useState<string>('all');
+    // ================= FILTER =================
+    const filteredWaterParameters =
+        waterparameters
+            ?.filter((item: any) => item !== null)
+            ?.filter((item: any) =>
+                filterType === 'all' ? true : item.type === filterType,
+            ) || [];
+
+    // ================= BADGE =================
     const getTypeBadge = (type: string) => {
         switch (type) {
             case 'fisika':
                 return 'bg-blue-100 text-blue-700';
+
             case 'kimia':
                 return 'bg-purple-100 text-purple-700';
+
             case 'biologi':
                 return 'bg-green-100 text-green-700';
+
             default:
                 return 'bg-gray-100 text-gray-700';
         }
@@ -161,9 +207,10 @@ export default function WaterParameters({ waterparameters }: any) {
 
     return (
         <>
-            <Head title="WaterParameters" />
+            <Head title="Water Parameters" />
+
             <div className="flex flex-col gap-4 p-6">
-                {/* header */}
+                {/* HEADER */}
                 <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:justify-between">
                     <Button
                         onClick={() => setOpenCreate(true)}
@@ -180,7 +227,7 @@ export default function WaterParameters({ waterparameters }: any) {
                         />
 
                         <Input
-                            placeholder="Search..."
+                            placeholder="Cari parameter..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             onKeyDown={handleKeyDown}
@@ -197,16 +244,20 @@ export default function WaterParameters({ waterparameters }: any) {
 
                 <Separator />
 
-                {/* table */}
+                {/* TABLE */}
                 <div className="w-full overflow-x-auto rounded-lg border">
                     <table className="table min-w-full text-center text-sm">
                         <thead>
                             <tr className="bg-secondary">
                                 <th className="p-2">Nama</th>
+
                                 <th className="p-2">Satuan</th>
+
                                 <th className="p-2">Nilai Minimum</th>
+
                                 <th className="p-2">Nilai Maksimum</th>
-                                <th className="flex items-center justify-center">
+
+                                <th className="flex items-center justify-center p-2">
                                     <Select
                                         value={filterType}
                                         onValueChange={(value) =>
@@ -216,115 +267,130 @@ export default function WaterParameters({ waterparameters }: any) {
                                         <SelectTrigger className="h-auto border-none bg-transparent p-0 text-xs shadow-none ring-0 focus:ring-0 focus:outline-none">
                                             <SelectValue placeholder="Jenis" />
                                         </SelectTrigger>
+
                                         <SelectContent>
                                             <SelectGroup>
                                                 <SelectItem value="all">
-                                                    <p className="text-sm">
-                                                        Jenis
-                                                    </p>
+                                                    Semua
                                                 </SelectItem>
+
                                                 <SelectItem value="fisika">
-                                                    <p className="text-sm">
-                                                        Fisika
-                                                    </p>
+                                                    Fisika
                                                 </SelectItem>
+
                                                 <SelectItem value="kimia">
-                                                    <p className="text-sm">
-                                                        Kimia
-                                                    </p>
+                                                    Kimia
                                                 </SelectItem>
+
                                                 <SelectItem value="biologi">
-                                                    <p className="text-sm">
-                                                        Biologi
-                                                    </p>
+                                                    Biologi
                                                 </SelectItem>
                                             </SelectGroup>
                                         </SelectContent>
                                     </Select>
                                 </th>
+
                                 <th className="p-2">Aksi</th>
                             </tr>
                         </thead>
 
                         <tbody>
-                            {waterparameters
-                                ?.filter((item: any) => item !== null)
-                                ?.filter((item: any) =>
-                                    filterType === 'all'
-                                        ? true
-                                        : item.type === filterType,
+                            {filteredWaterParameters.length > 0 ? (
+                                filteredWaterParameters.map(
+                                    (waterparameter: any, index: number) => (
+                                        <tr
+                                            key={waterparameter.id}
+                                            onClick={() =>
+                                                handleView(waterparameter)
+                                            }
+                                            className={`cursor-pointer transition hover:bg-secondary ${
+                                                index % 2 === 0
+                                                    ? 'bg-white'
+                                                    : 'bg-muted/50'
+                                            }`}
+                                        >
+                                            <td className="p-2 font-semibold">
+                                                {waterparameter.name || '-'}
+                                            </td>
+
+                                            <td className="p-2">
+                                                {waterparameter.unit || '-'}
+                                            </td>
+
+                                            <td className="p-2">
+                                                {waterparameter.min_value ??
+                                                    '-'}
+                                            </td>
+
+                                            <td className="p-2">
+                                                {waterparameter.max_value ??
+                                                    '-'}
+                                            </td>
+
+                                            <td className="p-2">
+                                                <span
+                                                    className={`rounded-full px-3 py-1 text-xs capitalize ${getTypeBadge(
+                                                        waterparameter.type,
+                                                    )}`}
+                                                >
+                                                    {waterparameter.type || '-'}
+                                                </span>
+                                            </td>
+
+                                            <td className="p-2">
+                                                <div className="flex flex-nowrap items-center justify-center gap-2">
+                                                    <Button
+                                                        title="Edit Data"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+
+                                                            handleEdit(
+                                                                waterparameter,
+                                                            );
+                                                        }}
+                                                        size="sm"
+                                                        className="cursor-pointer bg-yellow-100 text-yellow-700 hover:bg-yellow-300"
+                                                    >
+                                                        <Pencil size={20} />
+                                                    </Button>
+
+                                                    <Button
+                                                        title="Hapus Data"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+
+                                                            confirmDelete(
+                                                                waterparameter.id,
+                                                            );
+                                                        }}
+                                                        size="sm"
+                                                        className="cursor-pointer bg-red-100 text-red-700 hover:bg-red-300"
+                                                    >
+                                                        <Trash2 />
+                                                    </Button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ),
                                 )
-                                ?.map((waterparameter: any, index: number) => (
-                                    <tr
-                                        key={waterparameter.id}
-                                        onClick={() =>
-                                            handleView(waterparameter)
-                                        }
-                                        className={`cursor-pointer transition hover:bg-secondary ${
-                                            index % 2 === 0
-                                                ? 'bg-white'
-                                                : 'bg-muted/50'
-                                        }`}
+                            ) : (
+                                <tr>
+                                    <td
+                                        colSpan={6}
+                                        className="py-10 text-center text-sm text-muted-foreground"
                                     >
-                                        <td className="p-2 font-semibold">
-                                            {waterparameter.name}
-                                        </td>
-                                        <td className="p-2">
-                                            {waterparameter.unit}
-                                        </td>
-                                        <td className="p-2">
-                                            {waterparameter.min_value}
-                                        </td>
-                                        <td className="p-2">
-                                            {waterparameter.max_value}
-                                        </td>
-                                        <td className="p-2">
-                                            <span
-                                                className={`rounded-full px-3 py-1 text-xs capitalize ${getTypeBadge(
-                                                    waterparameter.type,
-                                                )}`}
-                                            >
-                                                {waterparameter.type}
-                                            </span>
-                                        </td>
-                                        <td className="p-2">
-                                            <div className="flex flex-nowrap items-center justify-center gap-2">
-                                                <Button
-                                                    title="Edit Data"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleEdit(
-                                                            waterparameter,
-                                                        );
-                                                    }}
-                                                    size="sm"
-                                                    className="cursor-pointer bg-yellow-100 text-yellow-700 hover:bg-yellow-300"
-                                                >
-                                                    <Pencil size={20} />
-                                                </Button>
-                                                <Button
-                                                    title="Hapus Data"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        confirmDelete(
-                                                            waterparameter.id,
-                                                        );
-                                                    }}
-                                                    size="sm"
-                                                    className="cursor-pointer bg-red-100 text-red-700 hover:bg-red-300"
-                                                >
-                                                    <Trash2 />
-                                                </Button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
+                                        {search || filterType !== 'all'
+                                            ? 'Parameter tidak ditemukan'
+                                            : 'Belum ada data parameter'}
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            {/* modal create & edit */}
+            {/* MODAL CREATE & EDIT */}
             <ModalCreate
                 open={openCreate}
                 setOpen={handleCloseModal}
@@ -333,26 +399,30 @@ export default function WaterParameters({ waterparameters }: any) {
                 processing={processing}
             >
                 <Field>
-                    <FieldLabel htmlFor="Name">Nama</FieldLabel>
+                    <FieldLabel htmlFor="name">Nama</FieldLabel>
+
                     <Input
                         placeholder="Nama"
                         value={data.name}
                         onChange={(e) => setData('name', e.target.value)}
                         className="mb-2"
                     />
+
                     {errors.name && (
                         <p className="text-xs text-red-500">{errors.name}</p>
                     )}
                 </Field>
 
                 <Field>
-                    <FieldLabel htmlFor="Unit">Satuan</FieldLabel>
+                    <FieldLabel htmlFor="unit">Satuan</FieldLabel>
+
                     <Input
                         placeholder="Satuan"
                         value={data.unit}
                         onChange={(e) => setData('unit', e.target.value)}
                         className="mb-2"
                     />
+
                     {errors.unit && (
                         <p className="text-xs text-red-500">{errors.unit}</p>
                     )}
@@ -360,6 +430,7 @@ export default function WaterParameters({ waterparameters }: any) {
 
                 <Field>
                     <FieldLabel htmlFor="min_value">Nilai Minimum</FieldLabel>
+
                     <Input
                         type="number"
                         placeholder="Nilai Minimum"
@@ -367,6 +438,7 @@ export default function WaterParameters({ waterparameters }: any) {
                         onChange={(e) => setData('min_value', e.target.value)}
                         className="mb-2"
                     />
+
                     {errors.min_value && (
                         <p className="text-xs text-red-500">
                             {errors.min_value}
@@ -376,6 +448,7 @@ export default function WaterParameters({ waterparameters }: any) {
 
                 <Field>
                     <FieldLabel htmlFor="max_value">Nilai Maksimum</FieldLabel>
+
                     <Input
                         type="number"
                         placeholder="Nilai Maksimum"
@@ -383,6 +456,7 @@ export default function WaterParameters({ waterparameters }: any) {
                         onChange={(e) => setData('max_value', e.target.value)}
                         className="mb-2"
                     />
+
                     {errors.max_value && (
                         <p className="text-xs text-red-500">
                             {errors.max_value}
@@ -392,17 +466,21 @@ export default function WaterParameters({ waterparameters }: any) {
 
                 <Field>
                     <FieldLabel htmlFor="type">Tipe Parameter</FieldLabel>
+
                     <Select
                         value={data.type}
                         onValueChange={(value) => setData('type', value)}
                     >
-                        <SelectTrigger className="">
+                        <SelectTrigger>
                             <SelectValue placeholder="Tipe Parameter" />
                         </SelectTrigger>
+
                         <SelectContent>
                             <SelectGroup>
                                 <SelectItem value="fisika">Fisika</SelectItem>
+
                                 <SelectItem value="kimia">Kimia</SelectItem>
+
                                 <SelectItem value="biologi">Biologi</SelectItem>
                             </SelectGroup>
                         </SelectContent>
@@ -410,49 +488,57 @@ export default function WaterParameters({ waterparameters }: any) {
                 </Field>
             </ModalCreate>
 
-            {/* modal detail */}
+            {/* MODAL DETAIL */}
             <ModalDetail
                 open={openDetail}
                 setOpen={setOpenDetail}
                 title="Detail Parameter Air"
             >
-                {selectedWaterParameter && (
-                    <>
+                {selectedWaterParameter ? (
+                    <div className="space-y-3">
                         <div>
                             <span className="font-semibold">Nama:</span>{' '}
-                            {selectedWaterParameter.name}
+                            {selectedWaterParameter.name || '-'}
                         </div>
+
                         <div>
                             <span className="font-semibold">Satuan:</span>{' '}
-                            {selectedWaterParameter.unit}
+                            {selectedWaterParameter.unit || '-'}
                         </div>
+
                         <div>
                             <span className="font-semibold">
                                 Nilai Minimum:
                             </span>{' '}
-                            {selectedWaterParameter.min_value}
+                            {selectedWaterParameter.min_value ?? '-'}
                         </div>
+
                         <div>
                             <span className="font-semibold">
                                 Nilai Maksimum:
                             </span>{' '}
-                            {selectedWaterParameter.max_value}
+                            {selectedWaterParameter.max_value ?? '-'}
                         </div>
+
                         <div>
                             <span className="font-semibold">
                                 Tipe Parameter:
                             </span>{' '}
-                            {selectedWaterParameter.type}
+                            {selectedWaterParameter.type || '-'}
                         </div>
-                    </>
+                    </div>
+                ) : (
+                    <p className="text-sm text-muted-foreground">
+                        Data parameter tidak tersedia
+                    </p>
                 )}
             </ModalDetail>
 
-            {/* modal delete */}
+            {/* MODAL DELETE */}
             <ModalConfirmDelete
                 open={openDelete}
                 setOpen={setOpenDelete}
-                title="Hapus Unit?"
+                title="Hapus Parameter?"
                 description="Apakah anda yakin ingin menghapus parameter ini?"
                 onConfirm={handleDelete}
             />

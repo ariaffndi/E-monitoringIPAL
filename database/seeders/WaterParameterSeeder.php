@@ -16,6 +16,7 @@ class WaterParameterSeeder extends Seeder
 
             // ================= FISIKA =================
             [
+                'project_id' => 1,
                 'name' => 'Suhu',
                 'unit' => '°C',
                 'min_value' => 25,
@@ -23,6 +24,7 @@ class WaterParameterSeeder extends Seeder
                 'type' => 'fisika',
             ],
             [
+                'project_id' => 1,
                 'name' => 'TSS',
                 'unit' => 'mg/L',
                 'min_value' => 0,
@@ -32,6 +34,7 @@ class WaterParameterSeeder extends Seeder
 
             // ================= KIMIA =================
             [
+                'project_id' => 1,
                 'name' => 'pH',
                 'unit' => '',
                 'min_value' => 6,
@@ -39,6 +42,7 @@ class WaterParameterSeeder extends Seeder
                 'type' => 'kimia',
             ],
             [
+                'project_id' => 1,
                 'name' => 'BOD',
                 'unit' => 'mg/L',
                 'min_value' => 0,
@@ -46,6 +50,7 @@ class WaterParameterSeeder extends Seeder
                 'type' => 'kimia',
             ],
             [
+                'project_id' => 1,
                 'name' => 'COD',
                 'unit' => 'mg/L',
                 'min_value' => 0,
@@ -55,6 +60,7 @@ class WaterParameterSeeder extends Seeder
 
             // ================= BIOLOGI =================
             [
+                'project_id' => 1,
                 'name' => 'E. Coli',
                 'unit' => 'MPN/100ml',
                 'min_value' => 0,

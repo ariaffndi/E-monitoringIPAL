@@ -1,35 +1,59 @@
 import { Head, router } from '@inertiajs/react';
 import { useForm } from '@inertiajs/react';
-import { PlusCircle, Search, Trash2, Pencil, MoreVertical } from 'lucide-react';
+import {
+    PlusCircle,
+    Search,
+    Trash2,
+    Pencil,
+    MoreVertical,
+    ImageOff,
+} from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 import { toast } from 'sonner';
+
 import ModalConfirmDelete from '@/components/modal-confirm-delete';
 import ModalCreate from '@/components/modal-create';
 import ModalDetail from '@/components/modal-detail';
+
 import { Button } from '@/components/ui/button';
+
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+
 import { Field } from '@/components/ui/field';
 import { FieldLabel } from '@/components/ui/field';
+
 import { Input } from '@/components/ui/input';
+
 import { Separator } from '@/components/ui/separator';
+
 import { Spinner } from '@/components/ui/spinner';
+
 import { Textarea } from '@/components/ui/textarea';
 
-export default function Units({ units }: any) {
-    // state
+export default function Units({ units, filters }: any) {
+    // ================= STATE =================
     const [openCreate, setOpenCreate] = useState(false);
+
     const [openDetail, setOpenDetail] = useState(false);
+
     const [selectedUnit, setSelectedUnit] = useState<any>(null);
+
     const [openDelete, setOpenDelete] = useState(false);
+
     const [selectedId, setSelectedId] = useState<number | null>(null);
+
     const [loading, setLoading] = useState(false);
-    const [search, setSearch] = useState('');
+
+    const [search, setSearch] = useState(filters?.search || '');
+
+    const [isEdit, setIsEdit] = useState(false);
+
     const { data, setData, post, processing, errors, reset } = useForm<{
         name: string;
         specification: string;
@@ -43,9 +67,8 @@ export default function Units({ units }: any) {
         description: '',
         image: null,
     });
-    const [isEdit, setIsEdit] = useState(false);
 
-    // handler
+    // ================= SUBMIT =================
     const handleSubmit = () => {
         if (isEdit && selectedUnit) {
             router.post(
@@ -56,46 +79,60 @@ export default function Units({ units }: any) {
                 },
                 {
                     forceFormData: true,
+
                     onSuccess: () => {
                         setOpenCreate(false);
+
                         reset();
+
                         setIsEdit(false);
+
                         toast.success('Unit berhasil diupdate');
                     },
                 },
             );
-        } else {
-            post('/units', {
-                forceFormData: true,
-                onSuccess: () => {
-                    setOpenCreate(false);
-                    reset();
-                    toast.success('Unit berhasil ditambahkan');
-                },
-            });
+
+            return;
         }
+
+        post('/units', {
+            forceFormData: true,
+
+            onSuccess: () => {
+                setOpenCreate(false);
+
+                reset();
+
+                toast.success('Unit berhasil ditambahkan');
+            },
+        });
     };
 
+    // ================= VIEW =================
     const handleView = (unit: any) => {
         setSelectedUnit(unit);
+
         setOpenDetail(true);
     };
 
+    // ================= EDIT =================
     const handleEdit = (unit: any) => {
         setIsEdit(true);
+
         setSelectedUnit(unit);
 
         setData({
-            name: unit.name,
-            specification: unit.specification,
-            dimension: unit.dimension,
-            description: unit.description,
+            name: unit.name || '',
+            specification: unit.specification || '',
+            dimension: unit.dimension || '',
+            description: unit.description || '',
             image: null,
         });
 
         setOpenCreate(true);
     };
 
+    // ================= DELETE =================
     const handleDelete = () => {
         if (!selectedId) {
             return;
@@ -104,33 +141,48 @@ export default function Units({ units }: any) {
         router.delete(`/units/${selectedId}`, {
             onSuccess: () => {
                 setOpenDelete(false);
+
                 toast.success('Unit berhasil dihapus');
             },
         });
     };
 
+    // ================= CLOSE MODAL =================
     const handleCloseModal = () => {
         setOpenCreate(false);
+
         setIsEdit(false);
+
         reset();
     };
 
+    // ================= CONFIRM DELETE =================
     const confirmDelete = (id: number) => {
         setSelectedId(id);
+
         setOpenDelete(true);
     };
 
-    // search
+    // ================= SEARCH =================
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setLoading(true);
 
         const delay = setTimeout(() => {
-            router.get('/units', search ? { search } : {}, {
-                preserveState: true,
-                replace: true,
-                onFinish: () => setLoading(false),
-            });
+            router.get(
+                '/units',
+                search
+                    ? {
+                        search,
+                    }
+                    : {},
+                {
+                    preserveState: true,
+                    replace: true,
+
+                    onFinish: () => setLoading(false),
+                },
+            );
         }, 300);
 
         return () => clearTimeout(delay);
@@ -139,15 +191,24 @@ export default function Units({ units }: any) {
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Escape') {
             setSearch('');
-            router.get('/units', {}, { preserveState: true });
+
+            router.get(
+                '/units',
+                {},
+                {
+                    preserveState: true,
+                    replace: true,
+                },
+            );
         }
     };
 
     return (
         <>
             <Head title="Units" />
+
             <div className="flex flex-col gap-4 p-6">
-                {/* HEADER */}
+                {/* ================= HEADER ================= */}
                 <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:justify-between">
                     <Button
                         onClick={() => setOpenCreate(true)}
@@ -157,6 +218,7 @@ export default function Units({ units }: any) {
                         Tambah Unit
                     </Button>
 
+                    {/* SEARCH */}
                     <div className="relative">
                         <Search
                             className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
@@ -164,7 +226,7 @@ export default function Units({ units }: any) {
                         />
 
                         <Input
-                            placeholder="Search..."
+                            placeholder="Cari unit..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             onKeyDown={handleKeyDown}
@@ -181,109 +243,132 @@ export default function Units({ units }: any) {
 
                 <Separator />
 
-                {/* table */}
+                {/* ================= TABLE ================= */}
                 <div className="w-full overflow-x-auto rounded-lg border p-6">
                     <table className="min-w-full text-center">
-                        <tbody className="">
-                            {units?.map((unit: any, index: number) => (
-                                <tr
-                                    key={unit.id}
-                                    onClick={() => handleView(unit)}
-                                    className={`cursor-pointer transition hover:bg-secondary ${
-                                        index % 2 === 0
-                                            ? 'bg-white'
-                                            : 'bg-muted/80'
-                                    }`}
-                                >
-                                    {/* UNIT */}
-                                    <td className="flex items-center gap-8 p-4">
-                                        <img
-                                            src={`/storage/${unit.image}`}
-                                            alt={unit.name}
-                                            className="h-16 w-16 rounded-lg object-cover"
-                                        />
+                        <tbody>
+                            {units?.length ? (
+                                units.map((unit: any, index: number) => (
+                                    <tr
+                                        key={unit.id}
+                                        onClick={() => handleView(unit)}
+                                        className={`cursor-pointer transition hover:bg-secondary ${
+                                            index % 2 === 0
+                                                ? 'bg-white'
+                                                : 'bg-muted/80'
+                                        }`}
+                                    >
+                                        {/* UNIT */}
+                                        <td className="flex items-center gap-8 p-4">
+                                            {unit.image ? (
+                                                <img
+                                                    src={`/storage/${unit.image}`}
+                                                    alt={unit.name}
+                                                    className="h-16 w-16 rounded-lg object-cover"
+                                                />
+                                            ) : (
+                                                <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-muted">
+                                                    <ImageOff className="h-6 w-6 text-muted-foreground" />
+                                                </div>
+                                            )}
 
-                                        <div className="text-start">
-                                            <p className="font-bold">
-                                                {unit.name}
-                                            </p>
-                                            <p className="text-sm text-muted-foreground">
-                                                {unit.specification}
-                                            </p>
-                                        </div>
-                                    </td>
+                                            <div className="text-start">
+                                                <p className="font-bold">
+                                                    {unit.name || '-'}
+                                                </p>
 
-                                    {/* DESKRIPSI */}
-                                    <td className="max-w-sm truncate p-3 text-sm whitespace-nowrap sm:table-cell">
-                                        {unit.description}
-                                    </td>
+                                                <p className="text-sm text-muted-foreground">
+                                                    {unit.specification ||
+                                                        'Tidak ada spesifikasi'}
+                                                </p>
+                                            </div>
+                                        </td>
 
-                                    {/* DIMENSI */}
-                                    <td className="p-3 text-center">
-                                        <span className="rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-700">
-                                            {unit.dimension}
-                                        </span>
-                                    </td>
+                                        {/* DESKRIPSI */}
+                                        <td className="max-w-sm truncate p-3 text-sm whitespace-nowrap sm:table-cell">
+                                            {unit.description ||
+                                                'Tidak ada deskripsi'}
+                                        </td>
 
-                                    {/* ACTION */}
-                                    <td className="text-right">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button
-                                                    variant="ghost"
-                                                    className="cursor-pointer"
+                                        {/* DIMENSI */}
+                                        <td className="p-3 text-center">
+                                            <span className="rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-700">
+                                                {unit.dimension || '-'}
+                                            </span>
+                                        </td>
+
+                                        {/* ACTION */}
+                                        <td className="text-right">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button
+                                                        variant="ghost"
+                                                        className="cursor-pointer"
+                                                        onClick={(e) =>
+                                                            e.stopPropagation()
+                                                        }
+                                                    >
+                                                        <MoreVertical
+                                                            size={16}
+                                                        />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+
+                                                <DropdownMenuContent
+                                                    align="end"
                                                     onClick={(e) =>
                                                         e.stopPropagation()
                                                     }
                                                 >
-                                                    <MoreVertical size={16} />
-                                                </Button>
-                                            </DropdownMenuTrigger>
+                                                    <DropdownMenuItem
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
 
-                                            <DropdownMenuContent
-                                                align="end"
-                                                onClick={(e) =>
-                                                    e.stopPropagation()
-                                                }
-                                            >
-                                                <DropdownMenuItem
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleEdit(unit);
-                                                    }}
-                                                    className="cursor-pointer text-yellow-500 focus:text-yellow-500"
-                                                >
-                                                    <Pencil
-                                                        size={16}
-                                                        className="mr-2 text-yellow-500"
-                                                    />
-                                                    Edit
-                                                </DropdownMenuItem>
+                                                            handleEdit(unit);
+                                                        }}
+                                                        className="cursor-pointer text-yellow-500 focus:text-yellow-500"
+                                                    >
+                                                        <Pencil
+                                                            size={16}
+                                                            className="mr-2 text-yellow-500"
+                                                        />
+                                                        Edit
+                                                    </DropdownMenuItem>
 
-                                                <DropdownMenuItem
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        confirmDelete(unit.id);
-                                                    }}
-                                                    className="cursor-pointer text-red-500 focus:text-red-500"
-                                                >
-                                                    <Trash2
-                                                        size={16}
-                                                        className="mr-2 text-red-500"
-                                                    />
-                                                    Hapus
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                                                    <DropdownMenuItem
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+
+                                                            confirmDelete(
+                                                                unit.id,
+                                                            );
+                                                        }}
+                                                        className="cursor-pointer text-red-500 focus:text-red-500"
+                                                    >
+                                                        <Trash2
+                                                            size={16}
+                                                            className="mr-2 text-red-500"
+                                                        />
+                                                        Hapus
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td className="py-10 text-center text-muted-foreground">
+                                        Belum ada data unit IPAL
                                     </td>
                                 </tr>
-                            ))}
+                            )}
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            {/* modal create */}
+            {/* ================= MODAL CREATE ================= */}
             <ModalCreate
                 open={openCreate}
                 setOpen={handleCloseModal}
@@ -293,12 +378,14 @@ export default function Units({ units }: any) {
             >
                 <Field>
                     <FieldLabel htmlFor="Name">Nama</FieldLabel>
+
                     <Input
                         placeholder="Nama"
                         value={data.name}
                         onChange={(e) => setData('name', e.target.value)}
                         className="mb-2"
                     />
+
                     {errors.name && (
                         <p className="text-xs text-red-500">{errors.name}</p>
                     )}
@@ -306,6 +393,7 @@ export default function Units({ units }: any) {
 
                 <Field>
                     <FieldLabel htmlFor="Specification">Spesifikasi</FieldLabel>
+
                     <Input
                         placeholder="Spesifikasi"
                         value={data.specification}
@@ -314,6 +402,7 @@ export default function Units({ units }: any) {
                         }
                         className="mb-2"
                     />
+
                     {errors.specification && (
                         <p className="text-xs text-red-500">
                             {errors.specification}
@@ -323,12 +412,14 @@ export default function Units({ units }: any) {
 
                 <Field>
                     <FieldLabel htmlFor="Dimension">Dimensi</FieldLabel>
+
                     <Input
                         placeholder="Dimensi"
                         value={data.dimension}
                         onChange={(e) => setData('dimension', e.target.value)}
                         className="mb-2"
                     />
+
                     {errors.dimension && (
                         <p className="text-xs text-red-500">
                             {errors.dimension}
@@ -338,12 +429,14 @@ export default function Units({ units }: any) {
 
                 <Field>
                     <FieldLabel htmlFor="Description">Deskripsi</FieldLabel>
+
                     <Textarea
                         placeholder="Deskripsi"
                         value={data.description}
                         onChange={(e) => setData('description', e.target.value)}
                         className="mb-2"
                     />
+
                     {errors.description && (
                         <p className="text-xs text-red-500">
                             {errors.description}
@@ -352,7 +445,8 @@ export default function Units({ units }: any) {
                 </Field>
 
                 <Field>
-                    <FieldLabel htmlFor="picture">Picture</FieldLabel>
+                    <FieldLabel htmlFor="picture">Gambar</FieldLabel>
+
                     {(isEdit && selectedUnit?.image) || data.image ? (
                         <div>
                             <img
@@ -361,63 +455,82 @@ export default function Units({ units }: any) {
                                         ? URL.createObjectURL(data.image)
                                         : `/storage/${selectedUnit.image}`
                                 }
-                                alt={data.name}
+                                alt={data.name || 'Preview'}
                                 className="mt-2 h-25 w-25 rounded-lg object-cover"
                             />
                         </div>
-                    ) : null}
+                    ) : (
+                        <div className="mb-2 text-sm text-muted-foreground">
+                            Belum ada gambar
+                        </div>
+                    )}
 
                     <Input
                         type="file"
                         className="cursor-pointer"
                         onChange={(e) => {
                             const file = e.target.files?.[0] ?? null;
+
                             setData('image', file);
                         }}
                     />
+
+                    {errors.image && (
+                        <p className="text-xs text-red-500">{errors.image}</p>
+                    )}
                 </Field>
             </ModalCreate>
 
-            {/* modal detail */}
+            {/* ================= MODAL DETAIL ================= */}
             <ModalDetail
                 open={openDetail}
                 setOpen={setOpenDetail}
                 title="Detail Unit"
             >
-                {selectedUnit && (
+                {selectedUnit ? (
                     <>
                         <div className="flex justify-center p-2">
-                            <img
-                                src={`/storage/${selectedUnit.image}`}
-                                alt={selectedUnit.name}
-                                className="mt-2 h-50 w-50 rounded-full object-cover"
-                            />
+                            {selectedUnit.image ? (
+                                <img
+                                    src={`/storage/${selectedUnit.image}`}
+                                    alt={selectedUnit.name}
+                                    className="mt-2 h-50 w-50 rounded-full object-cover"
+                                />
+                            ) : (
+                                <div className="flex h-50 w-50 items-center justify-center rounded-full bg-muted">
+                                    <ImageOff className="h-10 w-10 text-muted-foreground" />
+                                </div>
+                            )}
                         </div>
 
                         <div>
                             <span className="font-semibold">Nama:</span>{' '}
-                            {selectedUnit.name}
+                            {selectedUnit.name || '-'}
                         </div>
 
                         <div>
                             <span className="font-semibold">Spesifikasi:</span>{' '}
-                            {selectedUnit.specification}
+                            {selectedUnit.specification || '-'}
                         </div>
 
                         <div>
                             <span className="font-semibold">Dimensi:</span>{' '}
-                            {selectedUnit.dimension}
+                            {selectedUnit.dimension || '-'}
                         </div>
 
                         <div>
                             <span className="font-semibold">Deskripsi:</span>{' '}
-                            {selectedUnit.description}
+                            {selectedUnit.description || 'Tidak ada deskripsi'}
                         </div>
                     </>
+                ) : (
+                    <div className="text-sm text-muted-foreground">
+                        Data unit tidak tersedia
+                    </div>
                 )}
             </ModalDetail>
 
-            {/* modal delete */}
+            {/* ================= MODAL DELETE ================= */}
             <ModalConfirmDelete
                 open={openDelete}
                 setOpen={setOpenDelete}

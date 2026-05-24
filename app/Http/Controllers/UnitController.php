@@ -1,8 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-use Illuminate\Support\Facades\Storage;
 
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Models\Unit;
 use Inertia\Inertia;
@@ -14,17 +14,28 @@ class UnitController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Unit::query();
+        $projectId = session('selected_project_id');
 
-    if ($request->filled('search')) {
-    $query->where(function ($q) use ($request) {
-        $q->where('name', 'like', '%' . $request->search . '%');
-    });
-}
+        $query = Unit::where(
+            'project_id',
+            $projectId
+        );
 
-    return Inertia::render('admin/units/Index', [
-        'units' => $query->latest()->get()
-    ]);
+        if ($request->filled('search')) {
+
+            $query->where(function ($q) use ($request) {
+
+                $q->where(
+                    'name',
+                    'like',
+                    '%' . $request->search . '%'
+                );
+            });
+        }
+
+        return Inertia::render('admin/units/Index', [
+            'units' => $query->latest()->get()
+        ]);
     }
 
     /**
@@ -51,10 +62,14 @@ class UnitController extends Controller
         $path = null;
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('units', 'public');
+
+            $path = $request
+                ->file('image')
+                ->store('units', 'public');
         }
 
         Unit::create([
+            'project_id' => session('selected_project_id'),
             'name' => $validated['name'],
             'specification' => $validated['specification'],
             'dimension' => $validated['dimension'],
@@ -62,7 +77,12 @@ class UnitController extends Controller
             'image' => $path,
         ]);
 
-        return redirect()->back()->with('success', 'Unit berhasil ditambahkan');
+        return redirect()
+            ->back()
+            ->with(
+                'success',
+                'Unit berhasil ditambahkan'
+            );
     }
 
     /**
@@ -86,6 +106,13 @@ class UnitController extends Controller
      */
     public function update(Request $request, Unit $unit)
     {
+        if (
+            $unit->project_id !==
+            session('selected_project_id')
+        ) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'specification' => 'required|string|max:255',
@@ -95,13 +122,26 @@ class UnitController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('units', 'public');
+
+            if ($unit->image) {
+
+                Storage::disk('public')
+                    ->delete($unit->image);
+            }
+
+            $path = $request
+                ->file('image')
+                ->store('units', 'public');
+
             $validated['image'] = $path;
         }
 
         $unit->update($validated);
 
-        return back()->with('success', 'Unit berhasil diupdate');
+        return back()->with(
+            'success',
+            'Unit berhasil diupdate'
+        );
     }
 
     /**
@@ -109,8 +149,23 @@ class UnitController extends Controller
      */
     public function destroy($id)
     {
-        $unit = Unit::findOrFail($id);
+        $unit = Unit::where(
+                'project_id',
+                session('selected_project_id')
+            )
+            ->findOrFail($id);
+
+        if ($unit->image) {
+
+            Storage::disk('public')
+                ->delete($unit->image);
+        }
+
         $unit->delete();
-        return back()->with('success', 'Unit berhasil dihapus');
+
+        return back()->with(
+            'success',
+            'Unit berhasil dihapus'
+        );
     }
 }

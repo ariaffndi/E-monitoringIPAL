@@ -45,4 +45,9 @@ class User extends Authenticatable
     {
         return $this->role === 'operator';
     }
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
 }

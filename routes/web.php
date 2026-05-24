@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\WaterParameterController;
@@ -9,24 +10,100 @@ use App\Http\Controllers\OperationalReportController;
 use App\Http\Controllers\UnitTestController;
 use App\Http\Controllers\WaterTestController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProjectController;
 
-//Route Guest
+/*
+|--------------------------------------------------------------------------
+| ROOT
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/', function () {
-    return Auth::check()
-        ? redirect('/dashboard')
-        : redirect('/login');
+
+    if (!Auth::check()) {
+        return redirect('/login');
+    }
+
+    return Auth::user()->role === 'admin'
+        ? redirect('/projects')
+        : redirect('/dashboard');
 });
 
-//Route Dashboard based on role
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth'])
-    ->name('dashboard');
+/*
+|--------------------------------------------------------------------------
+| REDIRECT AFTER LOGIN
+|--------------------------------------------------------------------------
+*/
 
+Route::get('/redirect-after-login', function () {
 
-//Route Admin
+    // ADMIN
+    if (Auth::user()->role === 'admin') {
+
+        return redirect('/projects');
+    }
+
+    // OPERATOR
+    session([
+        'selected_project_id' =>
+            Auth::user()->project_id
+    ]);
+
+    return redirect('/dashboard');
+
+})->middleware('auth');
+
+/*
+|--------------------------------------------------------------------------
+| PROJECTS (ADMIN ONLY)
+|--------------------------------------------------------------------------
+| Tidak perlu project.selected
+*/
+
 Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::resource('projects', ProjectController::class);
     
-    // RECAP
+    Route::post(
+        '/projects/{project}/select',
+        [ProjectController::class, 'select']
+    )->name('projects.select');
+
+    Route::post(
+        '/projects/leave',
+        [ProjectController::class, 'leave']
+    )->name('projects.leave');
+});
+
+/*
+|--------------------------------------------------------------------------
+| DASHBOARD
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth'])->group(function () {
+
+    Route::get(
+        '/dashboard',
+        [DashboardController::class, 'index']
+    )
+    ->middleware('project.selected')
+    ->name('dashboard');
+});
+
+/*
+|--------------------------------------------------------------------------
+| OPERATIONAL REPORTS
+|--------------------------------------------------------------------------
+*/
+
+/* RECAP (ADMIN) */
+
+Route::middleware([
+    'auth',
+    'role:admin',
+    'project.selected'
+])->group(function () {
+
     Route::get(
         '/operational-reports/recap',
         [OperationalReportController::class, 'recap']
@@ -38,47 +115,97 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     )->name('operational-reports.recap.print');
 });
 
+/* OPERATOR & RESOURCE */
 
-//Route Operational Report (Gabungan)
-Route::middleware(['auth'])->group(function () {
-    Route::get('/operational-reports/history', [OperationalReportController::class, 'history']);
-    Route::get('/operational-reports/history/{id}', [OperationalReportController::class, 'historyShow']);
-    
-    Route::resource('operational-reports', OperationalReportController::class)
-        ->only(['index', 'show', 'create', 'store']);
+Route::middleware([
+    'auth',
+    'project.selected'
+])->group(function () {
+
+    // HISTORY
+    Route::get(
+        '/operational-reports/history',
+        [OperationalReportController::class, 'history']
+    );
+
+    Route::get(
+        '/operational-reports/history/{id}',
+        [OperationalReportController::class, 'historyShow']
+    );
+
+    // RESOURCE
+    Route::resource(
+        'operational-reports',
+        OperationalReportController::class
+    )->only([
+        'index',
+        'show',
+        'create',
+        'store'
+    ]);
 });
 
-//Route Admin
-Route::middleware(['auth', 'role:admin'])->group(function () {
+/*
+|--------------------------------------------------------------------------
+| PRINT & DETAIL (ADMIN)
+|--------------------------------------------------------------------------
+*/
 
-    // DETAIL PRINT
+Route::middleware([
+    'auth',
+    'role:admin',
+    'project.selected'
+])->group(function () {
+
     Route::get(
         '/operational-reports/{report}/print',
         [OperationalReportController::class, 'print']
     )->name('operational-reports.print');
 
-    // DETAIL
     Route::get(
         '/operational-reports/{id}',
         [OperationalReportController::class, 'show']
     )->name('operational-reports.show');
 });
 
-//Route Operator
-Route::middleware(['auth', 'role:operator'])->group(function () {
+/*
+|--------------------------------------------------------------------------
+| OPERATOR ONLY
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware([
+    'auth',
+    'role:operator'
+])->group(function () {
     Route::resource('unit-tests', UnitTestController::class);
     Route::resource('water-tests', WaterTestController::class);
 });
 
+/*
+|--------------------------------------------------------------------------
+| ADMIN FEATURES
+|--------------------------------------------------------------------------
+*/
 
-//Route Admin
-Route::middleware(['auth', 'role:admin'])->group(function () {
+Route::middleware([
+    'auth',
+    'role:admin',
+    'project.selected'
+])->group(function () {
+
     Route::resource('users', UserController::class);
     Route::resource('units', UnitController::class);
-    Route::resource('water-parameters', WaterParameterController::class);
+    Route::resource(
+        'water-parameters',
+        WaterParameterController::class
+    );
 });
 
+/*
+|--------------------------------------------------------------------------
+| SETTINGS
+|--------------------------------------------------------------------------
+*/
 
-
-
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';
