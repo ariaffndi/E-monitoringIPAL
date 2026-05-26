@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -44,6 +45,7 @@ class UserController extends Controller
                     'name',
                     'email',
                     'role',
+                    'image',
                     'project_id'
                 )
                 ->get()
@@ -68,7 +70,14 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email',
             'role' => 'required|in:admin,operator',
             'password' => 'required|min:6',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
+        $imagePath = null;
+
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')
+                ->store('users', 'public');
+        }
 
         User::create([
             'project_id' => session('selected_project_id'),
@@ -76,6 +85,7 @@ class UserController extends Controller
             'email' => $validated['email'],
             'role' => $validated['role'],
             'password' => Hash::make($validated['password']),
+            'image' => $imagePath,
         ]);
 
         return redirect()
@@ -117,7 +127,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'role' => 'required|in:admin,operator',
-            'password' => 'nullable|min:6',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $updateData = [
@@ -126,11 +136,18 @@ class UserController extends Controller
             'role' => $validated['role'],
         ];
 
-        if (!empty($validated['password'])) {
+        // ================= IMAGE =================
+        if ($request->hasFile('image')) {
 
-            $updateData['password'] = Hash::make(
-                $validated['password']
-            );
+            // hapus foto lama
+            if ($user->image && Storage::disk('public')->exists($user->image)) {
+
+                Storage::disk('public')->delete($user->image);
+            }
+
+            $updateData['image'] = $request
+                ->file('image')
+                ->store('users', 'public');
         }
 
         $user->update($updateData);

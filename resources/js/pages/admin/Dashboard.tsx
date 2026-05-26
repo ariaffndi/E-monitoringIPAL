@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { router } from '@inertiajs/react';
+import { Calendar1} from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
     Area,
@@ -25,7 +26,6 @@ import {
 import type { ChartConfig } from '@/components/ui/chart';
 
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-
 import {
     Select,
     SelectContent,
@@ -33,6 +33,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 
 import { dashboard } from '@/routes';
 
@@ -138,335 +139,375 @@ export default function Dashboard({
         <>
             <Head title="Dashboard Admin" />
 
-            {/* ================= MAIN LAYOUT ================= */}
-            <div className="grid gap-4 p-4 lg:grid-cols-10">
-                {/* ================= LEFT SIDE ================= */}
-                <div className="min-w-0 space-y-4 lg:col-span-7">
-                    {/* ================= UNIT ================= */}
-                    <Card>
-                        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <CardTitle>Kondisi Unit IPAL</CardTitle>
+            {/* ================= HEADER ================= */}
+            <div className="flex flex-col gap-4 p-6">
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                        <h1 className="text-2xl font-semibold tracking-tight">
+                            Operational Dashboard
+                        </h1>
 
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                className="cursor-pointer text-xs"
-                                onClick={() => router.visit('/units')}
-                            >
-                                Lihat Unit
-                            </Button>
-                        </CardHeader>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            Realtime Monitoring condition and performance of Waste Water Treatment Plant system.
+                        </p>
+                    </div>
 
-                        <CardContent>
-                            {units.length ? (
-                                <ScrollArea className="w-full whitespace-nowrap">
-                                    <div className="flex gap-4 pb-3">
-                                        {units.map((unit) => (
-                                            <div
-                                                key={unit.id}
-                                                className="min-w-[170px] rounded-xl border bg-muted/30 p-4"
-                                            >
-                                                <p className="mb-3 line-clamp-2 font-semibold">
-                                                    {unit.name}
-                                                </p>
-
-                                                <Badge
-                                                    className={getConditionBadge(
-                                                        unit.latest_test
-                                                            ?.condition ?? '-',
-                                                    )}
-                                                >
-                                                    {unit.latest_test
-                                                        ?.condition ??
-                                                        'Belum ada pengecekan'}
-                                                </Badge>
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    <ScrollBar orientation="horizontal" />
-                                </ScrollArea>
-                            ) : (
-                                <div className="flex h-[120px] items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
-                                    Belum ada unit pada project ini
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-
-                    {/* ================= CHART ================= */}
-                    <Card>
-                        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                            <CardTitle>Water Test</CardTitle>
-
-                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                                {/* LEGEND */}
-                                <div className="flex items-center gap-4 text-sm">
-                                    <div className="flex items-center gap-2">
-                                        <div className="h-3 w-3 rounded-sm bg-yellow-400" />
-                                        <span>Inlet</span>
-                                    </div>
-
-                                    <div className="flex items-center gap-2">
-                                        <div className="h-3 w-3 rounded-sm bg-green-500" />
-                                        <span>Outlet</span>
-                                    </div>
-                                </div>
-
-                                {/* SELECT PARAMETER */}
-                                {waterParameters.length ? (
-                                    <Select
-                                        value={parameter}
-                                        onValueChange={(value) => {
-                                            setParameter(value);
-
-                                            router.get(
-                                                '/dashboard',
-                                                {
-                                                    parameter: value,
-                                                },
-                                                {
-                                                    preserveState: true,
-                                                    replace: true,
-                                                },
-                                            );
-                                        }}
-                                    >
-                                        <SelectTrigger className="w-full sm:w-[140px]">
-                                            <SelectValue placeholder="Parameter" />
-                                        </SelectTrigger>
-
-                                        <SelectContent>
-                                            {waterParameters.map(
-                                                (parameter) => (
-                                                    <SelectItem
-                                                        key={parameter.id}
-                                                        value={String(
-                                                            parameter.id,
-                                                        )}
-                                                    >
-                                                        {parameter.name}
-                                                    </SelectItem>
-                                                ),
-                                            )}
-                                        </SelectContent>
-                                    </Select>
-                                ) : null}
-                            </div>
-                        </CardHeader>
-
-                        <CardContent>
-                            {chartData.length ? (
-                                <div className="h-[250px] w-full sm:h-[320px]">
-                                    <ChartContainer
-                                        config={chartConfig}
-                                        className="h-full w-full"
-                                    >
-                                        <ResponsiveContainer
-                                            width="100%"
-                                            height="100%"
-                                        >
-                                            <AreaChart
-                                                data={chartData}
-                                                margin={{
-                                                    left: 12,
-                                                    right: 12,
-                                                    top: 10,
-                                                }}
-                                            >
-                                                <defs>
-                                                    <linearGradient
-                                                        id="fillInlet"
-                                                        x1="0"
-                                                        y1="0"
-                                                        x2="0"
-                                                        y2="1"
-                                                    >
-                                                        <stop
-                                                            offset="5%"
-                                                            stopColor="#facc15"
-                                                            stopOpacity={0.5}
-                                                        />
-
-                                                        <stop
-                                                            offset="95%"
-                                                            stopColor="#facc15"
-                                                            stopOpacity={0.05}
-                                                        />
-                                                    </linearGradient>
-
-                                                    <linearGradient
-                                                        id="fillOutlet"
-                                                        x1="0"
-                                                        y1="0"
-                                                        x2="0"
-                                                        y2="1"
-                                                    >
-                                                        <stop
-                                                            offset="5%"
-                                                            stopColor="#22c55e"
-                                                            stopOpacity={0.5}
-                                                        />
-
-                                                        <stop
-                                                            offset="95%"
-                                                            stopColor="#22c55e"
-                                                            stopOpacity={0.05}
-                                                        />
-                                                    </linearGradient>
-                                                </defs>
-
-                                                <CartesianGrid
-                                                    vertical={false}
-                                                />
-
-                                                <XAxis
-                                                    dataKey="date"
-                                                    tickLine={false}
-                                                    axisLine={false}
-                                                    tickMargin={8}
-                                                />
-
-                                                <YAxis
-                                                    tickLine={false}
-                                                    axisLine={false}
-                                                    width={40}
-                                                    domain={yDomain}
-                                                />
-
-                                                <ChartTooltip
-                                                    cursor={false}
-                                                    content={
-                                                        <ChartTooltipContent />
-                                                    }
-                                                />
-
-                                                {/* INLET */}
-                                                <Area
-                                                    type="natural"
-                                                    dataKey="inlet"
-                                                    stroke="#facc15"
-                                                    fill="url(#fillInlet)"
-                                                    fillOpacity={1}
-                                                    strokeWidth={2}
-                                                />
-
-                                                {/* OUTLET */}
-                                                <Area
-                                                    type="natural"
-                                                    dataKey="outlet"
-                                                    stroke="#22c55e"
-                                                    fill="url(#fillOutlet)"
-                                                    fillOpacity={1}
-                                                    strokeWidth={2}
-                                                />
-                                            </AreaChart>
-                                        </ResponsiveContainer>
-                                    </ChartContainer>
-                                </div>
-                            ) : (
-                                <div className="flex h-[250px] items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
-                                    Belum ada data water test
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-
-                    {/* ================= NOTES ================= */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Catatan</CardTitle>
-                        </CardHeader>
-
-                        <CardContent className="space-y-3">
-                            {notes.length ? (
-                                notes.map((item) => (
-                                    <div
-                                        key={item.id}
-                                        className="rounded-lg border p-3 text-sm"
-                                    >
-                                        {item.note}
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-                                    Belum ada catatan operasional
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
+                    <div className="">
+                        <Badge variant="outline" className="p-2">
+                            <Calendar1 size={16} className="mr-2" />
+                            {new Date()
+                                .toLocaleDateString('id-ID', {
+                                    day: '2-digit',
+                                    month: 'short',
+                                    year: 'numeric',
+                                })
+                                .replace('.', '')
+                                .replace(/\b\w/g, (char) => char.toUpperCase())}
+                        </Badge>
+                    </div>
                 </div>
 
-                {/* ================= RIGHT SIDE ================= */}
-                <div className="flex min-w-0 flex-col gap-4 lg:col-span-3">
-                    {/* ================= CALENDAR ================= */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Kalender</CardTitle>
-                        </CardHeader>
+                <Separator />
 
-                        <CardContent className="flex justify-center">
-                            <Calendar
-                                mode="single"
-                                selected={new Date()}
-                                className="w-full"
-                                modifiers={{
-                                    hasReport: reportDates,
-                                }}
-                                modifiersClassNames={{
-                                    hasReport:
-                                        'bg-blue-50 text-blue-700 border border-blue-200 rounded-lg',
-                                }}
-                            />
-                        </CardContent>
-                    </Card>
+                {/* ================= MAIN LAYOUT ================= */}
+                <div className="grid gap-4 lg:grid-cols-10">
+                    {/* ================= LEFT SIDE ================= */}
+                    <div className="min-w-0 space-y-4 lg:col-span-7">
+                        {/* ================= UNIT ================= */}
+                        <Card>
+                            <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <CardTitle>Kondisi Unit IPAL</CardTitle>
 
-                    {/* ================= OPERATORS ================= */}
-                    <Card className="flex-1">
-                        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <CardTitle>Operator</CardTitle>
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="cursor-pointer text-xs"
+                                    onClick={() => router.visit('/units')}
+                                >
+                                    Lihat Unit
+                                </Button>
+                            </CardHeader>
 
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                className="cursor-pointer text-xs"
-                                onClick={() => router.visit('/users')}
-                            >
-                                Lihat Semua
-                            </Button>
-                        </CardHeader>
+                            <CardContent>
+                                {units.length ? (
+                                    <ScrollArea className="w-full whitespace-nowrap">
+                                        <div className="flex gap-4 pb-3">
+                                            {units.map((unit) => (
+                                                <div
+                                                    key={unit.id}
+                                                    className="min-w-[170px] rounded-xl border bg-muted/30 p-4"
+                                                >
+                                                    <p className="mb-3 line-clamp-2 font-semibold">
+                                                        {unit.name}
+                                                    </p>
 
-                        <CardContent className="space-y-4">
-                            {operators.length ? (
-                                operators.map((operator) => (
-                                    <div
-                                        key={operator.id}
-                                        className="flex items-center gap-3 rounded-lg border p-2 sm:p-3"
-                                    >
-                                        <Avatar>
-                                            <AvatarFallback>
-                                                {operator.name.charAt(0)}
-                                            </AvatarFallback>
-                                        </Avatar>
+                                                    <Badge
+                                                        className={getConditionBadge(
+                                                            unit.latest_test
+                                                                ?.condition ??
+                                                                '-',
+                                                        )}
+                                                    >
+                                                        {unit.latest_test
+                                                            ?.condition ??
+                                                            'Belum ada pengecekan'}
+                                                    </Badge>
+                                                </div>
+                                            ))}
+                                        </div>
 
-                                        <div className="min-w-0">
-                                            <p className="truncate text-sm font-medium">
-                                                {operator.name}
-                                            </p>
+                                        <ScrollBar orientation="horizontal" />
+                                    </ScrollArea>
+                                ) : (
+                                    <div className="flex h-[120px] items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
+                                        Belum ada unit pada project ini
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
 
-                                            <p className="truncate text-xs text-muted-foreground">
-                                                {operator.email}
-                                            </p>
+                        {/* ================= CHART ================= */}
+                        <Card>
+                            <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                <CardTitle>Water Test</CardTitle>
+
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                                    {/* LEGEND */}
+                                    <div className="flex items-center gap-4 text-sm">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-3 w-3 rounded-sm bg-yellow-400" />
+                                            <span>Inlet</span>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-3 w-3 rounded-sm bg-green-500" />
+                                            <span>Outlet</span>
                                         </div>
                                     </div>
-                                ))
-                            ) : (
-                                <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-                                    Belum ada operator pada project ini
+
+                                    {/* SELECT PARAMETER */}
+                                    {waterParameters.length ? (
+                                        <Select
+                                            value={parameter}
+                                            onValueChange={(value) => {
+                                                setParameter(value);
+
+                                                router.get(
+                                                    '/dashboard',
+                                                    {
+                                                        parameter: value,
+                                                    },
+                                                    {
+                                                        preserveState: true,
+                                                        replace: true,
+                                                    },
+                                                );
+                                            }}
+                                        >
+                                            <SelectTrigger className="w-full sm:w-[140px]">
+                                                <SelectValue placeholder="Parameter" />
+                                            </SelectTrigger>
+
+                                            <SelectContent>
+                                                {waterParameters.map(
+                                                    (parameter) => (
+                                                        <SelectItem
+                                                            key={parameter.id}
+                                                            value={String(
+                                                                parameter.id,
+                                                            )}
+                                                        >
+                                                            {parameter.name}
+                                                        </SelectItem>
+                                                    ),
+                                                )}
+                                            </SelectContent>
+                                        </Select>
+                                    ) : null}
                                 </div>
-                            )}
-                        </CardContent>
-                    </Card>
+                            </CardHeader>
+
+                            <CardContent>
+                                {chartData.length ? (
+                                    <div className="h-[250px] w-full sm:h-[320px]">
+                                        <ChartContainer
+                                            config={chartConfig}
+                                            className="h-full w-full"
+                                        >
+                                            <ResponsiveContainer
+                                                width="100%"
+                                                height="100%"
+                                            >
+                                                <AreaChart
+                                                    data={chartData}
+                                                    margin={{
+                                                        left: 12,
+                                                        right: 12,
+                                                        top: 10,
+                                                    }}
+                                                >
+                                                    <defs>
+                                                        <linearGradient
+                                                            id="fillInlet"
+                                                            x1="0"
+                                                            y1="0"
+                                                            x2="0"
+                                                            y2="1"
+                                                        >
+                                                            <stop
+                                                                offset="5%"
+                                                                stopColor="#facc15"
+                                                                stopOpacity={
+                                                                    0.5
+                                                                }
+                                                            />
+
+                                                            <stop
+                                                                offset="95%"
+                                                                stopColor="#facc15"
+                                                                stopOpacity={
+                                                                    0.05
+                                                                }
+                                                            />
+                                                        </linearGradient>
+
+                                                        <linearGradient
+                                                            id="fillOutlet"
+                                                            x1="0"
+                                                            y1="0"
+                                                            x2="0"
+                                                            y2="1"
+                                                        >
+                                                            <stop
+                                                                offset="5%"
+                                                                stopColor="#22c55e"
+                                                                stopOpacity={
+                                                                    0.5
+                                                                }
+                                                            />
+
+                                                            <stop
+                                                                offset="95%"
+                                                                stopColor="#22c55e"
+                                                                stopOpacity={
+                                                                    0.05
+                                                                }
+                                                            />
+                                                        </linearGradient>
+                                                    </defs>
+
+                                                    <CartesianGrid
+                                                        vertical={false}
+                                                    />
+
+                                                    <XAxis
+                                                        dataKey="date"
+                                                        tickLine={false}
+                                                        axisLine={false}
+                                                        tickMargin={8}
+                                                    />
+
+                                                    <YAxis
+                                                        tickLine={false}
+                                                        axisLine={false}
+                                                        width={40}
+                                                        domain={yDomain}
+                                                    />
+
+                                                    <ChartTooltip
+                                                        cursor={false}
+                                                        content={
+                                                            <ChartTooltipContent />
+                                                        }
+                                                    />
+
+                                                    {/* INLET */}
+                                                    <Area
+                                                        type="natural"
+                                                        dataKey="inlet"
+                                                        stroke="#facc15"
+                                                        fill="url(#fillInlet)"
+                                                        fillOpacity={1}
+                                                        strokeWidth={2}
+                                                    />
+
+                                                    {/* OUTLET */}
+                                                    <Area
+                                                        type="natural"
+                                                        dataKey="outlet"
+                                                        stroke="#22c55e"
+                                                        fill="url(#fillOutlet)"
+                                                        fillOpacity={1}
+                                                        strokeWidth={2}
+                                                    />
+                                                </AreaChart>
+                                            </ResponsiveContainer>
+                                        </ChartContainer>
+                                    </div>
+                                ) : (
+                                    <div className="flex h-[250px] items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
+                                        Belum ada data water test
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+
+                        {/* ================= NOTES ================= */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Catatan</CardTitle>
+                            </CardHeader>
+
+                            <CardContent className="space-y-3">
+                                {notes.length ? (
+                                    notes.map((item) => (
+                                        <div
+                                            key={item.id}
+                                            className="rounded-lg border p-3 text-sm"
+                                        >
+                                            {item.note}
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
+                                        Belum ada catatan operasional
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* ================= RIGHT SIDE ================= */}
+                    <div className="flex min-w-0 flex-col gap-4 lg:col-span-3">
+                        {/* ================= CALENDAR ================= */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Kalender</CardTitle>
+                            </CardHeader>
+
+                            <CardContent className="flex justify-center">
+                                <Calendar
+                                    mode="single"
+                                    selected={new Date()}
+                                    className="w-full"
+                                    modifiers={{
+                                        hasReport: reportDates,
+                                    }}
+                                    modifiersClassNames={{
+                                        hasReport:
+                                            'bg-blue-50 text-blue-700 border border-blue-200 rounded-lg',
+                                    }}
+                                />
+                            </CardContent>
+                        </Card>
+
+                        {/* ================= OPERATORS ================= */}
+                        <Card className="flex-1">
+                            <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <CardTitle>Operator</CardTitle>
+
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="cursor-pointer text-xs"
+                                    onClick={() => router.visit('/users')}
+                                >
+                                    Lihat Semua
+                                </Button>
+                            </CardHeader>
+
+                            <CardContent className="space-y-4">
+                                {operators.length ? (
+                                    operators.map((operator) => (
+                                        <div
+                                            key={operator.id}
+                                            className="flex items-center gap-3 rounded-lg border p-2 sm:p-3"
+                                        >
+                                            <Avatar>
+                                                <AvatarFallback>
+                                                    {operator.name.charAt(0)}
+                                                </AvatarFallback>
+                                            </Avatar>
+
+                                            <div className="min-w-0">
+                                                <p className="truncate text-sm font-medium">
+                                                    {operator.name}
+                                                </p>
+
+                                                <p className="truncate text-xs text-muted-foreground">
+                                                    {operator.email}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
+                                        Belum ada operator pada project ini
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
             </div>
         </>
@@ -476,8 +517,11 @@ export default function Dashboard({
 Dashboard.layout = {
     breadcrumbs: [
         {
-            title: 'Dashboard',
+            title: 'Home',
             href: dashboard(),
+        },
+        {
+            title: 'Dashboard',
         },
     ],
 };

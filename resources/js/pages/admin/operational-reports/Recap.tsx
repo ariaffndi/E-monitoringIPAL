@@ -152,7 +152,15 @@ export default function Recap({
 Recap.layout = {
     breadcrumbs: [
         {
-            title: 'Rekap Laporan',
+            title: 'Home',
+            href: '/dashboard',
+        },
+        {
+            title: 'Laporan Operasional',
+            href: '/operational-reports',
+        },
+        {
+            title: 'Rekap Laporan Operasional',
         },
     ],
 };

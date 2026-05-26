@@ -9,15 +9,11 @@ import {
     ImageOff,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-
 import { toast } from 'sonner';
-
 import ModalConfirmDelete from '@/components/modal-confirm-delete';
 import ModalCreate from '@/components/modal-create';
 import ModalDetail from '@/components/modal-detail';
-
 import { Button } from '@/components/ui/button';
-
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -27,33 +23,21 @@ import {
 
 import { Field } from '@/components/ui/field';
 import { FieldLabel } from '@/components/ui/field';
-
 import { Input } from '@/components/ui/input';
-
 import { Separator } from '@/components/ui/separator';
-
 import { Spinner } from '@/components/ui/spinner';
-
 import { Textarea } from '@/components/ui/textarea';
 
 export default function Units({ units, filters }: any) {
     // ================= STATE =================
     const [openCreate, setOpenCreate] = useState(false);
-
     const [openDetail, setOpenDetail] = useState(false);
-
     const [selectedUnit, setSelectedUnit] = useState<any>(null);
-
     const [openDelete, setOpenDelete] = useState(false);
-
     const [selectedId, setSelectedId] = useState<number | null>(null);
-
     const [loading, setLoading] = useState(false);
-
     const [search, setSearch] = useState(filters?.search || '');
-
     const [isEdit, setIsEdit] = useState(false);
-
     const { data, setData, post, processing, errors, reset } = useForm<{
         name: string;
         specification: string;
@@ -209,35 +193,47 @@ export default function Units({ units, filters }: any) {
 
             <div className="flex flex-col gap-4 p-6">
                 {/* ================= HEADER ================= */}
-                <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:justify-between">
-                    <Button
-                        onClick={() => setOpenCreate(true)}
-                        className="mb-2 w-fit cursor-pointer bg-blue-600 hover:bg-blue-700 sm:mb-0"
-                    >
-                        <PlusCircle />
-                        Tambah Unit
-                    </Button>
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                        <h1 className="text-2xl font-semibold tracking-tight">
+                            Unit Management
+                        </h1>
 
-                    {/* SEARCH */}
-                    <div className="relative">
-                        <Search
-                            className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
-                            size={16}
-                        />
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            Manage and monitor water treatment infrastructure
+                            nodes.
+                        </p>
+                    </div>
 
-                        <Input
-                            placeholder="Cari unit..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            className="pr-10 pl-10"
-                        />
+                    <div className="flex flex-col gap-4 sm:flex-row">
+                        <div className="relative w-full sm:w-80">
+                            <Search
+                                className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
+                                size={16}
+                            />
 
-                        {loading && (
-                            <div className="absolute top-1/2 right-3 -translate-y-1/2">
-                                <Spinner className="size-4" />
-                            </div>
-                        )}
+                            <Input
+                                placeholder="Cari unit..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                className="pr-10 pl-10"
+                            />
+
+                            {loading && (
+                                <div className="absolute top-1/2 right-3 -translate-y-1/2">
+                                    <Spinner className="size-4" />
+                                </div>
+                            )}
+                        </div>
+
+                        <Button
+                            onClick={() => setOpenCreate(true)}
+                            className="cursor-pointer bg-blue-600 transition-transform duration-500 hover:scale-105 hover:bg-blue-700"
+                        >
+                            <PlusCircle />
+                            Tambah Unit
+                        </Button>
                     </div>
                 </div>
 
@@ -544,6 +540,10 @@ export default function Units({ units, filters }: any) {
 
 Units.layout = {
     breadcrumbs: [
+        {
+            title: 'Home',
+            href: '/dashboard',
+        },
         {
             title: 'Unit IPAL',
         },

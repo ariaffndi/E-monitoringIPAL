@@ -68,7 +68,6 @@ export default function Show({ report }: { report: Report }) {
         }
     };
 
-    
     const inlet = report.water_tests.filter((w) => w.location === 'inlet');
     const outlet = report.water_tests.filter((w) => w.location === 'outlet');
     const groupByType = (data: any[]) => {
@@ -167,46 +166,51 @@ export default function Show({ report }: { report: Report }) {
         );
     };
 
-
-
-
     return (
         <>
             <Head title="Detail Laporan Operasional" />
 
-            <div className="flex flex-col gap-4 p-4">
+            <div className="flex flex-col gap-4 p-6">
                 {/* HEADER */}
-                <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:justify-between">
-                    <div className="">
-                        <p className="font-semibold">
-                            {formatDate(report.created_at)}
-                        </p>
-                        <p className="text-sm text-gray-800">
-                            {report.user?.name}
-                        </p>
-                        <p className="text-sm">
-                            Catatan: <br />{' '}
-                            <p className="text-sm text-gray-500">
-                                {report.note || '-'}
-                            </p>
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                        <h1 className="text-2xl font-semibold tracking-tight">
+                            Operational Log Details
+                        </h1>
+
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            Operational report that has been input by operators
+                            in this project.
                         </p>
                     </div>
 
-                    <Button
-                        className="mb-2 w-fit cursor-pointer bg-green-600 hover:bg-green-700 sm:mb-0"
-                        onClick={() =>
-                            window.open(
-                                `/operational-reports/${report.id}/print`,
-                                '_blank',
-                            )
-                        }
-                    >
-                        <Printer />
-                        Cetak Detail Laporan
-                    </Button>
+                    <div className="flex flex-col gap-4 sm:flex-row">
+                        <Button
+                            className="mb-2 w-fit cursor-pointer bg-green-600 transition-transform duration-500 hover:scale-105 hover:bg-green-700 sm:mb-0"
+                            onClick={() =>
+                                window.open(
+                                    `/operational-reports/${report.id}/print`,
+                                    '_blank',
+                                )
+                            }
+                        >
+                            <Printer />
+                            Cetak Detail Laporan
+                        </Button>
+                    </div>
                 </div>
 
                 <Separator />
+
+                <div className="mb-2 gap-2">
+                    <p className="font-semibold">
+                        {formatDate(report.created_at)}
+                    </p>
+                    <p className="text-sm text-gray-800">{report.user?.name}</p>
+                    <p className="text-sm text-gray-500">
+                        {report.note || '-'}
+                    </p>
+                </div>
 
                 <div className="w-full overflow-x-auto rounded-lg border">
                     <div className="space-y-6 p-6">
@@ -337,6 +341,14 @@ export default function Show({ report }: { report: Report }) {
 
 Show.layout = {
     breadcrumbs: [
+        {
+            title: 'Home',
+            href: '/dashboard',
+        },
+        {
+            title: 'Laporan Operasional',
+            href: '/operational-reports',
+        },
         {
             title: 'Detail Laporan Operasional',
         },

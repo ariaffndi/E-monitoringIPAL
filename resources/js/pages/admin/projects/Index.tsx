@@ -197,7 +197,7 @@ export default function Index({ projects }: Props) {
                return 'bg-green-100 text-green-700';
 
             case 'Industri':
-               return 'bg-blue-100 text-blue-700';
+               return 'bg-yellow-100 text-yellow-700';
 
             case 'Medis':
                return 'bg-red-100 text-red-700';
@@ -248,7 +248,7 @@ export default function Index({ projects }: Props) {
 
                         <Button
                            onClick={() => setOpenCreate(true)}
-                           className="cursor-pointer bg-blue-600 duration-300 ease-in hover:scale-102 hover:bg-blue-700"
+                           className="cursor-pointer bg-blue-600 transition-transform duration-500 hover:scale-105 hover:bg-blue-700"
                         >
                            <PlusCircle />
                            Tambah Project
@@ -284,8 +284,8 @@ export default function Index({ projects }: Props) {
                            projects.filter((p) => p.type === 'Industri').length
                         }
                         icon={Factory}
-                        iconBg="bg-blue-100"
-                        iconColor="text-blue-600"
+                        iconBg="bg-yellow-100"
+                        iconColor="text-yellow-600"
                   />
 
                   <ProjectStatCard
@@ -465,7 +465,7 @@ export default function Index({ projects }: Props) {
                         {/* ADD NEW PROJECT CARD */}
                         <Card
                            onClick={() => setOpenCreate(true)}
-                           className="flex aspect-[4/3] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-muted-foreground/30 bg-muted/20 p-6 text-center transition-all duration-300 hover:-translate-y-1 hover:border-blue-500 hover:bg-blue-50 hover:shadow-xl"
+                           className="flex h-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-muted-foreground/30 bg-muted/20 p-6 text-center transition-all duration-300 hover:-translate-y-1 hover:border-blue-500 hover:bg-blue-50 hover:shadow-xl"
                         >
                            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 transition-colors duration-300 group-hover:bg-blue-200">
                               <Plus
@@ -611,9 +611,13 @@ export default function Index({ projects }: Props) {
 }
 
 Index.layout = {
-   breadcrumbs: [
-      {
+    breadcrumbs: [
+        {
+            title: 'Home',
+            href: '/dashboard',
+        },
+        {
             title: 'Project IPAL',
-      },
-   ],
+        },
+    ],
 };

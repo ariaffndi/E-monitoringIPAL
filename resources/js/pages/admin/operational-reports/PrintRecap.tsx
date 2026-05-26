@@ -13,6 +13,9 @@ type ChartItem = {
 };
 
 type Props = {
+    project: {
+        name: string;
+    };
     reports: any[];
     from: string;
     to: string;
@@ -35,6 +38,7 @@ type Props = {
 };
 
 export default function PrintRecap({
+    project,
     reports,
     from,
     to,
@@ -78,8 +82,11 @@ export default function PrintRecap({
                         <h2 className="text-xl font-bold uppercase">
                             Rekap Laporan Operasional IPAL
                         </h2>
+                        <p className='font-semibold'>
+                            {project?.name}
+                        </p>
 
-                        <p className="mt-2 text-sm">
+                        <p className="text-sm">
                             Periode {from} s/d {to}
                         </p>
                     </div>

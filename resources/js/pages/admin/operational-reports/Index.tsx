@@ -137,110 +137,122 @@ export default function OperationalReports({ reports, filters }: any) {
         <>
             <Head title="Laporan Operasional" />
 
-            <div className="flex flex-col gap-4 p-4">
+            <div className="flex flex-col gap-4 p-6">
                 {/* ================= HEADER ================= */}
-                <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:justify-between">
-                    <Dialog open={openRecap} onOpenChange={setOpenRecap}>
-                        <DialogTrigger asChild>
-                            <Button className="mb-2 w-fit cursor-pointer bg-green-600 hover:bg-green-700 sm:mb-0">
-                                <ListChecks />
-                                Rekap Laporan
-                            </Button>
-                        </DialogTrigger>
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                        <h1 className="text-2xl font-semibold tracking-tight">
+                            Operational Reports
+                        </h1>
 
-                        <DialogContent className="sm:max-w-md">
-                            <DialogHeader>
-                                <DialogTitle>
-                                    Rekap Laporan Operasional
-                                </DialogTitle>
-                            </DialogHeader>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            Real-time monitoring and compliance tracking for
+                            IPAL units.
+                        </p>
+                    </div>
 
-                            <div className="space-y-4">
-                                {/* TANGGAL AWAL */}
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">
-                                        Tanggal Awal
-                                    </label>
+                    <div className="flex flex-col gap-4 sm:flex-row">
+                        <div className="relative w-full sm:w-80">
+                            <Search
+                                className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
+                                size={16}
+                            />
 
-                                    <Input
-                                        type="date"
-                                        value={fromDate}
-                                        onChange={(e) =>
-                                            setFromDate(e.target.value)
-                                        }
-                                    />
+                            <Input
+                                placeholder="Cari laporan..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                className="pr-10 pl-10"
+                            />
+
+                            {loading && (
+                                <div className="absolute top-1/2 right-3 -translate-y-1/2">
+                                    <Spinner className="size-4" />
                                 </div>
+                            )}
+                        </div>
 
-                                {/* TANGGAL AKHIR */}
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">
-                                        Tanggal Akhir
-                                    </label>
+                        <Dialog open={openRecap} onOpenChange={setOpenRecap}>
+                            <DialogTrigger asChild>
+                                <Button className="mb-2 w-fit cursor-pointer bg-green-600 transition-transform duration-500 hover:scale-105 hover:bg-green-700 sm:mb-0">
+                                    <ListChecks />
+                                    Rekap Laporan
+                                </Button>
+                            </DialogTrigger>
 
-                                    <Input
-                                        type="date"
-                                        value={toDate}
-                                        onChange={(e) =>
-                                            setToDate(e.target.value)
-                                        }
-                                    />
+                            <DialogContent className="sm:max-w-md">
+                                <DialogHeader>
+                                    <DialogTitle>
+                                        Rekap Laporan Operasional
+                                    </DialogTitle>
+                                </DialogHeader>
+
+                                <div className="space-y-4">
+                                    {/* TANGGAL AWAL */}
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">
+                                            Tanggal Awal
+                                        </label>
+
+                                        <Input
+                                            type="date"
+                                            value={fromDate}
+                                            onChange={(e) =>
+                                                setFromDate(e.target.value)
+                                            }
+                                        />
+                                    </div>
+
+                                    {/* TANGGAL AKHIR */}
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">
+                                            Tanggal Akhir
+                                        </label>
+
+                                        <Input
+                                            type="date"
+                                            value={toDate}
+                                            onChange={(e) =>
+                                                setToDate(e.target.value)
+                                            }
+                                        />
+                                    </div>
+
+                                    {/* ACTION */}
+                                    <div className="flex flex-col gap-2 pt-2 sm:flex-row">
+                                        {/* PREVIEW */}
+                                        <Button
+                                            className="flex-1 cursor-pointer"
+                                            disabled={!fromDate || !toDate}
+                                            onClick={() => {
+                                                router.visit(
+                                                    `/operational-reports/recap?from=${fromDate}&to=${toDate}`,
+                                                );
+                                            }}
+                                        >
+                                            <CalendarDays />
+                                            Preview Rekap
+                                        </Button>
+
+                                        {/* PRINT */}
+                                        <Button
+                                            variant="outline"
+                                            className="flex-1 cursor-pointer"
+                                            disabled={!fromDate || !toDate}
+                                            onClick={() => {
+                                                window.open(
+                                                    `/operational-reports/recap/print?from=${fromDate}&to=${toDate}`,
+                                                    '_blank',
+                                                );
+                                            }}
+                                        >
+                                            Cetak PDF
+                                        </Button>
+                                    </div>
                                 </div>
-
-                                {/* ACTION */}
-                                <div className="flex flex-col gap-2 pt-2 sm:flex-row">
-                                    {/* PREVIEW */}
-                                    <Button
-                                        className="flex-1 cursor-pointer"
-                                        disabled={!fromDate || !toDate}
-                                        onClick={() => {
-                                            router.visit(
-                                                `/operational-reports/recap?from=${fromDate}&to=${toDate}`,
-                                            );
-                                        }}
-                                    >
-                                        <CalendarDays />
-                                        Preview Rekap
-                                    </Button>
-
-                                    {/* PRINT */}
-                                    <Button
-                                        variant="outline"
-                                        className="flex-1 cursor-pointer"
-                                        disabled={!fromDate || !toDate}
-                                        onClick={() => {
-                                            window.open(
-                                                `/operational-reports/recap/print?from=${fromDate}&to=${toDate}`,
-                                                '_blank',
-                                            );
-                                        }}
-                                    >
-                                        Cetak PDF
-                                    </Button>
-                                </div>
-                            </div>
-                        </DialogContent>
-                    </Dialog>
-
-                    {/* ================= SEARCH ================= */}
-                    <div className="relative">
-                        <Search
-                            className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
-                            size={16}
-                        />
-
-                        <Input
-                            placeholder="Cari laporan..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            className="pr-10 pl-10"
-                        />
-
-                        {loading && (
-                            <div className="absolute top-1/2 right-3 -translate-y-1/2">
-                                <Spinner className="size-4" />
-                            </div>
-                        )}
+                            </DialogContent>
+                        </Dialog>
                     </div>
                 </div>
 
@@ -450,6 +462,10 @@ export default function OperationalReports({ reports, filters }: any) {
 
 OperationalReports.layout = {
     breadcrumbs: [
+        {
+            title: 'Home',
+            href: '/dashboard',
+        },
         {
             title: 'Laporan Operasional',
         },

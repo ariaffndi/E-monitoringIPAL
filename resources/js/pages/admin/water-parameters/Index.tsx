@@ -211,34 +211,52 @@ export default function WaterParameters({ waterparameters, filters }: Props) {
 
             <div className="flex flex-col gap-4 p-6">
                 {/* HEADER */}
-                <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:justify-between">
-                    <Button
-                        onClick={() => setOpenCreate(true)}
-                        className="mb-2 w-fit cursor-pointer bg-blue-600 hover:bg-blue-700 sm:mb-0"
-                    >
-                        <PlusCircle />
-                        Tambah Parameter
-                    </Button>
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                        <h1 className="text-2xl font-semibold tracking-tight">
+                            Water Parameter Management
+                        </h1>
 
-                    <div className="relative">
-                        <Search
-                            className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
-                            size={16}
-                        />
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            Configure and monitor chemical thresholds for
+                            effluent compliance.
+                        </p>
+                    </div>
 
-                        <Input
-                            placeholder="Cari parameter..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            className="pr-10 pl-10"
-                        />
+                    <div className="flex flex-col gap-4 sm:flex-row">
+                        <div className="relative w-full sm:w-80">
+                            <Search
+                                className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
+                                size={16}
+                            />
 
-                        {loading && (
-                            <div className="absolute top-1/2 right-3 -translate-y-1/2">
-                                <Spinner className="size-4" />
-                            </div>
-                        )}
+                            <Search
+                                className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
+                                size={16}
+                            />
+
+                            <Input
+                                placeholder="Cari parameter..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                className="pr-10 pl-10"
+                            />
+
+                            {loading && (
+                                <div className="absolute top-1/2 right-3 -translate-y-1/2">
+                                    <Spinner className="size-4" />
+                                </div>
+                            )}
+                        </div>
+
+                        <Button
+                            onClick={() => setOpenCreate(true)}
+                            className="cursor-pointer bg-blue-600 transition-transform duration-500 hover:scale-105 hover:bg-blue-700"
+                        >
+                            <PlusCircle />
+                            Tambah Parameter
+                        </Button>
                     </div>
                 </div>
 
@@ -548,6 +566,10 @@ export default function WaterParameters({ waterparameters, filters }: Props) {
 
 WaterParameters.layout = {
     breadcrumbs: [
+        {
+            title: 'Home',
+            href: '/dashboard',
+        },
         {
             title: 'Parameter Air',
         },

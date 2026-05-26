@@ -262,6 +262,7 @@ class OperationalReportController extends Controller
         );
     }
 
+
     public function printRecap(Request $request)
     {
         return Inertia::render(
@@ -279,6 +280,7 @@ class OperationalReportController extends Controller
     public function print(OperationalReport $report)
     {
         $report->load([
+            'project',
             'user',
             'unitTests.unit',
             'waterTests.waterParameter',
@@ -364,7 +366,7 @@ class OperationalReportController extends Controller
     {
         $from = $request->from;
         $to = $request->to;
-
+        $project = currentProject();
         $reports = OperationalReport::with([
             'user',
             'unitTests.unit',
@@ -380,6 +382,7 @@ class OperationalReportController extends Controller
         ->get();
 
         return [
+            'project' => $project,
             'reports' => $reports,
             'from' => $from,
             'to' => $to,

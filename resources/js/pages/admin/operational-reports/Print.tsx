@@ -55,6 +55,14 @@ export default function PrintOperationalReport({ report }: Props) {
                         </h2>
 
                         <p className="mt-2 text-sm">Nomor: {reportNumber}</p>
+
+                        <p className="mt-1 text-sm">
+                            Project:
+                            <span className="font-semibold">
+                                {' '}
+                                {report.project?.name}
+                            </span>
+                        </p>
                     </div>
 
                     {/* ================= INFO ================= */}
@@ -73,7 +81,7 @@ export default function PrintOperationalReport({ report }: Props) {
                             </p>
                         </div>
 
-                        <div>
+                        <div className="text-right">
                             <p>
                                 <span className="font-semibold">
                                     Waktu Input:
@@ -121,7 +129,6 @@ export default function PrintOperationalReport({ report }: Props) {
                             </tbody>
                         </table>
                     </div>
-                    
 
                     {/* ================= WATER TEST ================= */}
                     <div className="section report-table">
@@ -184,7 +191,7 @@ export default function PrintOperationalReport({ report }: Props) {
                         </p>
 
                         <div className="min-h-25 rounded border p-4 text-sm">
-                            {report.note || '-'}    
+                            {report.note || '-'}
                         </div>
                     </div>
 
