@@ -94,6 +94,13 @@ class DashboardController extends Controller
                 ->distinct()
                 ->pluck('date');
 
+            $reportsCount = OperationalReport::where('project_id', $projectId)->count();
+            $todayReport = OperationalReport::whereDate(
+                'created_at',
+                today()
+            )
+            ->exists();
+
             return Inertia::render('admin/Dashboard', [
                 'units' => $units,
                 'waterParameters' => $waterParameters,
@@ -102,6 +109,8 @@ class DashboardController extends Controller
                 'operators' => $operators,
                 'notes' => $notes,
                 'datesWithReports' => $datesWithReports,
+                'reportsCount' => $reportsCount,
+                'todayReport' => $todayReport,
             ]);
         }
 

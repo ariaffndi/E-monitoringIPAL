@@ -1,6 +1,10 @@
 import { Head } from '@inertiajs/react';
 import { router } from '@inertiajs/react';
-import { Calendar1} from 'lucide-react';
+import {
+    Calendar1,
+    Droplets,
+    SquareChartGantt,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
     Area,
@@ -34,7 +38,6 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-
 import { dashboard } from '@/routes';
 
 type Unit = {
@@ -73,21 +76,24 @@ type Props = {
     operators: Operator[];
     notes: Note[];
     datesWithReports: string[];
-
     waterParameters: WaterParameter[];
     chartData: ChartItem[];
     selectedParameter: number;
+    reportsCount: number;
+    todayReport: boolean;
 };
+
 
 export default function Dashboard({
     units,
     operators,
     notes,
     datesWithReports,
-
     waterParameters,
     chartData,
     selectedParameter,
+    reportsCount,
+    todayReport,
 }: Props) {
     // ================= BADGE COLOR =================
     const getConditionBadge = (condition: string) => {
@@ -135,6 +141,8 @@ export default function Dashboard({
         return [0, Math.ceil(max * 1.2)];
     }, [chartData]);
 
+    const currentStatus = todayReport ? 'Sudah Input' : 'Belum Input';
+
     return (
         <>
             <Head title="Dashboard Admin" />
@@ -148,26 +156,130 @@ export default function Dashboard({
                         </h1>
 
                         <p className="mt-1 text-sm text-muted-foreground">
-                            Realtime Monitoring condition and performance of Waste Water Treatment Plant system.
+                            Realtime Monitoring condition and performance of
+                            Waste Water Treatment Plant system.
                         </p>
-                    </div>
-
-                    <div className="">
-                        <Badge variant="outline" className="p-2">
-                            <Calendar1 size={16} className="mr-2" />
-                            {new Date()
-                                .toLocaleDateString('id-ID', {
-                                    day: '2-digit',
-                                    month: 'short',
-                                    year: 'numeric',
-                                })
-                                .replace('.', '')
-                                .replace(/\b\w/g, (char) => char.toUpperCase())}
-                        </Badge>
                     </div>
                 </div>
 
                 <Separator />
+
+                {/* ================= GREETING ================= */}
+                <Card className="relative overflow-hidden border-0 bg-linear-to-br from-blue-600 via-blue-700 to-cyan-600 py-0 text-white shadow-xl">
+                    {/* BACKGROUND EFFECT */}
+                    <div className="absolute top-0 right-0 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
+
+                    <div className="absolute bottom-0 left-0 h-40 w-40 rounded-full bg-cyan-300/10 blur-2xl" />
+
+                    <CardContent className="relative flex flex-col gap-8 p-8 lg:flex-row lg:items-center lg:justify-between">
+                        {/* LEFT */}
+                        <div className="max-w-2xl">
+                            <div className="mb-3 flex w-fit flex-row items-center text-sm text-blue-100">
+                                <Calendar1 size={16} className="mr-2" />
+
+                                {new Date()
+                                    .toLocaleDateString('id-ID', {
+                                        weekday: 'long',
+                                        day: '2-digit',
+                                        month: 'long',
+                                        year: 'numeric',
+                                    })
+                                    .replace('.', '')
+                                    .replace(/\b\w/g, (char) =>
+                                        char.toUpperCase(),
+                                    )}
+                            </div>
+
+                            <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
+                                Operational Dashboard
+                            </h1>
+
+                            <p className="mt-4 max-w-xl text-sm leading-relaxed text-blue-100 lg:text-base">
+                                Monitor kondisi unit IPAL, parameter kualitas
+                                air, aktivitas operator, dan laporan operasional
+                                secara realtime dalam satu dashboard
+                                terintegrasi.
+                            </p>
+
+                            <div className="mt-6 flex flex-wrap gap-3">
+                                <Button
+                                    className="cursor-pointer bg-white text-blue-700 transition-transform duration-500 hover:scale-105 hover:bg-blue-50"
+                                    onClick={() =>
+                                        router.visit('/operational-reports')
+                                    }
+                                >
+                                    <SquareChartGantt />
+                                    Operational Reports
+                                </Button>
+                            </div>
+                        </div>
+
+                        {/* RIGHT CARD */}
+                        <Card className="w-full max-w-sm border-white/10 bg-white/10 text-white backdrop-blur">
+                            <CardContent className="space-y-5 p-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-blue-100">
+                                            Status Hari Ini
+                                        </p>
+
+                                        <h3 className="text-xl font-semibold">
+                                            {currentStatus}
+                                        </h3>
+                                    </div>
+
+                                    <div
+                                        className={`rounded-full p-3 ${
+                                            todayReport
+                                                ? 'bg-green-400/20'
+                                                : 'bg-yellow-400/20'
+                                        }`}
+                                    >
+                                        <Droplets
+                                            className={`size-6 ${
+                                                todayReport
+                                                    ? 'text-cyan-200'
+                                                    : 'text-yellow-200'
+                                            }`}
+                                        />
+                                    </div>
+                                </div>
+
+                                <Separator className="bg-white/10" />
+
+                                <div className="grid grid-cols-3 gap-4 text-sm">
+                                    <div>
+                                        <p className="text-blue-100">
+                                            Reports
+                                        </p>
+
+                                        <p className="mt-1 text-2xl font-bold">
+                                            {reportsCount}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-blue-100">
+                                            Operator
+                                        </p>
+
+                                        <p className="mt-1 text-2xl font-bold">
+                                            {operators.length}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-blue-100">
+                                            Unit
+                                        </p>
+
+                                        <p className="mt-1 text-2xl font-bold">
+                                            {units.length}
+                                        </p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </CardContent>
+                </Card>
 
                 {/* ================= MAIN LAYOUT ================= */}
                 <div className="grid gap-4 lg:grid-cols-10">

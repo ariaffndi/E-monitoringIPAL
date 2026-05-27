@@ -379,7 +379,7 @@ export default function Index({ projects }: Props) {
                                                 >
                                                    <Pencil
                                                       size={16}
-                                                      className="mr-2"
+                                                      className="mr-2 text-yellow-500"
                                                    />
                                                    Edit
                                                 </DropdownMenuItem>
@@ -396,7 +396,7 @@ export default function Index({ projects }: Props) {
                                                 >
                                                    <Trash2
                                                       size={16}
-                                                      className="mr-2"
+                                                      className="mr-2 text-red-500"
                                                    />
                                                    Hapus
                                                 </DropdownMenuItem>
