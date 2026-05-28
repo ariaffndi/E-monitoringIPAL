@@ -73,21 +73,112 @@ class DashboardController extends Controller
                 ->values();
 
             $operators = User::where('role', 'operator')
-                ->where('project_id', $projectId)
-                ->oldest()
-                ->take(3)
-                ->get();
+            ->where('project_id', $projectId)
+            ->oldest()
+            ->take(2)
+            ->get([
+                'id',
+                'name',
+                'email',
+                'image',
+            ]);
 
-            $notes = OperationalReport::where('project_id', $projectId)
-                ->whereNotNull('note')
-                ->where('note', '!=', '')
-                ->latest()
-                ->take(2)
-                ->get([
-                    'id',
-                    'note',
-                    'created_at'
-                ]);
+            $conditionScores = [
+                'sangat kurang' => 1,
+                'kurang' => 2,
+                'cukup' => 3,
+                'baik' => 4,
+                'sangat baik' => 5,
+            ];
+
+            $recentReports = OperationalReport::with([
+                'unitTests',
+                'waterTests.waterParameter',
+            ])
+            ->where('project_id', $projectId)
+            ->latest()
+            ->take(3)
+            ->get()
+            ->map(function ($report) use ($conditionScores) {
+
+                // ================= UNIT AVG =================
+                $unitAvg = round(
+                    $report->unitTests->avg(function ($unitTest) use ($conditionScores) {
+
+                        return $conditionScores[
+                            strtolower($unitTest->condition)
+                        ] ?? 0;
+                    }),
+                    1
+                );
+
+                // ================= INLET =================
+                $inletTests = $report->waterTests
+                    ->where('location', 'inlet');
+
+                $inletMeet = 0;
+                $inletNotMeet = 0;
+
+                foreach ($inletTests as $test) {
+
+                    $value = (float) $test->value;
+
+                    $min = $test->waterParameter?->min_value;
+                    $max = $test->waterParameter?->max_value;
+
+                    $isMeet =
+                        ($min === null || $value >= $min) &&
+                        ($max === null || $value <= $max);
+
+                    if ($isMeet) {
+                        $inletMeet++;
+                    } else {
+                        $inletNotMeet++;
+                    }
+                }
+
+                // ================= OUTLET =================
+                $outletTests = $report->waterTests
+                    ->where('location', 'outlet');
+
+                $outletMeet = 0;
+                $outletNotMeet = 0;
+
+                foreach ($outletTests as $test) {
+
+                    $value = (float) $test->value;
+
+                    $min = $test->waterParameter?->min_value;
+                    $max = $test->waterParameter?->max_value;
+
+                    $isMeet =
+                        ($min === null || $value >= $min) &&
+                        ($max === null || $value <= $max);
+
+                    if ($isMeet) {
+                        $outletMeet++;
+                    } else {
+                        $outletNotMeet++;
+                    }
+                }
+
+                return [
+                    'id' => $report->id,
+                    'created_at' => $report->created_at,
+                    'note' => $report->note,
+                    'unit_avg' => $unitAvg,
+
+                    'inlet' => [
+                        'meet' => $inletMeet,
+                        'not_meet' => $inletNotMeet,
+                    ],
+
+                    'outlet' => [
+                        'meet' => $outletMeet,
+                        'not_meet' => $outletNotMeet,
+                    ],
+                ];
+            });
 
             $datesWithReports = OperationalReport::where('project_id', $projectId)
                 ->selectRaw('DATE(created_at) as date')
@@ -107,7 +198,7 @@ class DashboardController extends Controller
                 'chartData' => $chartData,
                 'selectedParameter' => $selectedParameter,
                 'operators' => $operators,
-                'notes' => $notes,
+                'recentReports' => $recentReports,
                 'datesWithReports' => $datesWithReports,
                 'reportsCount' => $reportsCount,
                 'todayReport' => $todayReport,
@@ -117,7 +208,7 @@ class DashboardController extends Controller
         // ================= OPERATOR =================
 
         $userId = $user->id;
-
+        $reportsCount = OperationalReport::where('project_id', $projectId)->where('user_id', $userId)->count();
         $todayReport = OperationalReport::where('project_id', $projectId)
             ->whereDate('created_at', now())
             ->where('user_id', $userId)
@@ -136,56 +227,103 @@ class DashboardController extends Controller
             ->where('user_id', $userId)
             ->count();
 
-        $latest = OperationalReport::with([
+        $conditionScores = [
+            'sangat kurang' => 1,
+            'kurang' => 2,
+            'cukup' => 3,
+            'baik' => 4,
+            'sangat baik' => 5,
+        ];
+
+        $latestReport = OperationalReport::with([
                 'unitTests',
-                'waterTests.waterParameter'
+                'waterTests.waterParameter',
             ])
-            ->where('project_id', $projectId)
-            ->where('user_id', $userId)
+            ->where('user_id', Auth::id())
+            ->where(
+                'project_id',
+                session('selected_project_id')
+            )
             ->latest()
             ->first();
 
-        $latestReport = null;
-
-        if ($latest) {
+        if ($latestReport) {
 
             // ================= UNIT AVG =================
+            $unitAvg = round(
+                $latestReport->unitTests->avg(function ($unitTest) use ($conditionScores) {
 
-            $unitAvg = $latest->unitTests->avg(function ($item) {
-
-                return $this->conditionToNumber(
-                    $item->condition
-                );
-            });
+                    return $conditionScores[
+                        strtolower($unitTest->condition)
+                    ] ?? 0;
+                }),
+                1
+            );
 
             // ================= INLET =================
+            $inletTests = $latestReport->waterTests
+                ->where('location', 'inlet');
 
-            $inlet = $latest->waterTests
-                ->where('location', 'inlet')
-                ->pluck('value')
-                ->map(fn ($v) => (float) $v);
+            $inletMeet = 0;
+            $inletNotMeet = 0;
 
-            $inletAvg = $inlet->count()
-                ? $inlet->avg()
-                : 0;
+            foreach ($inletTests as $test) {
+
+                $value = (float) $test->value;
+
+                $min = $test->waterParameter?->min_value;
+                $max = $test->waterParameter?->max_value;
+
+                $isMeet =
+                    ($min === null || $value >= $min) &&
+                    ($max === null || $value <= $max);
+
+                if ($isMeet) {
+                    $inletMeet++;
+                } else {
+                    $inletNotMeet++;
+                }
+            }
 
             // ================= OUTLET =================
+            $outletTests = $latestReport->waterTests
+                ->where('location', 'outlet');
 
-            $outlet = $latest->waterTests
-                ->where('location', 'outlet')
-                ->pluck('value')
-                ->map(fn ($v) => (float) $v);
+            $outletMeet = 0;
+            $outletNotMeet = 0;
 
-            $outletAvg = $outlet->count()
-                ? $outlet->avg()
-                : 0;
+            foreach ($outletTests as $test) {
+
+                $value = (float) $test->value;
+
+                $min = $test->waterParameter?->min_value;
+                $max = $test->waterParameter?->max_value;
+
+                $isMeet =
+                    ($min === null || $value >= $min) &&
+                    ($max === null || $value <= $max);
+
+                if ($isMeet) {
+                    $outletMeet++;
+                } else {
+                    $outletNotMeet++;
+                }
+            }
 
             $latestReport = [
-                'id' => $latest->id,
-                'created_at' => $latest->created_at,
-                'unit_avg' => round($unitAvg, 2),
-                'inlet_avg' => round($inletAvg, 2),
-                'outlet_avg' => round($outletAvg, 2),
+                'id' => $latestReport->id,
+                'created_at' => $latestReport->created_at,
+                'unit_avg' => $unitAvg,
+
+                'inlet' => [
+                    'meet' => $inletMeet,
+                    'not_meet' => $inletNotMeet,
+                ],
+
+                'outlet' => [
+                    'meet' => $outletMeet,
+                    'not_meet' => $outletNotMeet,
+                ],
             ];
         }
 
@@ -199,7 +337,7 @@ class DashboardController extends Controller
             'user' => [
                 'name' => $user->name,
             ],
-
+            'reportsCount' => $reportsCount,
             'todayReport' => $todayReport ?? false,
 
             'stats' => [
@@ -207,9 +345,7 @@ class DashboardController extends Controller
                 'week' => $week ?? 0,
                 'streak' => 0,
             ],
-
             'latestReport' => $latestReport,
-
             'recentReports' => $recentReports ?? [],
         ]);
     }

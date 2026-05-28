@@ -2,8 +2,14 @@ import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    // CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Progress } from '@/components/ui/progress';
 import {
     Select,
     SelectContent,
@@ -11,11 +17,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 
 // types
 type Unit = {
     id: number;
     name: string;
+    // description: string;
 };
 
 type Parameter = {
@@ -23,6 +31,8 @@ type Parameter = {
     name: string;
     unit: string;
     type: string;
+    min_value: number | null;
+    max_value: number | null;
 };
 
 type UnitTest = {
@@ -30,6 +40,7 @@ type UnitTest = {
     unit_name: string;
     condition: string;
     test_image: File | null;
+    // unit_description: string;
 };
 
 type WaterTest = {
@@ -38,7 +49,8 @@ type WaterTest = {
     unit: string;
     type: string;
     value: string;
-    test_image: File | null;
+    min_value: number | null;
+    max_value: number | null;
 };
 
 type FormType = {
@@ -65,6 +77,7 @@ export default function Create({ units, parameters }: Props) {
             unit_name: unit.name,
             condition: '',
             test_image: null,
+            // unit_description: unit.description,
         })),
         water_tests: {
             inlet: parameters.map((param) => ({
@@ -73,7 +86,8 @@ export default function Create({ units, parameters }: Props) {
                 unit: param.unit,
                 type: param.type,
                 value: '',
-                test_image: null,
+                min_value: param.min_value,
+                max_value: param.max_value,
             })),
             outlet: parameters.map((param) => ({
                 water_parameter_id: param.id,
@@ -81,7 +95,8 @@ export default function Create({ units, parameters }: Props) {
                 unit: param.unit,
                 type: param.type,
                 value: '',
-                test_image: null,
+                min_value: param.min_value,
+                max_value: param.max_value,
             })),
         },
     }));
@@ -140,6 +155,22 @@ export default function Create({ units, parameters }: Props) {
             default:
                 return 'bg-gray-100 text-gray-700';
         }
+    };
+
+    const getWaterStatus = (item: WaterTest) => {
+        const value = Number(item.value);
+
+        if (isNaN(value)) {
+            return false;
+        }
+
+        const min = item.min_value;
+        const max = item.max_value;
+
+        const meetsMin = min === null || value >= min;
+        const meetsMax = max === null || value <= max;
+
+        return meetsMin && meetsMax;
     };
 
     const groupByType = (data: WaterTest[]) => {
@@ -227,18 +258,41 @@ export default function Create({ units, parameters }: Props) {
                     <th className="p-2">No</th>
                     <th className="p-2">Parameter</th>
                     <th className="p-2">Value</th>
+                    <th className="p-2">Status</th>
                 </tr>
             </thead>
+
             <tbody>
-                {data.map((item, index) => (
-                    <tr key={index}>
-                        <td className="p-2">{index + 1}</td>
-                        <td className="p-2">
-                            {item.name} ({item.unit})
-                        </td>
-                        <td className="p-2">{item.value || '-'}</td>
-                    </tr>
-                ))}
+                {data.map((item, index) => {
+                    const isMeet = getWaterStatus(item);
+
+                    return (
+                        <tr
+                            key={index}>
+                            <td className="p-2">{index + 1}</td>
+
+                            <td className="p-2">
+                                {item.name} ({item.unit})
+                            </td>
+
+                            <td className="p-2 font-medium">
+                                {item.value || '-'}
+                            </td>
+
+                            <td className="p-2">
+                                <span
+                                    className={`rounded-full px-3 py-1 text-xs font-medium ${
+                                        isMeet
+                                            ? 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300'
+                                            : 'bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300'
+                                    }`}
+                                >
+                                    {isMeet ? 'Memenuhi' : 'Tidak Memenuhi'}
+                                </span>
+                            </td>
+                        </tr>
+                    );
+                })}
             </tbody>
         </table>
     );
@@ -248,129 +302,248 @@ export default function Create({ units, parameters }: Props) {
             <Head title="Input Laporan Operasional" />
 
             <div className="space-y-6 p-6">
-                <Progress value={(step / 3) * 100} className="h-2" />
-                {/* steps */}
-                <div className="flex items-center gap-2 text-xs md:text-sm">
-                    {[
-                        { stepNum: 1, label: 'Kondisi Unit' },
-                        { stepNum: 2, label: 'Parameter Air' },
-                        { stepNum: 3, label: 'Preview' },
-                    ].map((s, i) => (
-                        <div
-                            key={s.stepNum}
-                            className="flex items-center gap-2"
-                        >
-                            <span
-                                className={`rounded-full px-3 py-1 text-xs ${
-                                    step === s.stepNum
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-muted text-gray-600'
-                                }`}
-                            >
-                                {s.stepNum}. {s.label}
-                            </span>
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                        <h1 className="text-2xl font-semibold tracking-tight">
+                            Input Operational Report
+                        </h1>
 
-                            {i < 2 && <span>→</span>}
-                        </div>
-                    ))}
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            Fill out the daily operational status for IPAL units
+                            and water parameters.
+                        </p>
+                    </div>
                 </div>
 
-                {/* step 1 */}
-                {step === 1 && (
-                    <div className="space-y-4">
-                        <h2 className="font-semibold">Unit Test</h2>
+                <Separator />
 
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            {form.unit_tests.map((item, index) => (
+                {/* PROGRESS STEP */}
+                <div className="mx-auto mb-10 max-w-2xl">
+                    <div className="relative flex items-center justify-between">
+                        {/* LINE */}
+                        <div className="absolute top-5 left-0 h-1 w-full rounded-full bg-muted" />
+
+                        <div
+                            className="absolute top-5 left-0 h-1 rounded-full bg-blue-200 transition-all duration-300"
+                            style={{
+                                width:
+                                    step === 1
+                                        ? '0%'
+                                        : step === 2
+                                          ? '50%'
+                                          : '100%',
+                            }}
+                        />
+
+                        {[
+                            { number: 1, label: 'Kondisi Unit' },
+                            { number: 2, label: 'Parameter Air' },
+                            { number: 3, label: 'Preview' },
+                        ].map((item) => {
+                            const isActive = step === item.number;
+                            const isCompleted = step > item.number;
+
+                            return (
                                 <div
-                                    key={index}
-                                    className="w-full space-y-4 rounded border p-4 md:p-6"
+                                    key={item.number}
+                                    className="relative z-10 flex flex-col items-center gap-2"
                                 >
-                                    <p className="font-medium">
-                                        {item.unit_name}
-                                    </p>
-
-                                    <Select
-                                        value={item.condition}
-                                        onValueChange={(value) =>
-                                            handleUnitChange(
-                                                index,
-                                                'condition',
-                                                value,
-                                            )
-                                        }
+                                    <div
+                                        className={`flex h-10 w-10 items-center justify-center rounded-full border-4 text-sm font-semibold transition-all ${
+                                            isCompleted
+                                                ? 'border-blue-500 bg-blue-500 text-white'
+                                                : isActive
+                                                  ? 'border-blue-500 bg-background text-blue-500'
+                                                  : 'border-muted bg-background text-muted-foreground'
+                                        }`}
                                     >
-                                        <SelectTrigger
-                                            className={`${
-                                                item.condition
-                                                    ? getConditionColor(
-                                                          item.condition,
-                                                      )
-                                                    : ''
-                                            } cursor-pointer`}
-                                        >
-                                            <SelectValue placeholder="Kondisi Unit" />
-                                        </SelectTrigger>
+                                        {isCompleted ? '✓' : item.number}
+                                    </div>
 
-                                        <SelectContent>
-                                            <SelectItem
-                                                className="cursor-pointer"
-                                                value="sangat baik"
-                                            >
-                                                Sangat Baik
-                                            </SelectItem>
-                                            <SelectItem
-                                                className="cursor-pointer"
-                                                value="baik"
-                                            >
-                                                Baik
-                                            </SelectItem>
-                                            <SelectItem
-                                                className="cursor-pointer"
-                                                value="cukup"
-                                            >
-                                                Cukup
-                                            </SelectItem>
-                                            <SelectItem
-                                                className="cursor-pointer"
-                                                value="kurang"
-                                            >
-                                                Kurang
-                                            </SelectItem>
-                                            <SelectItem
-                                                className="cursor-pointer"
-                                                value="sangat kurang"
-                                            >
-                                                Sangat Kurang
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-
-                                    <Input
-                                        type="file"
-                                        className="w-full cursor-pointer"
-                                        onChange={(e) =>
-                                            handleUnitChange(
-                                                index,
-                                                'test_image',
-                                                e.target.files?.[0] ?? null,
-                                            )
-                                        }
-                                    />
+                                    <span
+                                        className={`text-xs font-medium md:text-sm ${
+                                            isCompleted || isActive
+                                                ? 'text-blue-500'
+                                                : 'text-muted-foreground'
+                                        }`}
+                                    >
+                                        {item.label}
+                                    </span>
                                 </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* STEP 1 */}
+                {step === 1 && (
+                    <div className="space-y-8">
+                        <div>
+                            <h2 className="text-xl font-semibold tracking-tight">
+                                Kondisi Unit IPAL
+                            </h2>
+
+                            <p className="mt-1 text-sm text-muted-foreground">
+                                Input kondisi setiap unit IPAL beserta
+                                dokumentasi pendukung.
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+                            {form.unit_tests.map((item, index) => (
+                                <Card
+                                    key={index}
+                                    className="border-border/60 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                                >
+                                    <CardHeader className="space-y-4">
+                                        <div className="flex items-start justify-between gap-4">
+                                            <div>
+                                                <CardTitle className="text-base">
+                                                    {item.unit_name}
+                                                </CardTitle>
+
+                                                {/* <CardDescription className="mt-1">
+                                                    {item.unit_description}
+                                                </CardDescription> */}
+                                            </div>
+                                        </div>
+                                    </CardHeader>
+
+                                    <CardContent className="space-y-5">
+                                        {/* CONDITION */}
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium">
+                                                Kondisi Unit
+                                            </label>
+                                            <Select
+                                                value={item.condition}
+                                                onValueChange={(value) =>
+                                                    handleUnitChange(
+                                                        index,
+                                                        'condition',
+                                                        value,
+                                                    )
+                                                }
+                                            >
+                                                <SelectTrigger
+                                                    className={`mt-2 w-full cursor-pointer p-4 transition-colors ${
+                                                        item.condition
+                                                            ? getConditionColor(
+                                                                  item.condition,
+                                                              )
+                                                            : ''
+                                                    }`}
+                                                >
+                                                    <SelectValue placeholder="Pilih kondisi unit" />
+                                                </SelectTrigger>
+
+                                                <SelectContent>
+                                                    <SelectItem
+                                                        value="sangat baik"
+                                                        className="cursor-pointer"
+                                                    >
+                                                        Sangat Baik
+                                                    </SelectItem>
+
+                                                    <SelectItem
+                                                        value="baik"
+                                                        className="cursor-pointer"
+                                                    >
+                                                        Baik
+                                                    </SelectItem>
+
+                                                    <SelectItem
+                                                        value="cukup"
+                                                        className="cursor-pointer"
+                                                    >
+                                                        Cukup
+                                                    </SelectItem>
+
+                                                    <SelectItem
+                                                        value="kurang"
+                                                        className="cursor-pointer"
+                                                    >
+                                                        Kurang
+                                                    </SelectItem>
+
+                                                    <SelectItem
+                                                        value="sangat kurang"
+                                                        className="cursor-pointer"
+                                                    >
+                                                        Sangat Kurang
+                                                    </SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+
+                                        {/* IMAGE */}
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium">
+                                                Dokumentasi
+                                            </label>
+
+                                            <label className="relative mt-2 flex aspect-3/1 w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-muted-foreground/20 transition-colors hover:border-primary/40 hover:bg-muted/30">
+                                                <Input
+                                                    type="file"
+                                                    className="hidden"
+                                                    onChange={(e) =>
+                                                        handleUnitChange(
+                                                            index,
+                                                            'test_image',
+                                                            e.target
+                                                                .files?.[0] ??
+                                                                null,
+                                                        )
+                                                    }
+                                                />
+
+                                                {item.test_image ? (
+                                                    <>
+                                                        {/* PREVIEW IMAGE */}
+                                                        <img
+                                                            src={URL.createObjectURL(
+                                                                item.test_image,
+                                                            )}
+                                                            alt={item.unit_name}
+                                                            className="absolute inset-0 h-full w-full object-cover"
+                                                        />
+
+                                                        {/* OVERLAY */}
+                                                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity hover:opacity-100">
+                                                            <p className="text-sm font-medium text-white">
+                                                                Ganti Gambar
+                                                            </p>
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <div className="space-y-2 text-center">
+                                                        <p className="text-sm font-medium">
+                                                            Upload Dokumentasi
+                                                        </p>
+
+                                                        <p className="text-xs text-muted-foreground">
+                                                            JPG, PNG, atau JPEG
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </label>
+                                        </div>
+                                    </CardContent>
+                                </Card>
                             ))}
                         </div>
 
                         <div className="flex justify-end">
                             <Button
-                                className="cursor-pointer"
+                                size="lg"
+                                className="cursor-pointer px-8"
                                 onClick={() => {
                                     if (validateStep()) {
                                         setStep(2);
                                     }
                                 }}
                             >
-                                Next
+                                Next Step
                             </Button>
                         </div>
                     </div>
@@ -439,7 +612,7 @@ export default function Create({ units, parameters }: Props) {
                                     }
                                 }}
                             >
-                                Next
+                                Next Step
                             </Button>
                         </div>
                     </div>
@@ -455,39 +628,71 @@ export default function Create({ units, parameters }: Props) {
                             <div className="my-8">
                                 <h3 className="font-semibold">Unit Test</h3>
 
-                                <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-                                    {form.unit_tests.map((item, i) => (
-                                        <div
-                                            key={i}
-                                            className="space-y-2 rounded border p-3 text-center"
+                                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+                                    {form.unit_tests.map((item, index) => (
+                                        <Card
+                                            key={index}
+                                            className="border-border/60 transition-all duration-300"
                                         >
-                                            <p className="font-medium">
-                                                {item.unit_name}
-                                            </p>
-
-                                            <span
-                                                className={`inline-block rounded px-2 py-1 text-xs ${getConditionColor(
-                                                    item.condition,
-                                                )}`}
-                                            >
-                                                {item.condition || '-'}
-                                            </span>
-
-                                            {/* PREVIEW IMAGE */}
-                                            {item.test_image ? (
-                                                <img
-                                                    src={URL.createObjectURL(
-                                                        item.test_image,
-                                                    )}
-                                                    alt={item.unit_name}
-                                                    className="mx-auto mt-2 h-24 w-24 rounded object-cover"
-                                                />
-                                            ) : (
-                                                <div className="mx-auto mt-2 flex h-24 w-24 items-center justify-center rounded bg-muted text-xs text-gray-400">
-                                                    No Image
+                                            <CardHeader className="space-y-4">
+                                                <div className="flex items-start justify-between gap-4">
+                                                    <div>
+                                                        <CardTitle className="text-base">
+                                                            {item.unit_name}
+                                                        </CardTitle>
+                                                    </div>
                                                 </div>
-                                            )}
-                                        </div>
+                                            </CardHeader>
+
+                                            <CardContent className="space-y-5">
+                                                {/* CONDITION */}
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-medium">
+                                                        Kondisi Unit
+                                                    </label>
+
+                                                    <div
+                                                        className={`mt-2 flex w-full items-center rounded-md border px-4 py-3 text-sm font-medium ${getConditionColor(
+                                                            item.condition,
+                                                        )}`}
+                                                    >
+                                                        {item.condition || '-'}
+                                                    </div>
+                                                </div>
+
+                                                {/* IMAGE */}
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-medium">
+                                                        Dokumentasi
+                                                    </label>
+
+                                                    <div className="relative mt-2 flex aspect-3/1 w-full items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-muted-foreground/20">
+                                                        {item.test_image ? (
+                                                            <img
+                                                                src={URL.createObjectURL(
+                                                                    item.test_image,
+                                                                )}
+                                                                alt={
+                                                                    item.unit_name
+                                                                }
+                                                                className="absolute inset-0 h-full w-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <div className="space-y-2 text-center">
+                                                                <p className="text-sm font-medium">
+                                                                    No Image
+                                                                </p>
+
+                                                                <p className="text-xs text-muted-foreground">
+                                                                    Tidak ada
+                                                                    dokumentasi
+                                                                </p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
                                     ))}
                                 </div>
                             </div>
@@ -587,6 +792,10 @@ export default function Create({ units, parameters }: Props) {
 
 Create.layout = {
     breadcrumbs: [
+        {
+            title: 'Home',
+            href: '/dashboard',
+        },
         {
             title: 'Input Laporan Operasional',
         },

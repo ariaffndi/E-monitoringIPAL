@@ -13,6 +13,7 @@ class OperationalReport extends Model
     use SoftDeletes;
 
     protected $fillable = [
+        'project_id',
         'user_id',
         'note',
     ];

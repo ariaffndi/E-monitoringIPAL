@@ -63,22 +63,73 @@ class OperationalReportController extends Controller
 
         $reports = $query
             ->latest()
-            ->paginate(15)
+            ->paginate(10)
             ->withQueryString();
 
         $reports->getCollection()->transform(function ($report) {
 
+            // ================= UNIT AVG =================
             $report->unit_avg = $this->calculateUnitAverage($report);
 
-            $report->inlet_avg = $this->calculateWaterAverage(
-                $report,
-                'inlet'
-            );
+            // ================= INLET =================
+            $inletTests = $report->waterTests
+                ->where('location', 'inlet');
 
-            $report->outlet_avg = $this->calculateWaterAverage(
-                $report,
-                'outlet'
-            );
+            $inletMeet = 0;
+            $inletNotMeet = 0;
+
+            foreach ($inletTests as $test) {
+
+                $value = (float) $test->value;
+
+                $min = $test->waterParameter?->min_value;
+                $max = $test->waterParameter?->max_value;
+
+                $isMeet =
+                    ($min === null || $value >= $min) &&
+                    ($max === null || $value <= $max);
+
+                if ($isMeet) {
+                    $inletMeet++;
+                } else {
+                    $inletNotMeet++;
+                }
+            }
+
+            // ================= OUTLET =================
+            $outletTests = $report->waterTests
+                ->where('location', 'outlet');
+
+            $outletMeet = 0;
+            $outletNotMeet = 0;
+
+            foreach ($outletTests as $test) {
+
+                $value = (float) $test->value;
+
+                $min = $test->waterParameter?->min_value;
+                $max = $test->waterParameter?->max_value;
+
+                $isMeet =
+                    ($min === null || $value >= $min) &&
+                    ($max === null || $value <= $max);
+
+                if ($isMeet) {
+                    $outletMeet++;
+                } else {
+                    $outletNotMeet++;
+                }
+            }
+
+            $report->inlet = [
+                'meet' => $inletMeet,
+                'not_meet' => $inletNotMeet,
+            ];
+
+            $report->outlet = [
+                'meet' => $outletMeet,
+                'not_meet' => $outletNotMeet,
+            ];
 
             return $report;
         });
@@ -109,7 +160,7 @@ class OperationalReportController extends Controller
                         'project_id',
                         session('selected_project_id')
                     )
-                    ->select('id', 'name')
+                    ->select('id', 'name', 'description')
                     ->get(),
 
                 'parameters' => WaterParameter::where(
@@ -120,7 +171,9 @@ class OperationalReportController extends Controller
                         'id',
                         'name',
                         'unit',
-                        'type'
+                        'type',
+                        'min_value',
+                        'max_value'
                     )
                     ->get(),
             ]
@@ -201,26 +254,130 @@ class OperationalReportController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function history()
+    public function history(Request $request)
     {
         $this->authorizeOperator();
 
-        $reports = OperationalReport::withCount([
+        $conditionScores = [
+            'sangat kurang' => 1,
+            'kurang' => 2,
+            'cukup' => 3,
+            'baik' => 4,
+            'sangat baik' => 5,
+        ];
+
+        $reports = OperationalReport::with([
                 'unitTests',
-                'waterTests'
+                'waterTests.waterParameter',
             ])
             ->where('user_id', Auth::id())
             ->where(
                 'project_id',
                 session('selected_project_id')
             )
+            ->when($request->search, function ($query, $search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('note', 'like', '%' . $search . '%');
+                $q->orWhereDate('created_at', $search);
+                $q->orWhereRaw(
+                    "DATE_FORMAT(created_at, '%d-%m-%Y') LIKE ?",
+                    ['%' . $search . '%']
+                );
+                $q->orWhereRaw(
+                    "DATE_FORMAT(created_at, '%Y-%m-%d') LIKE ?",
+                    ['%' . $search . '%']
+                );
+            });
+        })
             ->latest()
-            ->paginate(15);
+            ->paginate(15)
+            ->through(function ($report) use ($conditionScores) {
+
+                // ================= UNIT AVG =================
+                $unitAvg = round(
+                    $report->unitTests->avg(function ($unitTest) use ($conditionScores) {
+
+                        return $conditionScores[
+                            strtolower($unitTest->condition)
+                        ] ?? 0;
+                    }),
+                    1
+                );
+
+                // ================= INLET =================
+                $inletTests = $report->waterTests
+                    ->where('location', 'inlet');
+
+                $inletMeet = 0;
+                $inletNotMeet = 0;
+
+                foreach ($inletTests as $test) {
+
+                    $value = (float) $test->value;
+
+                    $min = $test->waterParameter?->min_value;
+                    $max = $test->waterParameter?->max_value;
+
+                    $isMeet =
+                        ($min === null || $value >= $min) &&
+                        ($max === null || $value <= $max);
+
+                    if ($isMeet) {
+                        $inletMeet++;
+                    } else {
+                        $inletNotMeet++;
+                    }
+                }
+
+                // ================= OUTLET =================
+                $outletTests = $report->waterTests
+                    ->where('location', 'outlet');
+
+                $outletMeet = 0;
+                $outletNotMeet = 0;
+
+                foreach ($outletTests as $test) {
+
+                    $value = (float) $test->value;
+
+                    $min = $test->waterParameter?->min_value;
+                    $max = $test->waterParameter?->max_value;
+
+                    $isMeet =
+                        ($min === null || $value >= $min) &&
+                        ($max === null || $value <= $max);
+
+                    if ($isMeet) {
+                        $outletMeet++;
+                    } else {
+                        $outletNotMeet++;
+                    }
+                }
+
+                return [
+                    'id' => $report->id,
+                    'created_at' => $report->created_at,
+                    'note' => $report->note,
+                    'unit_avg' => $unitAvg,
+                    'inlet' => [
+                        'meet' => $inletMeet,
+                        'not_meet' => $inletNotMeet,
+                    ],
+                    'outlet' => [
+                        'meet' => $outletMeet,
+                        'not_meet' => $outletNotMeet,
+                    ],
+                ];
+            });
 
         return Inertia::render(
             'operator/operational-reports/History',
             [
-                'reports' => $reports
+                'reports' => $reports,
+
+                'filters' => [
+                    'search' => $request->search,
+                ],
             ]
         );
     }

@@ -1,10 +1,8 @@
 import { Head, router } from '@inertiajs/react';
 import {
     ArrowRight,
-    ClipboardList,
     Droplets,
     FileClock,
-    Flame,
     PlusCircle,
     Calendar1,
 } from 'lucide-react';
@@ -19,8 +17,10 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { dashboard } from '@/routes';
 
 type DashboardProps = {
+    reportsCount: number;
     user: {
         name: string;
     };
@@ -37,8 +37,14 @@ type DashboardProps = {
         id: number;
         created_at: string;
         unit_avg: number;
-        inlet_avg: number;
-        outlet_avg: number;
+        inlet: {
+            meet: number;
+            not_meet: number;
+        };
+        outlet: {
+            meet: number;
+            not_meet: number;
+        };
     } | null;
 
     recentReports: any[];
@@ -48,7 +54,7 @@ export default function Dashboard(props: Partial<DashboardProps>) {
     const user = props.user ?? { name: 'User' };
 
     const todayReport = props.todayReport ?? false;
-
+    const reportsCount = props.reportsCount ?? 0;
     const stats = props.stats ?? {
         month: 0,
         week: 0,
@@ -211,7 +217,16 @@ export default function Dashboard(props: Partial<DashboardProps>) {
 
                                 <Separator className="bg-white/10" />
 
-                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div className="grid grid-cols-3 gap-2 text-sm">
+                                    <div>
+                                        <p className="text-blue-100">
+                                            Total Laporan
+                                        </p>
+
+                                        <p className="mt-1 text-2xl font-bold">
+                                            {reportsCount}
+                                        </p>
+                                    </div>
                                     <div>
                                         <p className="text-blue-100">
                                             Bulan Ini
@@ -237,93 +252,6 @@ export default function Dashboard(props: Partial<DashboardProps>) {
                     </CardContent>
                 </Card>
 
-                {/* ================= QUICK STATS ================= */}
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    <Card className="border-0 shadow-sm">
-                        <CardContent className="flex items-center justify-between p-6">
-                            <div>
-                                <p className="text-sm text-muted-foreground">
-                                    Total Bulan Ini
-                                </p>
-
-                                <h3 className="mt-2 text-3xl font-bold">
-                                    {stats.month}
-                                </h3>
-                            </div>
-
-                            <div className="rounded-2xl bg-blue-100 p-4 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-                                <ClipboardList className="size-6" />
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="border-0 shadow-sm">
-                        <CardContent className="flex items-center justify-between p-6">
-                            <div>
-                                <p className="text-sm text-muted-foreground">
-                                    Total Minggu Ini
-                                </p>
-
-                                <h3 className="mt-2 text-3xl font-bold">
-                                    {stats.week}
-                                </h3>
-                            </div>
-
-                            <div className="rounded-2xl bg-cyan-100 p-4 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300">
-                                <FileClock className="size-6" />
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="border-0 shadow-sm">
-                        <CardContent className="flex items-center justify-between p-6">
-                            <div>
-                                <p className="text-sm text-muted-foreground">
-                                    Streak Input
-                                </p>
-
-                                <h3 className="mt-2 text-3xl font-bold">
-                                    {stats.streak}
-                                </h3>
-
-                                <p className="text-xs text-muted-foreground">
-                                    Hari berturut-turut
-                                </p>
-                            </div>
-
-                            <div className="rounded-2xl bg-orange-100 p-4 text-orange-700 dark:bg-orange-950 dark:text-orange-300">
-                                <Flame className="size-6" />
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="border-0 shadow-sm">
-                        <CardContent className="flex items-center justify-between p-6">
-                            <div>
-                                <p className="text-sm text-muted-foreground">
-                                    Status Hari Ini
-                                </p>
-
-                                <h3 className="mt-2 text-xl font-bold">
-                                    {todayReport
-                                        ? 'Sudah Input'
-                                        : 'Belum Input'}
-                                </h3>
-                            </div>
-
-                            <Badge
-                                className={
-                                    todayReport
-                                        ? 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300'
-                                        : 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300'
-                                }
-                            >
-                                {todayReport ? 'Aktif' : 'Pending'}
-                            </Badge>
-                        </CardContent>
-                    </Card>
-                </div>
-
                 {/* ================= STATUS & HISTORY ================= */}
                 <div className="grid gap-6 xl:grid-cols-5">
                     {/* STATUS */}
@@ -339,6 +267,7 @@ export default function Dashboard(props: Partial<DashboardProps>) {
                         <CardContent>
                             {latestReport ? (
                                 <div className="space-y-4">
+                                    {/* UNIT */}
                                     <div className="rounded-xl border bg-muted/30 p-4">
                                         <div className="mb-3 flex items-center justify-between">
                                             <p className="font-medium">Unit</p>
@@ -350,54 +279,66 @@ export default function Dashboard(props: Partial<DashboardProps>) {
                                             >
                                                 {getStatusLabel(
                                                     latestReport.unit_avg,
-                                                )}
+                                                )}{' '}
+                                                ({latestReport.unit_avg})
                                             </Badge>
                                         </div>
 
                                         <p className="text-xs text-muted-foreground">
-                                            Monitoring unit IPAL terbaru
+                                            Rata-rata kondisi unit IPAL
                                         </p>
                                     </div>
 
+                                    {/* INLET */}
                                     <div className="rounded-xl border bg-muted/30 p-4">
                                         <div className="mb-3 flex items-center justify-between">
                                             <p className="font-medium">Inlet</p>
+                                            <div className="flex flex-wrap gap-2">
+                                                <Badge className="bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300">
+                                                    Memenuhi:{' '}
+                                                    {latestReport.inlet.meet}
+                                                </Badge>
+                                                <p> | </p>
 
-                                            <Badge
-                                                className={getStatusBadge(
-                                                    latestReport.inlet_avg,
-                                                )}
-                                            >
-                                                {getStatusLabel(
-                                                    latestReport.inlet_avg,
-                                                )}
-                                            </Badge>
+                                                <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300">
+                                                    Tidak:{' '}
+                                                    {
+                                                        latestReport.inlet
+                                                            .not_meet
+                                                    }
+                                                </Badge>
+                                            </div>
                                         </div>
 
-                                        <p className="text-xs text-muted-foreground">
-                                            Kondisi parameter air masuk
+                                        <p className="mt-3 text-xs text-muted-foreground">
+                                            Status kondisi air pada inlet
                                         </p>
                                     </div>
 
+                                    {/* OUTLET */}
                                     <div className="rounded-xl border bg-muted/30 p-4">
                                         <div className="mb-3 flex items-center justify-between">
                                             <p className="font-medium">
                                                 Outlet
                                             </p>
+                                            <div className="flex flex-wrap gap-2">
+                                                <Badge className="bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300">
+                                                    Memenuhi:{' '}
+                                                    {latestReport.outlet.meet}
+                                                </Badge>
 
-                                            <Badge
-                                                className={getStatusBadge(
-                                                    latestReport.outlet_avg,
-                                                )}
-                                            >
-                                                {getStatusLabel(
-                                                    latestReport.outlet_avg,
-                                                )}
-                                            </Badge>
+                                                <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300">
+                                                    Tidak:{' '}
+                                                    {
+                                                        latestReport.outlet
+                                                            .not_meet
+                                                    }
+                                                </Badge>
+                                            </div>
                                         </div>
 
-                                        <p className="text-xs text-muted-foreground">
-                                            Kondisi parameter air keluar
+                                        <p className="mt-3 text-xs text-muted-foreground">
+                                            Status kondisi air pada outlet
                                         </p>
                                     </div>
                                 </div>
@@ -414,14 +355,13 @@ export default function Dashboard(props: Partial<DashboardProps>) {
                         <CardHeader className="flex flex-row items-center justify-between space-y-0">
                             <div>
                                 <CardTitle>Riwayat Terakhir</CardTitle>
-
-                                <CardDescription>
+                                <CardDescription className="mt-2">
                                     Aktivitas laporan operasional terbaru
                                 </CardDescription>
                             </div>
 
                             <Button
-                                variant="ghost"
+                                variant="outline"
                                 className="cursor-pointer"
                                 onClick={() =>
                                     router.visit('/operational-reports/history')
@@ -445,19 +385,13 @@ export default function Dashboard(props: Partial<DashboardProps>) {
                                         className="cursor-pointer rounded-2xl border bg-muted/20 p-4 transition-all duration-300 hover:border-blue-200 hover:bg-blue-50 dark:hover:border-blue-900 dark:hover:bg-blue-950/30"
                                     >
                                         <div className="flex items-start justify-between gap-4">
-                                            <div className="space-y-1">
-                                                <h4 className="font-semibold">
-                                                    Laporan Operasional
-                                                </h4>
-
-                                                <p className="text-sm text-muted-foreground">
-                                                    {item.note || '-'}
-                                                </p>
-                                            </div>
-
-                                            <Badge variant="secondary">
+                                            <p className="text-sm font-semibold">
                                                 {formatDate(item.created_at)}
-                                            </Badge>
+                                            </p>
+
+                                            <p className="max-w-sm truncate text-sm whitespace-nowrap text-muted-foreground">
+                                                {item.note || '-'}
+                                            </p>
                                         </div>
                                     </div>
                                 ))
@@ -478,6 +412,10 @@ export default function Dashboard(props: Partial<DashboardProps>) {
 
 Dashboard.layout = {
     breadcrumbs: [
+        {
+            title: 'Home',
+            href: dashboard(),
+        },
         {
             title: 'Dashboard',
         },

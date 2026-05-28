@@ -38,8 +38,8 @@ export default function OperationalReports({ reports, filters }: any) {
                 '/operational-reports',
                 search
                     ? {
-                        search,
-                    }
+                          search,
+                      }
                     : {},
                 {
                     preserveState: true,
@@ -263,19 +263,19 @@ export default function OperationalReports({ reports, filters }: any) {
                     <table className="table min-w-full text-center text-sm">
                         <thead>
                             <tr className="bg-secondary">
-                                <th className="max-w-fit p-2">No</th>
+                                <th className="max-w-fit p-4">No</th>
 
-                                <th className="p-2">Tanggal</th>
+                                <th className="p-4">Tanggal</th>
 
-                                <th className="p-2">Operator</th>
+                                <th className="p-4">Operator</th>
 
-                                <th className="p-2">Unit</th>
+                                <th className="p-4">Rata-rata Unit</th>
 
-                                <th className="p-2">Inlet</th>
+                                <th className="p-4">Inlet</th>
 
-                                <th className="p-2">Outlet</th>
+                                <th className="p-4">Outlet</th>
 
-                                <th className="p-2">Catatan</th>
+                                <th className="p-4">Catatan</th>
                             </tr>
                         </thead>
 
@@ -314,6 +314,7 @@ export default function OperationalReports({ reports, filters }: any) {
                                                     'Operator tidak tersedia'}
                                             </td>
 
+                                            {/* UNIT */}
                                             <td className="p-4">
                                                 <span
                                                     className={`rounded-full px-3 py-1 text-xs ${getStatusBadge(
@@ -322,32 +323,43 @@ export default function OperationalReports({ reports, filters }: any) {
                                                 >
                                                     {getStatusLabel(
                                                         report.unit_avg,
-                                                    )}
+                                                    )}{' '}
+                                                    ({report.unit_avg})
                                                 </span>
                                             </td>
 
+                                            {/* INLET */}
                                             <td className="p-4">
-                                                <span
-                                                    className={`rounded-full px-3 py-1 text-xs ${getStatusBadge(
-                                                        report.inlet_avg,
-                                                    )}`}
-                                                >
-                                                    {getStatusLabel(
-                                                        report.inlet_avg,
-                                                    )}
-                                                </span>
+                                                <div className="flex flex-col items-center gap-2">
+                                                    <span className="rounded-full bg-green-100 px-3 py-1 text-xs text-green-700">
+                                                        Memenuhi:{' '}
+                                                        {report.inlet.meet}
+                                                    </span>
+
+                                                    <Separator className="w-16" />
+
+                                                    <span className="rounded-full bg-orange-100 px-3 py-1 text-xs text-orange-700">
+                                                        Tidak:{' '}
+                                                        {report.inlet.not_meet}
+                                                    </span>
+                                                </div>
                                             </td>
 
+                                            {/* OUTLET */}
                                             <td className="p-4">
-                                                <span
-                                                    className={`rounded-full px-3 py-1 text-xs ${getStatusBadge(
-                                                        report.outlet_avg,
-                                                    )}`}
-                                                >
-                                                    {getStatusLabel(
-                                                        report.outlet_avg,
-                                                    )}
-                                                </span>
+                                                <div className="flex flex-col items-center gap-2">
+                                                    <span className="rounded-full bg-green-100 px-3 py-1 text-xs text-green-700">
+                                                        Memenuhi:{' '}
+                                                        {report.outlet.meet}
+                                                    </span>
+
+                                                    <Separator className="w-16" />
+
+                                                    <span className="rounded-full bg-orange-100 px-3 py-1 text-xs text-orange-700">
+                                                        Tidak:{' '}
+                                                        {report.outlet.not_meet}
+                                                    </span>
+                                                </div>
                                             </td>
 
                                             <td className="max-w-xs truncate p-4 text-sm whitespace-nowrap sm:table-cell">

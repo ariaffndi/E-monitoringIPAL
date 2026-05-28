@@ -1,10 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { router } from '@inertiajs/react';
-import {
-    Calendar1,
-    Droplets,
-    SquareChartGantt,
-} from 'lucide-react';
+import { Calendar1, Droplets, SquareChartGantt } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
     Area,
@@ -38,7 +34,6 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { dashboard } from '@/routes';
 
 type Unit = {
     id: number;
@@ -59,22 +54,32 @@ type ChartItem = {
     outlet: number | null;
 };
 
-type Note = {
+type RecentReport = {
     id: number;
     note: string;
     created_at: string;
+    unit_avg: number;
+    inlet: {
+        meet: number;
+        not_meet: number;
+    };
+    outlet: {
+        meet: number;
+        not_meet: number;
+    };
 };
 
 type Operator = {
     id: number;
     name: string;
     email: string;
+    image?: string | null;
 };
 
 type Props = {
     units: Unit[];
     operators: Operator[];
-    notes: Note[];
+    recentReports: RecentReport[];
     datesWithReports: string[];
     waterParameters: WaterParameter[];
     chartData: ChartItem[];
@@ -83,11 +88,10 @@ type Props = {
     todayReport: boolean;
 };
 
-
 export default function Dashboard({
     units,
     operators,
-    notes,
+    recentReports,
     datesWithReports,
     waterParameters,
     chartData,
@@ -142,6 +146,57 @@ export default function Dashboard({
     }, [chartData]);
 
     const currentStatus = todayReport ? 'Sudah Input' : 'Belum Input';
+    const getStatusBadge = (value: number) => {
+        if (!value) {
+            return 'bg-muted text-muted-foreground';
+        }
+
+        if (value >= 4.5) {
+            return 'bg-green-100 text-green-700';
+        }
+
+        if (value >= 3.5) {
+            return 'bg-blue-100 text-blue-700';
+        }
+
+        if (value >= 2.5) {
+            return 'bg-yellow-100 text-yellow-700';
+        }
+
+        return 'bg-red-100 text-red-700';
+    };
+
+    const getStatusLabel = (value: number) => {
+        if (!value) {
+            return '-';
+        }
+
+        if (value >= 4.5) {
+            return 'Sangat Baik';
+        }
+
+        if (value >= 3.5) {
+            return 'Baik';
+        }
+
+        if (value >= 2.5) {
+            return 'Cukup';
+        }
+
+        if (value >= 1.5) {
+            return 'Kurang';
+        }
+
+        return 'Sangat Kurang';
+    };
+
+    const formatDate = (date: string) => {
+        return new Date(date).toLocaleDateString('id-ID', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+        });
+    };
 
     return (
         <>
@@ -249,9 +304,7 @@ export default function Dashboard({
 
                                 <div className="grid grid-cols-3 gap-4 text-sm">
                                     <div>
-                                        <p className="text-blue-100">
-                                            Reports
-                                        </p>
+                                        <p className="text-blue-100">Reports</p>
 
                                         <p className="mt-1 text-2xl font-bold">
                                             {reportsCount}
@@ -267,9 +320,7 @@ export default function Dashboard({
                                         </p>
                                     </div>
                                     <div>
-                                        <p className="text-blue-100">
-                                            Unit
-                                        </p>
+                                        <p className="text-blue-100">Unit</p>
 
                                         <p className="mt-1 text-2xl font-bold">
                                             {units.length}
@@ -282,13 +333,15 @@ export default function Dashboard({
                 </Card>
 
                 {/* ================= MAIN LAYOUT ================= */}
-                <div className="grid gap-4 lg:grid-cols-10">
+                <div className="grid items-stretch gap-4 lg:grid-cols-10">
                     {/* ================= LEFT SIDE ================= */}
-                    <div className="min-w-0 space-y-4 lg:col-span-7">
+                    <div className="flex min-w-0 flex-col gap-4 lg:col-span-7">
                         {/* ================= UNIT ================= */}
                         <Card>
                             <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                <CardTitle>Kondisi Unit IPAL</CardTitle>
+                                <CardTitle>
+                                    Kondisi Terakhir Unit IPAL
+                                </CardTitle>
 
                                 <Button
                                     size="sm"
@@ -307,7 +360,7 @@ export default function Dashboard({
                                             {units.map((unit) => (
                                                 <div
                                                     key={unit.id}
-                                                    className="min-w-[170px] rounded-xl border bg-muted/30 p-4"
+                                                    className="min-w-42.5 rounded-xl border bg-muted/30 p-4"
                                                 >
                                                     <p className="mb-3 line-clamp-2 font-semibold">
                                                         {unit.name}
@@ -331,7 +384,7 @@ export default function Dashboard({
                                         <ScrollBar orientation="horizontal" />
                                     </ScrollArea>
                                 ) : (
-                                    <div className="flex h-[120px] items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
+                                    <div className="flex h-30 items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
                                         Belum ada unit pada project ini
                                     </div>
                                 )}
@@ -339,9 +392,9 @@ export default function Dashboard({
                         </Card>
 
                         {/* ================= CHART ================= */}
-                        <Card>
+                        <Card className="h-full">
                             <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                                <CardTitle>Water Test</CardTitle>
+                                <CardTitle>Grafik Kondisi Air</CardTitle>
 
                                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                                     {/* LEGEND */}
@@ -376,7 +429,7 @@ export default function Dashboard({
                                                 );
                                             }}
                                         >
-                                            <SelectTrigger className="w-full sm:w-[140px]">
+                                            <SelectTrigger className="w-full sm:w-35">
                                                 <SelectValue placeholder="Parameter" />
                                             </SelectTrigger>
 
@@ -401,7 +454,7 @@ export default function Dashboard({
 
                             <CardContent>
                                 {chartData.length ? (
-                                    <div className="h-[250px] w-full sm:h-[320px]">
+                                    <div className="h-62.5 w-full sm:h-80">
                                         <ChartContainer
                                             config={chartConfig}
                                             className="h-full w-full"
@@ -517,32 +570,8 @@ export default function Dashboard({
                                         </ChartContainer>
                                     </div>
                                 ) : (
-                                    <div className="flex h-[250px] items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
+                                    <div className="flex h-62.5 items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
                                         Belum ada data water test
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
-
-                        {/* ================= NOTES ================= */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Catatan</CardTitle>
-                            </CardHeader>
-
-                            <CardContent className="space-y-3">
-                                {notes.length ? (
-                                    notes.map((item) => (
-                                        <div
-                                            key={item.id}
-                                            className="rounded-lg border p-3 text-sm"
-                                        >
-                                            {item.note}
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-                                        Belum ada catatan operasional
                                     </div>
                                 )}
                             </CardContent>
@@ -595,10 +624,20 @@ export default function Dashboard({
                                             key={operator.id}
                                             className="flex items-center gap-3 rounded-lg border p-2 sm:p-3"
                                         >
-                                            <Avatar>
-                                                <AvatarFallback>
-                                                    {operator.name.charAt(0)}
-                                                </AvatarFallback>
+                                            <Avatar className="h-10 w-10">
+                                                {operator.image ? (
+                                                    <img
+                                                        src={`/storage/${operator.image}`}
+                                                        alt={operator.name}
+                                                        className="h-full w-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <AvatarFallback>
+                                                        {operator.name.charAt(
+                                                            0,
+                                                        )}
+                                                    </AvatarFallback>
+                                                )}
                                             </Avatar>
 
                                             <div className="min-w-0">
@@ -621,6 +660,92 @@ export default function Dashboard({
                         </Card>
                     </div>
                 </div>
+                {/* ================= RECENT REPORTS ================= */}
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                        <div>
+                            <CardTitle>Laporan Operasional Terakhir</CardTitle>
+                        </div>
+
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            className="cursor-pointer text-xs"
+                            onClick={() => router.visit('/operational-reports')}
+                        >
+                            Lihat Semua
+                        </Button>
+                    </CardHeader>
+
+                    <CardContent className="space-y-4">
+                        {recentReports.length ? (
+                            recentReports.map((item) => (
+                                <div
+                                    key={item.id}
+                                    onClick={() =>
+                                        router.visit(
+                                            `/operational-reports/${item.id}`,
+                                        )
+                                    }
+                                    className="cursor-pointer rounded-xl border bg-muted/20 p-4 transition-all duration-300 hover:border-blue-200 hover:bg-blue-50 dark:hover:border-blue-900 dark:hover:bg-blue-950/30"
+                                >
+                                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                                        {/* LEFT */}
+                                        <div className="min-w-0 flex-1">
+                                            <p className="text-sm font-semibold">
+                                                {formatDate(item.created_at)}
+                                            </p>
+
+                                            <p className="mt-1 line-clamp-2 max-w-xl text-sm text-muted-foreground">
+                                                {item.note || '-'}
+                                            </p>
+                                        </div>
+
+                                        {/* RIGHT */}
+                                        <div className="flex items-center gap-2 overflow-x-auto lg:justify-end">
+                                            <Badge
+                                                className={getStatusBadge(
+                                                    item.unit_avg,
+                                                )}
+                                            >
+                                                Unit:{' '}
+                                                {getStatusLabel(item.unit_avg)}
+                                            </Badge>
+
+                                            <div className="border-l px-4">
+                                                <Badge className="bg-green-100 text-green-700">
+                                                    Inlet Meet:{' '}
+                                                    {item.inlet.meet}
+                                                </Badge>
+                                                <Separator />
+                                                <Badge className="bg-orange-100 text-orange-700">
+                                                    Inlet Not:{' '}
+                                                    {item.inlet.not_meet}
+                                                </Badge>
+                                            </div>
+                                            <div className="border-l px-4">
+
+                                            <Badge className="bg-green-100 text-green-700">
+                                                Outlet Meet:{' '}
+                                                {item.outlet.meet}
+                                            </Badge>
+                                            <Separator />
+                                            <Badge className="bg-orange-100 text-orange-700">
+                                                Outlet Not:{' '}
+                                                {item.outlet.not_meet}
+                                            </Badge>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
+                                Belum ada laporan operasional
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
             </div>
         </>
     );
@@ -630,7 +755,7 @@ Dashboard.layout = {
     breadcrumbs: [
         {
             title: 'Home',
-            href: dashboard(),
+            href: '/dashboard',
         },
         {
             title: 'Dashboard',
