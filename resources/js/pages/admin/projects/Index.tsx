@@ -15,13 +15,11 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-
 import ModalConfirmDelete from '@/components/modal-confirm-delete';
 import ModalCreate from '@/components/modal-create';
 import ProjectStatCard from '@/components/project-stat-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-
 import {
    Card,
    CardDescription,
@@ -29,18 +27,14 @@ import {
    CardHeader,
    CardTitle,
 } from '@/components/ui/card';
-
 import {
    DropdownMenu,
    DropdownMenuContent,
    DropdownMenuItem,
    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-
 import { Field, FieldLabel } from '@/components/ui/field';
-
 import { Input } from '@/components/ui/input';
-
 import {
    Select,
    SelectContent,
@@ -49,7 +43,6 @@ import {
    SelectTrigger,
    SelectValue,
 } from '@/components/ui/select';
-
 import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
 
@@ -68,21 +61,14 @@ type Props = {
 
 export default function Index({ projects }: Props) {
    const [search, setSearch] = useState('');
-
    const [loading, setLoading] = useState(false);
-
    const [openCreate, setOpenCreate] = useState(false);
-
    const [isEdit, setIsEdit] = useState(false);
-
    const [selectedProject, setSelectedProject] = useState<Project | null>(
       null,
    );
-
    const [openDelete, setOpenDelete] = useState(false);
-
    const [selectedId, setSelectedId] = useState<number | null>(null);
-
    const { data, setData, post, processing, reset, errors } = useForm({
       name: '',
       location: '',

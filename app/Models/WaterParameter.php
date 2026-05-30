@@ -16,6 +16,7 @@ class WaterParameter extends Model
         'min_value',
         'max_value',
         'type',
+        'project_id',
     ];
 
     public function waterTests(): HasMany

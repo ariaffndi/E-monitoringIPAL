@@ -25,7 +25,6 @@ import { Spinner } from '@/components/ui/spinner';
 
 export default function OperationalReports({ reports, filters }: any) {
     const [loading, setLoading] = useState(false);
-
     const [search, setSearch] = useState(filters.search || '');
 
     // ================= SEARCH =================
@@ -69,11 +68,9 @@ export default function OperationalReports({ reports, filters }: any) {
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
-
         const hari = date.toLocaleDateString('id-ID', {
             weekday: 'long',
         });
-
         const tanggal = date.toLocaleDateString('id-ID', {
             day: '2-digit',
             month: '2-digit',
@@ -128,9 +125,7 @@ export default function OperationalReports({ reports, filters }: any) {
     };
 
     const [openRecap, setOpenRecap] = useState(false);
-
     const [fromDate, setFromDate] = useState('');
-
     const [toDate, setToDate] = useState('');
 
     return (
@@ -264,17 +259,11 @@ export default function OperationalReports({ reports, filters }: any) {
                         <thead>
                             <tr className="bg-secondary">
                                 <th className="max-w-fit p-4">No</th>
-
                                 <th className="p-4">Tanggal</th>
-
                                 <th className="p-4">Operator</th>
-
                                 <th className="p-4">Rata-rata Unit</th>
-
                                 <th className="p-4">Inlet</th>
-
                                 <th className="p-4">Outlet</th>
-
                                 <th className="p-4">Catatan</th>
                             </tr>
                         </thead>
@@ -300,7 +289,6 @@ export default function OperationalReports({ reports, filters }: any) {
                                             <td className="max-w-fit p-4">
                                                 {reports.from + index}
                                             </td>
-
                                             <td className="p-4">
                                                 {report.created_at
                                                     ? formatDate(
@@ -308,12 +296,10 @@ export default function OperationalReports({ reports, filters }: any) {
                                                       )
                                                     : '-'}
                                             </td>
-
                                             <td className="p-4">
                                                 {report.user?.name ??
                                                     'Operator tidak tersedia'}
                                             </td>
-
                                             {/* UNIT */}
                                             <td className="p-4">
                                                 <span
@@ -327,7 +313,6 @@ export default function OperationalReports({ reports, filters }: any) {
                                                     ({report.unit_avg})
                                                 </span>
                                             </td>
-
                                             {/* INLET */}
                                             <td className="p-4">
                                                 <div className="flex flex-col items-center gap-2">
@@ -335,16 +320,13 @@ export default function OperationalReports({ reports, filters }: any) {
                                                         Memenuhi:{' '}
                                                         {report.inlet.meet}
                                                     </span>
-
                                                     <Separator className="w-16" />
-
                                                     <span className="rounded-full bg-orange-100 px-3 py-1 text-xs text-orange-700">
                                                         Tidak:{' '}
                                                         {report.inlet.not_meet}
                                                     </span>
                                                 </div>
                                             </td>
-
                                             {/* OUTLET */}
                                             <td className="p-4">
                                                 <div className="flex flex-col items-center gap-2">
@@ -352,16 +334,13 @@ export default function OperationalReports({ reports, filters }: any) {
                                                         Memenuhi:{' '}
                                                         {report.outlet.meet}
                                                     </span>
-
                                                     <Separator className="w-16" />
-
                                                     <span className="rounded-full bg-orange-100 px-3 py-1 text-xs text-orange-700">
                                                         Tidak:{' '}
                                                         {report.outlet.not_meet}
                                                     </span>
                                                 </div>
                                             </td>
-
                                             <td className="max-w-xs truncate p-4 text-sm whitespace-nowrap sm:table-cell">
                                                 {report.note ||
                                                     'Tidak ada catatan'}

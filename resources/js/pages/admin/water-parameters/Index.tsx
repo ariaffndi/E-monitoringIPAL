@@ -2,7 +2,6 @@ import { Head, router } from '@inertiajs/react';
 import { useForm } from '@inertiajs/react';
 import { PlusCircle, Search, Trash2, Pencil } from 'lucide-react';
 import { useState, useEffect } from 'react';
-
 import { toast } from 'sonner';
 import ModalConfirmDelete from '@/components/modal-confirm-delete';
 import ModalCreate from '@/components/modal-create';
@@ -33,21 +32,15 @@ export default function WaterParameters({ waterparameters, filters }: Props) {
     // ================= STATE =================
     const [openCreate, setOpenCreate] = useState(false);
     const [openDetail, setOpenDetail] = useState(false);
-
     const [selectedWaterParameter, setSelectedWaterParameter] =
         useState<any>(null);
-
     const [openDelete, setOpenDelete] = useState(false);
-
     const [selectedId, setSelectedId] = useState<number | null>(null);
-
     const [loading, setLoading] = useState(false);
 
     // ================= SEARCH =================
     const [search, setSearch] = useState(filters?.search || '');
-
     const [filterType, setFilterType] = useState<string>('all');
-
     const { data, setData, post, processing, errors, reset } = useForm<{
         name: string;
         unit: string;
@@ -77,11 +70,8 @@ export default function WaterParameters({ waterparameters, filters }: Props) {
                     forceFormData: true,
                     onSuccess: () => {
                         setOpenCreate(false);
-
                         reset();
-
                         setIsEdit(false);
-
                         toast.success('Parameter berhasil diupdate');
                     },
                 },
@@ -91,9 +81,7 @@ export default function WaterParameters({ waterparameters, filters }: Props) {
                 forceFormData: true,
                 onSuccess: () => {
                     setOpenCreate(false);
-
                     reset();
-
                     toast.success('Parameter berhasil ditambahkan');
                 },
             });
@@ -102,15 +90,12 @@ export default function WaterParameters({ waterparameters, filters }: Props) {
 
     const handleView = (waterparameter: any) => {
         setSelectedWaterParameter(waterparameter);
-
         setOpenDetail(true);
     };
 
     const handleEdit = (waterparameter: any) => {
         setIsEdit(true);
-
         setSelectedWaterParameter(waterparameter);
-
         setData({
             name: waterparameter.name || '',
             unit: waterparameter.unit || '',
@@ -130,7 +115,6 @@ export default function WaterParameters({ waterparameters, filters }: Props) {
         router.delete(`/water-parameters/${selectedId}`, {
             onSuccess: () => {
                 setOpenDelete(false);
-
                 toast.success('Parameter berhasil dihapus');
             },
         });
@@ -138,15 +122,12 @@ export default function WaterParameters({ waterparameters, filters }: Props) {
 
     const handleCloseModal = () => {
         setOpenCreate(false);
-
         setIsEdit(false);
-
         reset();
     };
 
     const confirmDelete = (id: number) => {
         setSelectedId(id);
-
         setOpenDelete(true);
     };
 
@@ -154,7 +135,6 @@ export default function WaterParameters({ waterparameters, filters }: Props) {
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setLoading(true);
-
         const delay = setTimeout(() => {
             router.get('/water-parameters', search ? { search } : {}, {
                 preserveState: true,
@@ -169,7 +149,6 @@ export default function WaterParameters({ waterparameters, filters }: Props) {
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Escape') {
             setSearch('');
-
             router.get(
                 '/water-parameters',
                 {},
@@ -193,13 +172,10 @@ export default function WaterParameters({ waterparameters, filters }: Props) {
         switch (type) {
             case 'fisika':
                 return 'bg-blue-100 text-blue-700';
-
             case 'kimia':
                 return 'bg-purple-100 text-purple-700';
-
             case 'biologi':
                 return 'bg-green-100 text-green-700';
-
             default:
                 return 'bg-gray-100 text-gray-700';
         }
@@ -268,13 +244,9 @@ export default function WaterParameters({ waterparameters, filters }: Props) {
                         <thead>
                             <tr className="bg-secondary">
                                 <th className="p-2">Nama</th>
-
                                 <th className="p-2">Satuan</th>
-
                                 <th className="p-2">Nilai Minimum</th>
-
                                 <th className="p-2">Nilai Maksimum</th>
-
                                 <th className="flex items-center justify-center p-2">
                                     <Select
                                         value={filterType}
@@ -291,15 +263,12 @@ export default function WaterParameters({ waterparameters, filters }: Props) {
                                                 <SelectItem value="all">
                                                     Semua
                                                 </SelectItem>
-
                                                 <SelectItem value="fisika">
                                                     Fisika
                                                 </SelectItem>
-
                                                 <SelectItem value="kimia">
                                                     Kimia
                                                 </SelectItem>
-
                                                 <SelectItem value="biologi">
                                                     Biologi
                                                 </SelectItem>
@@ -307,7 +276,6 @@ export default function WaterParameters({ waterparameters, filters }: Props) {
                                         </SelectContent>
                                     </Select>
                                 </th>
-
                                 <th className="p-2">Aksi</th>
                             </tr>
                         </thead>
@@ -330,21 +298,17 @@ export default function WaterParameters({ waterparameters, filters }: Props) {
                                             <td className="p-2 font-semibold">
                                                 {waterparameter.name || '-'}
                                             </td>
-
                                             <td className="p-2">
                                                 {waterparameter.unit || '-'}
                                             </td>
-
                                             <td className="p-2">
                                                 {waterparameter.min_value ??
                                                     '-'}
                                             </td>
-
                                             <td className="p-2">
                                                 {waterparameter.max_value ??
                                                     '-'}
                                             </td>
-
                                             <td className="p-2">
                                                 <span
                                                     className={`rounded-full px-3 py-1 text-xs capitalize ${getTypeBadge(

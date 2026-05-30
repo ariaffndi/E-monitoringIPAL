@@ -20,7 +20,6 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-
 import { Field } from '@/components/ui/field';
 import { FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
@@ -84,9 +83,7 @@ export default function Units({ units, filters }: any) {
 
             onSuccess: () => {
                 setOpenCreate(false);
-
                 reset();
-
                 toast.success('Unit berhasil ditambahkan');
             },
         });
@@ -95,16 +92,13 @@ export default function Units({ units, filters }: any) {
     // ================= VIEW =================
     const handleView = (unit: any) => {
         setSelectedUnit(unit);
-
         setOpenDetail(true);
     };
 
     // ================= EDIT =================
     const handleEdit = (unit: any) => {
         setIsEdit(true);
-
         setSelectedUnit(unit);
-
         setData({
             name: unit.name || '',
             specification: unit.specification || '',
@@ -125,7 +119,6 @@ export default function Units({ units, filters }: any) {
         router.delete(`/units/${selectedId}`, {
             onSuccess: () => {
                 setOpenDelete(false);
-
                 toast.success('Unit berhasil dihapus');
             },
         });
@@ -134,16 +127,13 @@ export default function Units({ units, filters }: any) {
     // ================= CLOSE MODAL =================
     const handleCloseModal = () => {
         setOpenCreate(false);
-
         setIsEdit(false);
-
         reset();
     };
 
     // ================= CONFIRM DELETE =================
     const confirmDelete = (id: number) => {
         setSelectedId(id);
-
         setOpenDelete(true);
     };
 

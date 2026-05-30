@@ -2,7 +2,6 @@ import { Head, router } from '@inertiajs/react';
 import { useForm } from '@inertiajs/react';
 import { PlusCircle, Search, MoreVertical, Trash2, Pencil } from 'lucide-react';
 import { useState, useEffect } from 'react';
-
 import { toast } from 'sonner';
 import ModalConfirmDelete from '@/components/modal-confirm-delete';
 import ModalCreate from '@/components/modal-create';
@@ -46,7 +45,6 @@ export default function Users({ users, filters }: Props) {
 
     // ================= SEARCH =================
     const [search, setSearch] = useState(filters?.search || '');
-
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
@@ -69,11 +67,8 @@ export default function Users({ users, filters }: Props) {
 
                     onSuccess: () => {
                         setOpenCreate(false);
-
                         reset();
-
                         setIsEdit(false);
-
                         toast.success('User berhasil diupdate');
                     },
                 },
@@ -87,9 +82,7 @@ export default function Users({ users, filters }: Props) {
 
             onSuccess: () => {
                 setOpenCreate(false);
-
                 reset();
-
                 toast.success('User berhasil ditambahkan');
             },
         });
@@ -98,9 +91,7 @@ export default function Users({ users, filters }: Props) {
     // ================= EDIT =================
     const handleEdit = (user: User) => {
         setIsEdit(true);
-
         setSelectedUser(user);
-
         setData({
             name: user.name || '',
             email: user.email || '',
@@ -126,7 +117,6 @@ export default function Users({ users, filters }: Props) {
         router.delete(`/users/${selectedId}`, {
             onSuccess: () => {
                 setOpenDelete(false);
-
                 toast.success('User berhasil dihapus');
             },
         });
@@ -135,9 +125,7 @@ export default function Users({ users, filters }: Props) {
     // ================= CLOSE MODAL =================
     const handleCloseModal = () => {
         setOpenCreate(false);
-
         setIsEdit(false);
-
         reset();
     };
 
@@ -145,7 +133,6 @@ export default function Users({ users, filters }: Props) {
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setLoading(true);
-
         const delay = setTimeout(() => {
             router.get('/users', search ? { search } : {}, {
                 preserveState: true,
@@ -160,7 +147,6 @@ export default function Users({ users, filters }: Props) {
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Escape') {
             setSearch('');
-
             router.get(
                 '/users',
                 {},

@@ -6,6 +6,9 @@ use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class ProjectController extends Controller
 {
@@ -73,8 +76,10 @@ class ProjectController extends Controller
 
         $imagePath = null;
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')
-                ->store('projects', 'public');
+            $imagePath = $this->uploadImage(
+                $request->file('image'),
+                'projects'
+            );
         }
 
         Project::create([
@@ -126,8 +131,12 @@ class ProjectController extends Controller
                 Storage::disk('public')
                     ->delete($project->image);
             }
-            $imagePath = $request->file('image')
-                ->store('projects', 'public');
+            $imagePath = $this->uploadImage(
+                $request->file('image'),
+                'projects'
+            );
+
+            $validated['image'] = $imagePath;
         }
 
         $project->update([
@@ -175,5 +184,28 @@ class ProjectController extends Controller
         session()->forget('selected_project_id');
 
         return redirect('/projects');
+    }
+
+    private function uploadImage($file, string $folder): string
+    {
+        $manager = new ImageManager(
+            new Driver()
+        );
+
+        $filename = Str::uuid() . '.webp';
+
+        $image = $manager->decode($file);
+
+        $image->scaleDown(width: 1200);
+
+        Storage::disk('public')->put(
+            "{$folder}/{$filename}",
+            (string) $image->encodeUsingFileExtension(
+                'webp',
+                quality: 50
+            )
+        );
+
+        return "{$folder}/{$filename}";
     }
 }

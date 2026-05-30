@@ -11,6 +11,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class OperationalReportController extends Controller
 {
@@ -697,20 +701,30 @@ class OperationalReportController extends Controller
                 continue;
             }
 
-            $image = null;
+            $imagePath = null;
 
             if ($request->hasFile("unit_tests.$index.test_image")) {
 
-                $image = $request
-                    ->file("unit_tests.$index.test_image")
-                    ->store('unit-tests', 'public');
+                $imagePath = $this->uploadImage(
+                    $request->file("unit_tests.$index.test_image"),
+                    'unit-tests'
+                );
             }
+
+            // $image = null;
+
+            // if ($request->hasFile("unit_tests.$index.test_image")) {
+
+            //     $image = $request
+            //         ->file("unit_tests.$index.test_image")
+            //         ->store('unit-tests', 'public');
+            // }
 
             UnitTest::create([
                 'operational_report_id' => $reportId,
                 'unit_id' => $unit['unit_id'],
                 'condition' => $unit['condition'],
-                'test_image' => $image,
+                'test_image' => $imagePath,
             ]);
         }
     }
@@ -747,5 +761,28 @@ class OperationalReportController extends Controller
                 ]);
             }
         }
+    }
+
+    private function uploadImage($file, string $folder): string
+    {
+        $manager = new ImageManager(
+            new Driver()
+        );
+
+        $filename = Str::uuid() . '.webp';
+
+        $image = $manager->decode($file);
+
+        $image->scaleDown(width: 1200);
+
+        Storage::disk('public')->put(
+            "{$folder}/{$filename}",
+            (string) $image->encodeUsingFileExtension(
+                'webp',
+                quality: 50
+            )
+        );
+
+        return "{$folder}/{$filename}";
     }
 }

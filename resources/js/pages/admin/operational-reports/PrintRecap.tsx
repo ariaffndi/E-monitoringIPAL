@@ -1,8 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { useEffect } from 'react';
-
 // import ComplianceChart from '@/components/operational-reports/CompilanceChart';
-
 import ParameterRecapTable from '@/components/operational-reports/ParameterRecapTable';
 import ReportsTable from '@/components/operational-reports/ReportsTable';
 import UnitRecapTable from '@/components/operational-reports/UnitRecapTable';

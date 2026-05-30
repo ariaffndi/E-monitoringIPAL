@@ -17,6 +17,7 @@ class Unit extends Model
         'dimension',
         'description',
         'image',
+        'project_id',
     ];
 
     public function unitTests(): HasMany

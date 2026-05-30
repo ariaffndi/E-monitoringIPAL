@@ -7,6 +7,10 @@ use Inertia\Inertia;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
+
 
 class UserController extends Controller
 {
@@ -75,8 +79,11 @@ class UserController extends Controller
         $imagePath = null;
 
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')
-                ->store('users', 'public');
+
+            $imagePath = $this->uploadImage(
+                $request->file('image'),
+                'users'
+            );
         }
 
         User::create([
@@ -92,7 +99,7 @@ class UserController extends Controller
             ->back()
             ->with(
                 'success',
-                'User berhasil ditambahkan'
+                'Operator berhasil ditambahkan'
             );
     }
 
@@ -145,16 +152,19 @@ class UserController extends Controller
                 Storage::disk('public')->delete($user->image);
             }
 
-            $updateData['image'] = $request
-                ->file('image')
-                ->store('users', 'public');
+            $imagePath = $this->uploadImage(
+                $request->file('image'),
+                'users'
+            );
+
+            $updateData['image'] = $imagePath;
         }
 
         $user->update($updateData);
 
         return back()->with(
             'success',
-            'User berhasil diupdate'
+            'Operator berhasil diupdate'
         );
     }
 
@@ -173,7 +183,30 @@ class UserController extends Controller
 
         return back()->with(
             'success',
-            'User berhasil dihapus'
+            'Operator berhasil dihapus'
         );
+    }
+
+    private function uploadImage($file, string $folder): string
+    {
+        $manager = new ImageManager(
+            new Driver()
+        );
+
+        $filename = Str::uuid() . '.webp';
+
+        $image = $manager->decode($file);
+
+        $image->scaleDown(width: 1200);
+
+        Storage::disk('public')->put(
+            "{$folder}/{$filename}",
+            (string) $image->encodeUsingFileExtension(
+                'webp',
+                quality: 50
+            )
+        );
+
+        return "{$folder}/{$filename}";
     }
 }

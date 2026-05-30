@@ -1,4 +1,5 @@
 import { Form, Head } from '@inertiajs/react';
+import { Mail, LockKeyhole } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
@@ -25,121 +26,166 @@ export default function Login({
 }: Props) {
     return (
         <div className="grid min-h-svh lg:grid-cols-2">
-            <div className="flex flex-col gap-4 p-6 md:p-10">
+            <div className="relative flex flex-col gap-4 p-6 md:p-10">
+                {/* LOGO TETAP */}
                 <div className="flex gap-2 md:justify-start">
                     <AppLogo textClassName="text-2xl" iconClassName="size-8" />
                 </div>
+
                 <div className="flex flex-1 items-center justify-center">
-                    <div className="w-full max-w-xs">
+                    <div className="w-full max-w-md">
                         <>
                             <Head title="Log in" />
 
                             <Form
                                 {...store.form()}
                                 resetOnSuccess={['password']}
-                                className="flex flex-col gap-6"
+                                className="space-y-6"
                             >
                                 {({ processing, errors }) => (
                                     <>
-                                        <div className="grid gap-6">
-                                            <div className="mb-2">
-                                                <h1 className="text-2xl font-semibold">
-                                                    Sign in to your account!
-                                                </h1>
-                                                <p className="text-sm text-muted-foreground">
-                                                    Welcome back! please enter
-                                                    your detail
-                                                </p>
-                                            </div>
-                                            <div className="grid gap-2">
-                                                <Label htmlFor="email">
-                                                    Email address
+                                        {/* HEADER */}
+                                        <div className="space-y-2">
+                                            <h1 className="text-3xl font-bold tracking-tight">
+                                                Sign in to your account
+                                            </h1>
+
+                                            <p className="text-muted-foreground">
+                                                Monitor and manage wastewater
+                                                treatment operations
+                                                efficiently.
+                                            </p>
+                                        </div>
+
+                                        {/* FORM */}
+                                        <div className="space-y-5">
+                                            {/* EMAIL */}
+                                            <div className="space-y-2">
+                                                <Label
+                                                    htmlFor="email"
+                                                    className="text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+                                                >
+                                                    Email Address
                                                 </Label>
-                                                <Input
-                                                    id="email"
-                                                    type="email"
-                                                    name="email"
-                                                    required
-                                                    autoFocus
-                                                    tabIndex={1}
-                                                    autoComplete="email"
-                                                    placeholder="email@example.com"
-                                                />
+
+                                                <div className="relative">
+                                                    <Mail className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+
+                                                    <Input
+                                                        id="email"
+                                                        type="email"
+                                                        name="email"
+                                                        required
+                                                        autoFocus
+                                                        autoComplete="email"
+                                                        placeholder="name@company.com"
+                                                        className="h-12 pl-10"
+                                                    />
+                                                </div>
+
                                                 <InputError
                                                     message={errors.email}
                                                 />
                                             </div>
 
-                                            <div className="grid gap-2">
-                                                <div className="flex items-center">
-                                                    <Label htmlFor="password">
-                                                        Password
-                                                    </Label>
-                                                    {canResetPassword && (
-                                                        <TextLink
-                                                            href={request()}
-                                                            className="ml-auto text-sm"
-                                                            tabIndex={5}
-                                                        >
-                                                            Forgot password?
-                                                        </TextLink>
-                                                    )}
+                                            {/* PASSWORD */}
+                                            <div className="space-y-2">
+                                                <Label
+                                                    htmlFor="password"
+                                                    className="text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+                                                >
+                                                    Password
+                                                </Label>
+
+                                                <div className="relative">
+                                                    <LockKeyhole className="absolute top-1/2 left-3 z-1 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+
+                                                    <PasswordInput
+                                                        id="password"
+                                                        name="password"
+                                                        required
+                                                        autoComplete="current-password"
+                                                        placeholder="••••••••"
+                                                        className="h-12 pl-10"
+                                                    />
                                                 </div>
-                                                <PasswordInput
-                                                    id="password"
-                                                    name="password"
-                                                    required
-                                                    tabIndex={2}
-                                                    autoComplete="current-password"
-                                                    placeholder="Password"
-                                                />
                                                 <InputError
                                                     message={errors.password}
                                                 />
                                             </div>
 
-                                            <div className="flex items-center space-x-3">
-                                                <Checkbox
-                                                    id="remember"
-                                                    name="remember"
-                                                    tabIndex={3}
-                                                />
-                                                <Label htmlFor="remember">
-                                                    Remember me
-                                                </Label>
+                                            {/* REMEMBER + FORGOT */}
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center space-x-2">
+                                                    <Checkbox
+                                                        id="remember"
+                                                        name="remember"
+                                                    />
+
+                                                    <Label htmlFor="remember">
+                                                        Remember me
+                                                    </Label>
+                                                </div>
+
+                                                {canResetPassword && (
+                                                    <TextLink
+                                                        href={request()}
+                                                        className="font-medium"
+                                                    >
+                                                        Forgot password?
+                                                    </TextLink>
+                                                )}
                                             </div>
 
+                                            {/* BUTTON */}
                                             <Button
                                                 type="submit"
-                                                className="mt-4 w-full cursor-pointer bg-blue-600 hover:bg-blue-700"
-                                                tabIndex={4}
                                                 disabled={processing}
-                                                data-test="login-button"
+                                                className="h-12 w-full cursor-pointer bg-gradient-to-r from-blue-600 to-emerald-600 text-white hover:from-blue-700 hover:to-emerald-700"
                                             >
                                                 {processing && <Spinner />}
-                                                Log in
+
+                                                <span>
+                                                    Sign In to Dashboard
+                                                </span>
                                             </Button>
                                         </div>
 
-                                        {/* {canRegister && (
-                            <div className="text-center text-sm text-muted-foreground">
-                                Don't have an account?{' '}
-                                <TextLink href={register()} tabIndex={5}>
-                                    Sign up
-                                </TextLink>
-                            </div>
-                        )} */}
+                                        {/* FOOTER INFO */}
+                                        <div className="border-t pt-6">
+                                            <p className="text-sm text-muted-foreground">
+                                                Secure access to the WWTP
+                                                Monitoring System.
+                                            </p>
+                                        </div>
+
+                                        {/* REGISTER (TETAP DIKEEP COMMENT) */}
+
+                                        {/*
+                            {canRegister && (
+                                <div className="text-center text-sm text-muted-foreground">
+                                    Don't have an account?{' '}
+                                    <TextLink href={register()}>
+                                        Sign up
+                                    </TextLink>
+                                </div>
+                            )}
+                            */}
                                     </>
                                 )}
                             </Form>
 
                             {status && (
-                                <div className="mb-4 text-center text-sm font-medium text-green-600">
+                                <div className="mt-4 text-center text-sm font-medium text-green-600">
                                     {status}
                                 </div>
                             )}
                         </>
                     </div>
+                </div>
+                {/* FOOTER */}
+                <div className="absolute bottom-6 left-6 text-xs tracking-wide text-muted-foreground md:left-10">
+                    © 2025 E-Monitoring IPAL. All rights reserved.
                 </div>
             </div>
             <div className="relative hidden overflow-hidden bg-muted lg:block">
