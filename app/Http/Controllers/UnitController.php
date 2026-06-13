@@ -108,29 +108,38 @@ class UnitController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Unit $unit)
+    public function update(Request $request, string $id)
     {
-        if (
-            $unit->project_id !==
-            session('selected_project_id')
-        ) {
-            abort(403);
-        }
+        $unit = Unit::where(
+                'project_id',
+                session('selected_project_id')
+            )
+            ->findOrFail($id);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'specification' => 'required|string|max:255',
             'dimension' => 'required|string|max:255',
             'description' => 'required|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
         ]);
 
+        $updateData = [
+            'name' => $validated['name'],
+            'specification' => $validated['specification'],
+            'dimension' => $validated['dimension'],
+            'description' => $validated['description'],
+        ];
+
+        // ================= IMAGE =================
         if ($request->hasFile('image')) {
 
-            if ($unit->image) {
-
-                Storage::disk('public')
-                    ->delete($unit->image);
+            // hapus gambar lama
+            if (
+                $unit->image &&
+                Storage::disk('public')->exists($unit->image)
+            ) {
+                Storage::disk('public')->delete($unit->image);
             }
 
             $imagePath = $this->uploadImage(
@@ -138,10 +147,10 @@ class UnitController extends Controller
                 'units'
             );
 
-            $validated['image'] = $imagePath;
+            $updateData['image'] = $imagePath;
         }
 
-        $unit->update($validated);
+        $unit->update($updateData);
 
         return back()->with(
             'success',

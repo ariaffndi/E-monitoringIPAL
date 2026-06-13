@@ -245,39 +245,41 @@ export default function Units({ units, filters }: any) {
                                         }`}
                                     >
                                         {/* UNIT */}
-                                        <td className="flex items-center gap-8 p-4">
-                                            {unit.image ? (
-                                                <img
-                                                    src={`/storage/${unit.image}`}
-                                                    alt={unit.name}
-                                                    className="h-16 w-16 rounded-lg object-cover"
-                                                />
-                                            ) : (
-                                                <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-muted">
-                                                    <ImageOff className="h-6 w-6 text-muted-foreground" />
+                                        <td className="p-4 whitespace-nowrap">
+                                            <div className="flex items-center gap-4">
+                                                {unit.image ? (
+                                                    <img
+                                                        src={`/storage/${unit.image}`}
+                                                        alt={unit.name}
+                                                        className="h-16 w-16 rounded-lg object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-muted">
+                                                        <ImageOff className="h-6 w-6 text-muted-foreground" />
+                                                    </div>
+                                                )}
+
+                                                <div className="text-start">
+                                                    <p className="font-bold">
+                                                        {unit.name || '-'}
+                                                    </p>
+
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {unit.specification ||
+                                                            'Tidak ada spesifikasi'}
+                                                    </p>
                                                 </div>
-                                            )}
-
-                                            <div className="text-start">
-                                                <p className="font-bold">
-                                                    {unit.name || '-'}
-                                                </p>
-
-                                                <p className="text-sm text-muted-foreground">
-                                                    {unit.specification ||
-                                                        'Tidak ada spesifikasi'}
-                                                </p>
                                             </div>
                                         </td>
 
                                         {/* DESKRIPSI */}
-                                        <td className="max-w-sm truncate p-3 text-sm whitespace-nowrap sm:table-cell">
+                                        <td className="max-w-xs truncate p-3 text-sm whitespace-nowrap sm:table-cell">
                                             {unit.description ||
                                                 'Tidak ada deskripsi'}
                                         </td>
 
                                         {/* DIMENSI */}
-                                        <td className="p-3 text-center">
+                                        <td className="p-3 text-center whitespace-nowrap">
                                             <span className="rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-700">
                                                 {unit.dimension || '-'}
                                             </span>
@@ -434,19 +436,19 @@ export default function Units({ units, filters }: any) {
                     <FieldLabel htmlFor="picture">Gambar</FieldLabel>
 
                     {(isEdit && selectedUnit?.image) || data.image ? (
-                        <div>
+                        <div className="mb-3">
                             <img
                                 src={
                                     data.image
                                         ? URL.createObjectURL(data.image)
-                                        : `/storage/${selectedUnit.image}`
+                                        : `/storage/${selectedUnit?.image}`
                                 }
                                 alt={data.name || 'Preview'}
-                                className="mt-2 h-25 w-25 rounded-lg object-cover"
+                                className="h-24 w-24 rounded-lg object-cover"
                             />
                         </div>
                     ) : (
-                        <div className="mb-2 text-sm text-muted-foreground">
+                        <div className="mb-3 text-sm text-muted-foreground">
                             Belum ada gambar
                         </div>
                     )}

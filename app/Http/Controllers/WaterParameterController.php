@@ -99,23 +99,20 @@ class WaterParameterController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(
-        Request $request,
-        WaterParameter $waterParameter
-    ) {
-        if (
-            $waterParameter->project_id !==
-            session('selected_project_id')
-        ) {
-            abort(403);
-        }
+    public function update(Request $request, string $id) 
+    {
+        $selectedProjectId = session('selected_project_id');
+
+        $waterParameter = WaterParameter::query()
+            ->where('project_id', $selectedProjectId)
+            ->findOrFail($id);
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'unit' => 'required|string|max:255',
-            'min_value' => 'required|numeric',
-            'max_value' => 'required|numeric',
-            'type' => 'required|string|max:255',
+            'name' => 'required', 'string', 'max:255',
+            'unit' => 'required', 'string', 'max:255',
+            'min_value' => 'required', 'numeric',
+            'max_value' => 'required', 'numeric',
+            'type' => 'required', 'string', 'max:255',
         ]);
 
         $waterParameter->update($validated);

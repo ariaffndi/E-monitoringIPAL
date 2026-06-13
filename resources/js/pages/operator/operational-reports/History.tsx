@@ -60,19 +60,19 @@ export default function History({ reports, filters }: any) {
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
 
-        const hari = date.toLocaleDateString('id-ID', {
-            weekday: 'long',
-        });
-
-        const tanggal = date.toLocaleDateString('id-ID', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-        });
-
-        return `${hari}, ${tanggal.replace(/\//g, '-')}`;
+        return {
+            hari: date.toLocaleDateString('id-ID', {
+                weekday: 'long',
+            }),
+            tanggal: date
+                .toLocaleDateString('id-ID', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                })
+                .replace(/\//g, '-'),
+        };
     };
-
     const getStatusBadge = (value: number) => {
         if (!value) {
             return 'bg-gray-100 text-gray-500';
@@ -165,7 +165,9 @@ export default function History({ reports, filters }: any) {
                             <tr className="bg-secondary">
                                 <th className="p-4">No</th>
                                 <th className="p-4">Tanggal</th>
-                                <th className="p-4">Rata-rata Unit</th>
+                                <th className="p-4 whitespace-nowrap">
+                                    Rata-rata Unit
+                                </th>
                                 <th className="p-4">Inlet</th>
                                 <th className="p-4">Outlet</th>
                                 <th className="p-4">Catatan</th>
@@ -195,12 +197,26 @@ export default function History({ reports, filters }: any) {
                                             </td>
 
                                             <td className="p-4">
-                                                {formatDate(report.created_at)}
+                                                {(() => {
+                                                    const { hari, tanggal } =
+                                                        formatDate(
+                                                            report.created_at,
+                                                        );
+
+                                                    return (
+                                                        <div>
+                                                            <div>{hari},</div>
+                                                            <div className="whitespace-nowrap">
+                                                                {tanggal}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })()}
                                             </td>
 
-                                            <td className="p-4">
+                                            <td className="p-4 whitespace-nowrap">
                                                 <span
-                                                    className={`rounded-full px-3 py-1 text-xs ${getStatusBadge(
+                                                    className={`inline-flex rounded-full px-3 py-1 text-xs whitespace-nowrap ${getStatusBadge(
                                                         report.unit_avg,
                                                     )}`}
                                                 >
@@ -212,7 +228,7 @@ export default function History({ reports, filters }: any) {
                                             </td>
 
                                             {/* INLET */}
-                                            <td className="p-4">
+                                            <td className="p-4 whitespace-nowrap">
                                                 <div className="flex flex-col items-center gap-2">
                                                     <span className="rounded-full bg-green-100 px-3 py-1 text-xs text-green-700">
                                                         Memenuhi:{' '}
