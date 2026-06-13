@@ -228,7 +228,7 @@ export default function WaterParameters({ waterparameters, filters }: Props) {
 
                         <Button
                             onClick={() => setOpenCreate(true)}
-                            className="cursor-pointer bg-blue-600 transition-transform duration-500 hover:scale-105 hover:bg-blue-700"
+                            className="cursor-pointer bg-blue-600 transition-transform duration-500 hover:scale-105 hover:bg-blue-700 text-white"
                         >
                             <PlusCircle />
                             Tambah Parameter
@@ -291,8 +291,8 @@ export default function WaterParameters({ waterparameters, filters }: Props) {
                                             }
                                             className={`cursor-pointer transition hover:bg-secondary ${
                                                 index % 2 === 0
-                                                    ? 'bg-white'
-                                                    : 'bg-muted/50'
+                                                    ? 'bg-base'
+                                                    : 'bg-secondary/50'
                                             }`}
                                         >
                                             <td className="p-2 font-semibold">

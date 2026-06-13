@@ -21,6 +21,8 @@ export default function ForgotPassword({ status }: { status?: string }) {
             )}
 
             <div className="space-y-6">
+                <div className="mx-auto w-full max-w-md">
+
                 <Form {...email.form()}>
                     {({ processing, errors }) => (
                         <>
@@ -53,6 +55,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
                         </>
                     )}
                 </Form>
+                </div>
 
                 <div className="space-x-1 text-center text-sm text-muted-foreground">
                     <span>Or, return to</span>

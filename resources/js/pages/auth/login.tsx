@@ -141,7 +141,7 @@ export default function Login({
                                             <Button
                                                 type="submit"
                                                 disabled={processing}
-                                                className="h-12 w-full cursor-pointer bg-gradient-to-r from-blue-600 to-emerald-600 text-white hover:from-blue-700 hover:to-emerald-700"
+                                                className="h-12 w-full cursor-pointer bg-linear-to-r from-blue-600 to-emerald-600 text-white hover:from-blue-700 hover:to-emerald-700"
                                             >
                                                 {processing && <Spinner />}
 

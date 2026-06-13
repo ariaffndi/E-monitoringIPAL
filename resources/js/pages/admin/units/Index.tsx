@@ -219,7 +219,7 @@ export default function Units({ units, filters }: any) {
 
                         <Button
                             onClick={() => setOpenCreate(true)}
-                            className="cursor-pointer bg-blue-600 transition-transform duration-500 hover:scale-105 hover:bg-blue-700"
+                            className="cursor-pointer bg-blue-600 text-white transition-transform duration-500 hover:scale-105 hover:bg-blue-700"
                         >
                             <PlusCircle />
                             Tambah Unit
@@ -240,8 +240,8 @@ export default function Units({ units, filters }: any) {
                                         onClick={() => handleView(unit)}
                                         className={`cursor-pointer transition hover:bg-secondary ${
                                             index % 2 === 0
-                                                ? 'bg-white'
-                                                : 'bg-muted/80'
+                                                ? 'bg-base'
+                                                : 'bg-secondary/50'
                                         }`}
                                     >
                                         {/* UNIT */}

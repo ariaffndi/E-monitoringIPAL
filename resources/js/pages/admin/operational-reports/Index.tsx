@@ -170,7 +170,7 @@ export default function OperationalReports({ reports, filters }: any) {
 
                         <Dialog open={openRecap} onOpenChange={setOpenRecap}>
                             <DialogTrigger asChild>
-                                <Button className="mb-2 w-fit cursor-pointer bg-green-600 transition-transform duration-500 hover:scale-105 hover:bg-green-700 sm:mb-0">
+                                <Button className="mb-2 w-fit cursor-pointer bg-green-600 text-white transition-transform duration-500 hover:scale-105 hover:bg-green-700 sm:mb-0">
                                     <ListChecks />
                                     Rekap Laporan
                                 </Button>
@@ -282,8 +282,8 @@ export default function OperationalReports({ reports, filters }: any) {
                                             }
                                             className={`cursor-pointer transition hover:bg-secondary ${
                                                 index % 2 === 0
-                                                    ? 'bg-white'
-                                                    : 'bg-muted/50'
+                                                    ? 'bg-base'
+                                                    : 'bg-secondary/50'
                                             }`}
                                         >
                                             <td className="max-w-fit p-4">

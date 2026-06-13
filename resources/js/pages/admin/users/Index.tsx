@@ -204,7 +204,7 @@ export default function Users({ users, filters }: Props) {
 
                         <Button
                             onClick={() => setOpenCreate(true)}
-                            className="cursor-pointer bg-blue-600 transition-transform duration-500 hover:scale-105 hover:bg-blue-700"
+                            className="cursor-pointer bg-blue-600 text-white transition-transform duration-500 hover:scale-105 hover:bg-blue-700"
                         >
                             <PlusCircle />
                             Tambah Operator
@@ -216,7 +216,7 @@ export default function Users({ users, filters }: Props) {
 
                 {/* CARD LIST */}
                 {users.length > 0 ? (
-                    <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-4 mt-2">
+                    <div className="mt-2 grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
                         {users.map((user) => (
                             <Card
                                 key={user.id}
@@ -230,7 +230,7 @@ export default function Users({ users, filters }: Props) {
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="absolute top-3 right-3 z-20 cursor-pointer  hover:bg-white/20"
+                                                className="absolute top-3 right-3 z-20 cursor-pointer hover:bg-white/20"
                                             >
                                                 <MoreVertical size={18} />
                                             </Button>

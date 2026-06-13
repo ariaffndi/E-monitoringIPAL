@@ -10,7 +10,7 @@ export default function ConfirmPassword() {
     return (
         <>
             <Head title="Confirm password" />
-
+            <div className="mx-auto w-full max-w-md">
             <Form {...store.form()} resetOnSuccess={['password']}>
                 {({ processing, errors }) => (
                     <div className="space-y-6">
@@ -40,6 +40,7 @@ export default function ConfirmPassword() {
                     </div>
                 )}
             </Form>
+            </div>
         </>
     );
 }

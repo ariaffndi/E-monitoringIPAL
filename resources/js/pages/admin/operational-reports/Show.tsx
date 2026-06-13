@@ -185,7 +185,7 @@ export default function Show({ report }: { report: Report }) {
                     </div>
 
                     <Button
-                        className="w-fit cursor-pointer bg-green-600 transition-transform duration-500 hover:scale-105 hover:bg-green-700"
+                        className="w-fit cursor-pointer bg-green-600 text-white transition-transform duration-500 hover:scale-105 hover:bg-green-700"
                         onClick={() =>
                             window.open(
                                 `/operational-reports/${report.id}/print`,
