@@ -74,7 +74,7 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email',
             'role' => 'required|in:admin,operator',
             'password' => 'required|min:6',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:8192',
         ]);
         $imagePath = null;
 
@@ -134,7 +134,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'role' => 'required|in:admin,operator',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:8192',
         ]);
 
         $updateData = [

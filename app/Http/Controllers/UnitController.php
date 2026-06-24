@@ -59,7 +59,7 @@ class UnitController extends Controller
             'specification' => 'required|string|max:255',
             'dimension' => 'required|string|max:255',
             'description' => 'required|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:8192',
         ]);
 
         $imagePath = null;
@@ -121,7 +121,7 @@ class UnitController extends Controller
             'specification' => 'required|string|max:255',
             'dimension' => 'required|string|max:255',
             'description' => 'required|string',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:8192',
         ]);
 
         $updateData = [

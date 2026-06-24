@@ -71,7 +71,7 @@ class ProjectController extends Controller
             'location' => 'required|string|max:255',
             'type' => 'required|string|max:255',
             'capacity' => 'required|numeric',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:8192',
         ]);
 
         $imagePath = null;
@@ -121,7 +121,7 @@ class ProjectController extends Controller
             'location' => 'required|string|max:255',
             'type' => 'required|string|max:255',
             'capacity' => 'required|numeric',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:8192',
         ]);
 
         $imagePath = $project->image;
