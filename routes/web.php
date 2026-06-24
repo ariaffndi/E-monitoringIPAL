@@ -24,9 +24,7 @@ Route::get('/', function () {
         return redirect('/login');
     }
 
-    return Auth::user()->role === 'admin'
-        ? redirect('/projects')
-        : redirect('/dashboard');
+    return redirect('/redirect-after-login');
 });
 
 /*
@@ -39,8 +37,8 @@ Route::get('/redirect-after-login', function () {
 
     // ADMIN
     if (Auth::user()->role === 'admin') {
-
-        return redirect('/projects');
+        session()->forget('selected_project_id');
+        return redirect('/dashboard');
     }
 
     // OPERATOR
@@ -80,14 +78,11 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth'])->group(function () {
-
+Route::middleware('auth')->group(function () {
     Route::get(
         '/dashboard',
         [DashboardController::class, 'index']
-    )
-    ->middleware('project.selected')
-    ->name('dashboard');
+    )->name('dashboard');
 });
 
 /*
@@ -190,10 +185,8 @@ Route::middleware([
 
 Route::middleware([
     'auth',
-    'role:admin',
-    'project.selected'
+    'role:admin'
 ])->group(function () {
-
     Route::resource('users', UserController::class);
     Route::resource('units', UnitController::class);
     Route::resource(

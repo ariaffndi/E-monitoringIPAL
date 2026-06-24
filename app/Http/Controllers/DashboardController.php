@@ -17,6 +17,23 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
         $projectId = session('selected_project_id');
+        
+        if (! currentProject()) {
+            return Inertia::render(
+                'admin/Dashboard',
+                [
+                    'units' => [],
+                    'operators' => [],
+                    'recentReports' => [],
+                    'datesWithReports' => [],
+                    'waterParameters' => [],
+                    'chartData' => [],
+                    'selectedParameter' => 0,
+                    'reportsCount' => 0,
+                    'todayReport' => false,
+                ]
+            );
+        }
 
         // ================= ADMIN =================
         if ($user->role === 'admin') {

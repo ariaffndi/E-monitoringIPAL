@@ -157,6 +157,15 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
+        if (
+            session('selected_project_id')
+            == $project->id
+        ) {
+            session()->forget(
+                'selected_project_id'
+            );
+        }
+
         if ($project->image) {
             Storage::disk('public')
                 ->delete($project->image);
@@ -175,16 +184,21 @@ class ProjectController extends Controller
         session([
             'selected_project_id' => $project->id
         ]);
-
-        return redirect('/dashboard');
+        return Inertia::location(
+            route('dashboard')
+        );
     }
+
+
 
     public function leave()
     {
         session()->forget('selected_project_id');
-
-        return redirect('/projects');
+        return Inertia::location(
+            route('dashboard')
+        );
     }
+
 
     private function uploadImage($file, string $folder): string
     {

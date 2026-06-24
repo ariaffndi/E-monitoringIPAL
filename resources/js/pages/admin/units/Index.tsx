@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import ModalConfirmDelete from '@/components/modal-confirm-delete';
 import ModalCreate from '@/components/modal-create';
 import ModalDetail from '@/components/modal-detail';
+import ProjectRequired from '@/components/project/project-required';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -179,6 +180,7 @@ export default function Units({ units, filters }: any) {
 
     return (
         <>
+            <ProjectRequired>
             <Head title="Units" />
 
             <div className="flex flex-col gap-4 p-6">
@@ -526,6 +528,7 @@ export default function Units({ units, filters }: any) {
                 description="Apakah anda yakin ingin menghapus unit ini?"
                 onConfirm={handleDelete}
             />
+            </ProjectRequired>
         </>
     );
 }

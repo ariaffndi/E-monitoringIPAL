@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import ModalConfirmDelete from '@/components/modal-confirm-delete';
 import ModalCreate from '@/components/modal-create';
 import ModalDetail from '@/components/modal-detail';
+import ProjectRequired from '@/components/project/project-required';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
 import { FieldLabel } from '@/components/ui/field';
@@ -183,6 +184,7 @@ export default function WaterParameters({ waterparameters, filters }: Props) {
 
     return (
         <>
+            <ProjectRequired>
             <Head title="Water Parameters" />
 
             <div className="flex flex-col gap-4 p-6">
@@ -524,6 +526,7 @@ export default function WaterParameters({ waterparameters, filters }: Props) {
                 description="Apakah anda yakin ingin menghapus parameter ini?"
                 onConfirm={handleDelete}
             />
+            </ProjectRequired>
         </>
     );
 }

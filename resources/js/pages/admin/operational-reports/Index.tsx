@@ -2,6 +2,7 @@ import { Head, router } from '@inertiajs/react';
 import { ListChecks, Search } from 'lucide-react';
 import { CalendarDays } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import ProjectRequired from '@/components/project/project-required';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -130,6 +131,7 @@ export default function OperationalReports({ reports, filters }: any) {
 
     return (
         <>
+            <ProjectRequired>
             <Head title="Laporan Operasional" />
 
             <div className="flex flex-col gap-4 p-6">
@@ -447,6 +449,7 @@ export default function OperationalReports({ reports, filters }: any) {
                     </Pagination>
                 )}
             </div>
+            </ProjectRequired>
         </>
     );
 }

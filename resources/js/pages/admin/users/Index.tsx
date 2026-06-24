@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import ModalConfirmDelete from '@/components/modal-confirm-delete';
 import ModalCreate from '@/components/modal-create';
+import ProjectRequired from '@/components/project/project-required';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -164,6 +165,7 @@ export default function Users({ users, filters }: Props) {
 
     return (
         <>
+            <ProjectRequired>
             <Head title="Users" />
 
             <div className="flex flex-col gap-4 p-6">
@@ -458,6 +460,7 @@ export default function Users({ users, filters }: Props) {
                 description="Apakah anda yakin ingin menghapus user ini?"
                 onConfirm={handleDelete}
             />
+            </ProjectRequired>
         </>
     );
 }

@@ -38,15 +38,25 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
+
             'name' => config('app.name'),
+
             'auth' => [
                 'user' => $request->user(),
             ],
-            'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-            'session' => [
-            'selected_project_id' =>
-                session('selected_project_id'),
-            ],
+
+            'projects' => fn () =>
+                $request->user()?->role === 'admin'
+                    ? Project::select(
+                        'id',
+                        'name',
+                        'location',
+                        'type'
+                    )
+                    ->orderBy('name')
+                    ->get()
+                    : [],
+
             'currentProject' => currentProject(),
         ];
     }

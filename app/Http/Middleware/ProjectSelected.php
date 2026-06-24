@@ -13,19 +13,9 @@ class ProjectSelected
         Closure $next
     ): Response {
 
-        // ADMIN
-        if ($request->user()->role === 'admin') {
-
-            if (!currentProject()) {
-
-                return redirect('/projects');
-            }
-        }
-
         // OPERATOR
         if ($request->user()->role === 'operator') {
 
-            // ambil project otomatis dari user
             if (!session('selected_project_id')) {
 
                 session([
@@ -34,10 +24,12 @@ class ProjectSelected
                 ]);
             }
 
-            // kalau operator tidak punya project
             if (!currentProject()) {
 
-                abort(403, 'Operator belum memiliki project');
+                abort(
+                    403,
+                    'Operator belum memiliki project'
+                );
             }
         }
 

@@ -1,5 +1,4 @@
 import { Link, usePage } from '@inertiajs/react';
-import { router } from '@inertiajs/react';
 import {
     Users,
     LayoutGrid,
@@ -9,11 +8,11 @@ import {
     History,
     TrafficCone,
 } from 'lucide-react';
-
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
-
+import { ProjectSelector } from '@/components/project/project-selector';
+import { Separator } from '@/components/ui/separator';
 import {
     Sidebar,
     SidebarContent,
@@ -23,61 +22,12 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-
 import type { NavItem } from '@/types';
 
 export function AppSidebar() {
-    const { auth, session, currentProject } = usePage().props as any;
+    const { auth } = usePage().props as any;
     const user = auth.user;
     const isAdmin = user?.role === 'admin';
-    const selectedProjectId = session?.selected_project_id;
-
-    /*
-    |--------------------------------------------------------------------------
-    | ADMIN BELUM PILIH PROJECT
-    |--------------------------------------------------------------------------
-    */
-
-    if (isAdmin && !selectedProjectId) {
-        const projectNavItems: NavItem[] = [
-            {
-                title: 'Project IPAL',
-                href: '/projects',
-                icon: TrafficCone,
-            },
-        ];
-
-        return (
-            <Sidebar collapsible="icon" variant="inset">
-                <SidebarHeader>
-                    <SidebarMenu>
-                        <SidebarMenuItem>
-                            <SidebarMenuButton size="lg" asChild>
-                                <Link href="/projects">
-                                    <AppLogo />
-                                </Link>
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                    </SidebarMenu>
-                </SidebarHeader>
-
-                <SidebarContent>
-                    <NavMain items={projectNavItems} />
-                </SidebarContent>
-
-                <SidebarFooter>
-                    <NavUser />
-                </SidebarFooter>
-            </Sidebar>
-        );
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | ADMIN SUDAH PILIH PROJECT
-    |--------------------------------------------------------------------------
-    */
-
     const adminNavItems: NavItem[] = [
         {
             title: 'Dashboard',
@@ -106,12 +56,6 @@ export function AppSidebar() {
         },
     ];
 
-    /*
-    |--------------------------------------------------------------------------
-    | OPERATOR
-    |--------------------------------------------------------------------------
-    */
-
     const operatorNavItems: NavItem[] = [
         {
             title: 'Dashboard',
@@ -130,7 +74,7 @@ export function AppSidebar() {
         },
     ];
 
-    const mainNavItems = isAdmin ? adminNavItems : operatorNavItems;
+    const navItems = isAdmin ? adminNavItems : operatorNavItems;
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -142,35 +86,36 @@ export function AppSidebar() {
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
-                        <div className="px-2 pb-2">
-                            <p className="truncate text-sm font-semibold">
-                                {currentProject?.name}
-                            </p>
-
-                            <p className="truncate text-xs text-muted-foreground">
-                                {currentProject?.location} •{' '}
-                                {currentProject?.type}
-                            </p>
-                        </div>
                     </SidebarMenuItem>
                 </SidebarMenu>
+
+                {isAdmin && (
+                    <div className="px-2 pb-2">
+                        <ProjectSelector />
+                    </div>
+                )}
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain items={navItems} />
             </SidebarContent>
 
             <SidebarFooter>
                 {isAdmin && (
-                    <button
-                        onClick={() => {
-                            router.post('/projects/leave');
-                        }}
-                        className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-sidebar-accent"
-                    >
-                        <TrafficCone size={18} />
-                        <span>Project IPAL</span>
-                    </button>
+                    <>
+                        <SidebarMenu>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton asChild>
+                                    <Link href="/projects">
+                                        <TrafficCone />
+                                        <span>Project IPAL</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        </SidebarMenu>
+
+                        <Separator />
+                    </>
                 )}
                 <NavUser />
             </SidebarFooter>
